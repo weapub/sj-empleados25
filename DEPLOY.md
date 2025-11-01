@@ -24,7 +24,7 @@ Si tu cuenta muestra "Limited Access" y solo permite desplegar bases de datos, u
 
 ### Pasos en Render (alternativa gratuita)
 1. Crea cuenta en https://render.com e inicia sesión con GitHub
-2. New → Web Service → Selecciona `weapub/sj-empleados-system`
+2. New → Web Service → Selecciona `weapub/sj-empleados25`
 3. Configuración:
    - Root Directory: `backend`
    - Build Command: `npm install`
