@@ -16,8 +16,26 @@ Este documento complementa el README con pasos prácticos para producción.
 - Env vars:
   - `MONGO_URI` → MongoDB Atlas
   - `JWT_SECRET` → secreto fuerte
-  - `CORS_ORIGIN` → URL de Vercel/Netlify
+  - `CORS_ORIGIN` → URL de Vercel/Netlify (puede ser lista separada por comas)
   - Opcional: `CLOUDINARY_URL` o `CLOUDINARY_*`
+
+### Nota sobre Railway
+Si tu cuenta muestra "Limited Access" y solo permite desplegar bases de datos, usa **Render** o **Koyeb** para el servicio de backend.
+
+### Pasos en Render (alternativa gratuita)
+1. Crea cuenta en https://render.com e inicia sesión con GitHub
+2. New → Web Service → Selecciona `weapub/sj-empleados-system`
+3. Configuración:
+   - Root Directory: `backend`
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+   - Runtime: `Node`
+4. Variables de entorno:
+   - `MONGO_URI`, `JWT_SECRET`, `CORS_ORIGIN`, `NODE_ENV=production`
+5. Despliega y toma la URL pública (ej: `https://<service>.onrender.com/`)
+6. Pruebas rápidas:
+   - `GET /` → debe responder `SJ-Empleados API OK`
+   - `GET /api/_debug/routes` → lista de rutas
 
 ## 3) Base de datos en MongoDB Atlas
 - Crea cluster (free tier).
@@ -104,6 +122,12 @@ exports.create = async (req, res) => {
 ## 5) Seguridad y CORS
 - En backend, CORS: permite solo el dominio del frontend (no `*`).
 - No expongas secretos en frontend (`REACT_APP_*` son públicos).
+
+Multiorigen CORS:
+```
+CORS_ORIGIN=https://tu-frontend.vercel.app,https://otro-dominio.app
+```
+Si `CORS_ORIGIN` no está definido, el backend permite todas las solicitudes (útil para desarrollo).
 
 ## 6) Pruebas post-deploy
 - Frontend carga y ejecuta llamadas a backend.
