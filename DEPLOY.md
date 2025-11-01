@@ -7,7 +7,8 @@ Este documento complementa el README con pasos prácticos para producción.
 - Build: `npm install && npm run build`
 - Output: `build/`
 - Env vars (Project Settings → Environment Variables):
-  - `REACT_APP_API_URL=https://tu-backend.onrender.com`
+  - `REACT_APP_API_URL=https://tu-backend.onrender.com` (sin sufijo `/api`; el cliente lo agrega)
+  - Si ves "Login – Vercel" y el `manifest.json` responde `401`, desactiva **Preview Protection** en Vercel o usa un dominio de producción público.
 
 ## 2) Backend en Render/Railway
 - Root Directory: `backend`
@@ -17,6 +18,7 @@ Este documento complementa el README con pasos prácticos para producción.
   - `MONGO_URI` → MongoDB Atlas
   - `JWT_SECRET` → secreto fuerte
   - `CORS_ORIGIN` → URL de Vercel/Netlify (puede ser lista separada por comas)
+  - Opcional `CORS_ORIGIN_PATTERNS` → patrones con comodines (ej: `https://*.vercel.app`) para permitir previews dinámicos
   - Opcional: `CLOUDINARY_URL` o `CLOUDINARY_*`
 
 ### Nota sobre Railway
@@ -129,10 +131,23 @@ CORS_ORIGIN=https://tu-frontend.vercel.app,https://otro-dominio.app
 ```
 Si `CORS_ORIGIN` no está definido, el backend permite todas las solicitudes (útil para desarrollo).
 
+Wildcards para previews (opcional):
+```
+CORS_ORIGIN_PATTERNS=https://*.vercel.app
+```
+Esto permite despliegues de vista previa en Vercel con subdominios variables sin tener que actualizar `CORS_ORIGIN` en cada deploy.
+
 ## 6) Pruebas post-deploy
 - Frontend carga y ejecuta llamadas a backend.
 - Backend responde y conecta con Atlas.
 - Flujos de subida retornan URLs (no paths locales).
+
+Endpoints de ejemplo (Render):
+```
+GET   https://<service>.onrender.com/
+POST  https://<service>.onrender.com/api/auth/login
+POST  https://<service>.onrender.com/api/auth/register
+```
 
 ## 7) Rollout
 - Usa ramas: `main` (producción), `dev` (desarrollo).

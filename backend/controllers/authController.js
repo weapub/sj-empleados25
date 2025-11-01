@@ -5,9 +5,15 @@ const jwt = require('jsonwebtoken');
 // Registro de usuario
 exports.register = async (req, res) => {
   try {
-    // Aceptar tanto name como nombre para mayor compatibilidad
-    const { nombre, name, email, password, role } = req.body;
-    const nombreFinal = nombre || name || '';
+    // Robustez: manejar req.body indefinido y aceptar tanto name como nombre
+    const body = req.body || {};
+    const nombreFinal = body.nombre || body.name;
+    const { email, password, role } = body;
+
+    // Validación de campos requeridos
+    if (!nombreFinal || !email || !password) {
+      return res.status(400).json({ message: 'Datos inválidos: nombre, email y password son requeridos' });
+    }
 
     // Verificar si el usuario ya existe
     let user = await User.findOne({ email });

@@ -23,22 +23,47 @@ const allowedOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
+const allowedOriginPatterns = (process.env.CORS_ORIGIN_PATTERNS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const isOriginAllowed = (origin) => {
+  // Si no hay restricciones, permitir todo
+  if (allowedOrigins.length === 0 && allowedOriginPatterns.length === 0) return true;
+  // Coincidencia exacta
+  if (allowedOrigins.includes(origin)) return true;
+  // Patrones con comodines (ej: https://*.vercel.app)
+  return allowedOriginPatterns.some((pattern) => {
+    if (!pattern) return false;
+    // Convertir '*' en '.*' y escapar puntos
+    const regexStr = '^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$';
+    try {
+      const regex = new RegExp(regexStr);
+      return regex.test(origin);
+    } catch (_) {
+      return false;
+    }
+  });
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Permitir requests sin origin (same-origin, curl, health checks)
       if (!origin) return callback(null, true);
-      // Si no se define CORS_ORIGIN, permitir todo (comportamiento actual)
-      if (allowedOrigins.length === 0) return callback(null, true);
-      // Permitir solo orígenes configurados
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (isOriginAllowed(origin)) return callback(null, true);
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'x-auth-token'],
+    optionsSuccessStatus: 204,
   })
 );
 
+// Parsear cuerpos application/x-www-form-urlencoded además de JSON
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Static uploads
