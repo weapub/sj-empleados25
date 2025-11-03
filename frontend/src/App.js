@@ -45,7 +45,7 @@ function App() {
     <Router>
       <div className="App">
         <Navbar isAuthenticated={isAuthenticated} logout={logout} />
-        <div className="container-fluid mt-4">
+        <div className="container mt-4">
           <Routes>
             <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
             <Route path="/login" element={!isAuthenticated ? <Login login={login} /> : <Navigate to="/" />} />
