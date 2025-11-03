@@ -108,14 +108,17 @@
 
 .btn-success {
   background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
+  color: #ffffff;
 }
 
 .btn-warning {
   background: linear-gradient(135deg, var(--warning-color) 0%, #b45309 100%);
+  color: #ffffff;
 }
 
 .btn-danger {
   background: linear-gradient(135deg, var(--danger-color) 0%, #b91c1c 100%);
+  color: #ffffff;
 }
 
 .btn-outline-primary {

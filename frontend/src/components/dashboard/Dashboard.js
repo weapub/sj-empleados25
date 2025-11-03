@@ -125,7 +125,7 @@ const Dashboard = () => {
             </Col>
             <Col lg={3} md={6} className="mb-3">
               <Button as={Link} to="/payroll/new" variant="info" className="w-100 py-3" 
-                     style={{ background: 'linear-gradient(135deg, #0891b2 0%, #0e7490 100%)', border: 'none' }}>
+                     style={{ background: 'linear-gradient(135deg, #0891b2 0%, #0e7490 100%)', border: 'none', color: '#fff' }}>
                 <FaFileInvoiceDollar className="me-2" />
                 Nuevo Recibo
               </Button>
