@@ -292,7 +292,7 @@ const EmployeeDetail = () => {
                     <Button
                       variant="success"
                       disabled={!employee?.telefono}
-                      onClick={() => openWhatsApp(`Aviso de Recursos Humanos: ${ev.message}`)}
+                      onClick={() => openWhatsApp(`Aviso de San Jorge Fiambres &amp; Quesos: ${ev.message}`)}
                     >
                       Enviar por WhatsApp
                     </Button>
