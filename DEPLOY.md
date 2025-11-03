@@ -153,5 +153,36 @@ POST  https://<service>.onrender.com/api/auth/register
 - Usa ramas: `main` (producción), `dev` (desarrollo).
 - Vercel/Render despliegan automáticamente los cambios en `main`.
 
+## 8) Twilio (WhatsApp)
+- El backend ya integra envíos automáticos de WhatsApp vía Twilio en:
+  - Registro/actualización de asistencias (`attendanceController`) si el empleado tiene `telefono`.
+  - Registro de medidas disciplinarias (`disciplinaryController`).
+  - Recordatorios automáticos (`jobs/reminders`).
+
+### Variables de entorno (backend)
+Define en el servicio de backend (Render/Railway/Koyeb):
+```
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+```
+- `TWILIO_WHATSAPP_NUMBER` debe usar el formato `whatsapp:+<numero>`. En sandbox suele ser `whatsapp:+14155238886`.
+
+### Activar WhatsApp Sandbox (Twilio)
+1. Ve a `Twilio Console → Messaging → Try it out → WhatsApp`. 
+2. Sigue el “Join” del sandbox (envía `join <code>` al número de Twilio en WhatsApp desde el teléfono que recibirá mensajes).
+3. Usa el número sandbox (`+14155238886`) como emisor con el prefijo `whatsapp:`.
+
+### Formato de números
+- El sistema normaliza números: si pones `1155555555` asumirá Argentina (+54) y lo convertirá a `whatsapp:+541155555555`.
+- Se recomienda guardar `telefono` en DB con código país (`+54...`) para mayor precisión.
+
+### Pruebas
+- Crea una asistencia o una medida disciplinaria a un empleado con `telefono` y verifica que llegue el WhatsApp.
+- Logs del backend mostrarán `[WHATSAPP MOCK]` si faltan credenciales; con credenciales correctas verás `sid` de Twilio.
+
+### Producción
+- Para salir del sandbox y usar un número propio de WhatsApp Business, debes verificar el número y completar el flujo de aprobación de Facebook/WhatsApp Business.
+
 ---
 Cualquier ajuste adicional (S3, firma segura de uploads, validaciones extra) se puede incorporar si lo necesitas.

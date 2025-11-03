@@ -4,6 +4,7 @@ const Disciplinary = require('../models/Disciplinary');
 const { cloudinary, extractPublicIdFromUrl } = require('../utils/cloudinary');
 const https = require('https');
 const http = require('http');
+const { sendWhatsApp } = require('../utils/whatsapp');
 
 // Obtener content-type via HEAD; si falla, intentar GET rápido sin cuerpo completo
 const getContentType = (url) => new Promise((resolve) => {
@@ -102,5 +103,29 @@ exports.migrateRawFormats = async (req, res) => {
   } catch (error) {
     console.error('[AdminMigration] Error general:', error);
     return res.status(500).json({ msg: 'Error en la migración', error: error.message });
+  }
+};
+
+// Enviar WhatsApp de prueba vía Twilio
+exports.testTwilioWhatsApp = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Acceso denegado. Solo admin.' });
+    }
+
+    const { to, body } = req.body || {};
+    if (!to) {
+      return res.status(400).json({ msg: 'Falta el número destino (to).' });
+    }
+    const text = body || 'Prueba de WhatsApp desde SJ-Empleados (Twilio)';
+
+    const result = await sendWhatsApp(to, text);
+    if (result?.error) {
+      return res.status(400).json({ msg: 'Error enviando WhatsApp', error: result.error });
+    }
+    return res.json({ msg: 'WhatsApp enviado', result });
+  } catch (e) {
+    console.error('[Admin] testTwilioWhatsApp error:', e);
+    return res.status(500).json({ msg: 'Error interno', error: e.message });
   }
 };
