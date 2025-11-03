@@ -1,5 +1,5 @@
 // Service Worker para PWA (producción)
-const CACHE_NAME = 'sj-empleados-v2';
+const CACHE_NAME = 'sj-empleados-v4';
 // Sólo precachea recursos estables sin hash; los assets con hash se cachean runtime
 const urlsToCache = [
   '/',
@@ -13,11 +13,10 @@ const urlsToCache = [
 // Instalación del Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
+  // Activar inmediatamente el SW nuevo
+  self.skipWaiting();
 });
 
 // Activación del Service Worker
@@ -33,6 +32,8 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  // Tomar control de las páginas abiertas
+  self.clients.claim();
 });
 
 // Intercepción de requests
@@ -61,18 +62,15 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (['style', 'script', 'image', 'font'].includes(request.destination)) {
-    // Estáticos: cache-first
+    // Estáticos: network-first con fallback a cache y revalidación
     event.respondWith(
-      caches.match(request).then((cached) => {
-        return (
-          cached ||
-          fetch(request).then((response) => {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-            return response;
-          })
-        );
-      })
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }

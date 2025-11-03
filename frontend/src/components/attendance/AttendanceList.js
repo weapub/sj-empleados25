@@ -274,10 +274,8 @@ const AttendanceList = () => {
                 <th role="button" onClick={(e) => handleSort(e, 'status')}>
                   Estado {renderSort('status')}
                 </th>
-                <th>Establecida</th>
-                <th>Registrada</th>
                 <th role="button" onClick={(e) => handleSort(e, 'late')}>
-                  Min. tardanza {renderSort('late')}
+                  Horario y tardanza {renderSort('late')}
                 </th>
                 <th>Vence cert.</th>
                 <th>Inicio vacaciones</th>
@@ -314,9 +312,15 @@ const AttendanceList = () => {
                         </Badge>
                       </div>
                     </td>
-                    <td>{attendance.scheduledEntry || '-'}</td>
-                    <td>{attendance.actualEntry || '-'}</td>
-                    <td>{attendance.lateMinutes ?? 0}</td>
+                    <td title={`Hora establecida: ${attendance.scheduledEntry || '-'} / Hora registrada: ${attendance.actualEntry || '-'} / Tardanza: ${attendance.lateMinutes ?? 0} min`}>
+                      {(() => {
+                        const estab = attendance.scheduledEntry || '-';
+                        const reg = attendance.actualEntry || '-';
+                        const late = attendance.lateMinutes ?? 0;
+                        const hasData = attendance.scheduledEntry || attendance.actualEntry || (late > 0);
+                        return hasData ? `${estab} → ${reg} (${late} min)` : '-';
+                      })()}
+                    </td>
                     <td>{attendance.certificateExpiry ? formatDate(attendance.certificateExpiry) : '-'}</td>
                     <td>{attendance.vacationsStart ? formatDate(attendance.vacationsStart) : '-'}</td>
                     <td>{attendance.vacationsEnd ? formatDate(attendance.vacationsEnd) : '-'}</td>
@@ -349,7 +353,7 @@ const AttendanceList = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="12" className="text-center">No hay registros que coincidan con los filtros</td>
+                  <td colSpan="10" className="text-center">No hay registros que coincidan con los filtros</td>
                 </tr>
               )}
             </tbody>
@@ -367,9 +371,16 @@ const AttendanceList = () => {
 
               // Agregar campos específicos según el tipo
               if (attendance.type === 'tardanza') {
-                if (attendance.scheduledEntry) fields.push({ label: 'Hora establecida', value: attendance.scheduledEntry });
-                if (attendance.actualEntry) fields.push({ label: 'Hora registrada', value: attendance.actualEntry });
-                if (attendance.lateMinutes) fields.push({ label: 'Minutos tarde', value: attendance.lateMinutes });
+                const estab = attendance.scheduledEntry || '-';
+                const reg = attendance.actualEntry || '-';
+                const late = attendance.lateMinutes ?? 0;
+                const hasData = attendance.scheduledEntry || attendance.actualEntry || (late > 0);
+                if (hasData) {
+                  fields.push({
+                    label: 'Horario y tardanza',
+                    value: `${estab} → ${reg} (${late} min)`
+                  });
+                }
               }
 
               if (attendance.type === 'licencia medica' && attendance.certificateExpiry) {

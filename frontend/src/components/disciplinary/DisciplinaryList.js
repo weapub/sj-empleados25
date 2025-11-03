@@ -116,7 +116,7 @@ const DisciplinaryList = () => {
         <>
           {/* Vista escritorio - Tabla */}
           <div className="desktop-view">
-            <Table striped bordered hover responsive>
+            <Table striped bordered hover responsive className="disciplinary-table">
               <thead>
                 <tr>
                   <th>Empleado</th>

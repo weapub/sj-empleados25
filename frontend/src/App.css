@@ -359,17 +359,25 @@
 }
 
 /* Transaction table improvements */
+.table {
+  table-layout: fixed;
+  width: 100%;
+}
 .table th {
   background-color: var(--light-bg);
   border-top: none;
   font-weight: 600;
   color: var(--text-color);
   padding: 1rem 0.75rem;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .table td {
   padding: 0.875rem 0.75rem;
   vertical-align: middle;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .table-responsive {
@@ -377,6 +385,39 @@
   /* Permitir scroll horizontal en tablas anchas en escritorio */
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+/* Cortar palabras largas para evitar desbordes */
+.table th, .table td {
+  overflow-wrap: anywhere;
+}
+
+/* Ajustes de escritorio: tablas fluidas sin scroll horizontal */
+@media (min-width: 769px) {
+  /* Ampliar layout general en escritorio */
+  .container {
+    max-width: 1920px;
+  }
+
+  /* Permitir ancho fluido de tablas en escritorio */
+  .table {
+    table-layout: auto;
+    width: 100%;
+  }
+
+  .table-responsive .table,
+  .payroll-table,
+  .attendance-table {
+    min-width: auto;
+    width: 100%;
+  }
+  /* Compactar ligeramente celdas en escritorio */
+  .table th, .table td {
+    padding: 0.6rem 0.45rem;
+    font-size: 0.92rem;
+    word-break: break-word;
+    white-space: normal;
+  }
 }
 
 /* Badge improvements */
@@ -472,6 +513,49 @@
   border-radius: var(--border-radius-sm);
   box-shadow: var(--shadow-sm);
   margin-bottom: 1rem;
+}
+
+/* Ocultar columnas no críticas en escritorio medio (992–1400px) */
+@media (min-width: 992px) and (max-width: 1400px) {
+  /* Asistencia: ocultar columnas de certificados y vacaciones para compactar */
+  .attendance-table th:nth-child(5),
+  .attendance-table td:nth-child(5),
+  .attendance-table th:nth-child(6),
+  .attendance-table td:nth-child(6),
+  .attendance-table th:nth-child(7),
+  .attendance-table td:nth-child(7),
+  .attendance-table th:nth-child(8),
+  .attendance-table td:nth-child(8) {
+    display: none;
+  }
+
+  /* Disciplinarias: ocultar Hora y Fecha de Firma para compactar */
+  .disciplinary-table th:nth-child(3),
+  .disciplinary-table td:nth-child(3),
+  .disciplinary-table th:nth-child(8),
+  .disciplinary-table td:nth-child(8) {
+    display: none;
+  }
+
+  /* Payroll: ocultar columnas menos críticas para compactar */
+  .payroll-table th:nth-child(5),
+  .payroll-table td:nth-child(5), /* Horas Extras */
+  .payroll-table th:nth-child(6),
+  .payroll-table td:nth-child(6), /* Otros */
+  .payroll-table th:nth-child(7),
+  .payroll-table td:nth-child(7), /* Descuentos */
+  .payroll-table th:nth-child(10),
+  .payroll-table td:nth-child(10) /* Semanal */
+  {
+    display: none;
+  }
+
+  /* Ajuste de padding y fuente para mejorar densidad */
+  .attendance-table th, .attendance-table td,
+  .disciplinary-table th, .disciplinary-table td {
+    padding: 0.55rem 0.45rem;
+    font-size: 0.9rem;
+  }
 }
 
 .table-responsive .table {
@@ -707,7 +791,8 @@
 }
 /* Payroll desktop table improvements */
 .payroll-table {
-  min-width: 1024px; /* Más espacio para columnas resumidas */
+  min-width: auto; /* Evitar scroll horizontal forzado */
+  width: 100%;
 }
 
 .payroll-table td, .payroll-table th {
@@ -720,10 +805,12 @@
 
 .payroll-table .text-truncate {
   max-width: 220px;
-  display: inline-block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Clamp de 2 líneas para nombres largos */
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 /* Sortable header cursor for payroll table */
 .payroll-table th[role="button"] {
@@ -731,7 +818,8 @@
 }
 /* Attendance desktop table improvements */
 .attendance-table {
-  min-width: 1024px; /* Más espacio para columnas separadas */
+  min-width: auto; /* Evitar scroll horizontal forzado */
+  width: 100%;
 }
 
 .attendance-table td, .attendance-table th {
