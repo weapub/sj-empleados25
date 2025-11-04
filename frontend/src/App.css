@@ -11,7 +11,7 @@
   --warning-color: #f59e0b; /* amber-500 */
   --danger-color: #ef4444; /* red-500 */
   --light-bg: #f8fafc; /* fondo claro y suave */
-  --card-bg: #ffffff;
+  --card-bg: #f8f8f8;
   --surface-soft: #f6f7fb; /* listas/tablas suaves */
   --text-primary: #0f172a; /* contraste alto legible */
   --text-secondary: #334155;
@@ -193,6 +193,7 @@ a:hover { color: var(--primary-color); }
 /* Cards con padding similar al template */
 .card {
   padding: 2em;
+  background-color: var(--card-bg);
 }
 
 .theme-dsign .navbar {
