@@ -1826,12 +1826,32 @@ a:hover { color: var(--primary-color); }
   }
 
   /* Tipografía y espaciado de tarjetas móviles */
+  /* Ampliar legibilidad general en body */
+  body {
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
   .mobile-card .mobile-card-header {
     padding-bottom: 0.5rem;
   }
   .mobile-card .mobile-card-title {
-    font-size: 1rem;
-    line-height: 1.25rem;
+    font-size: 1.1rem;
+    line-height: 1.35rem;
+  }
+  .mobile-card .card-body {
+    padding: 1.25rem;
+  }
+  .mobile-card-fields {
+    gap: 0.75rem;
+  }
+  .mobile-card-field {
+    padding: 0.5rem 0;
+  }
+  .mobile-card .field-label,
+  .mobile-card .field-value {
+    font-size: 0.95rem;
+    line-height: 1.5;
   }
   .mobile-card .mobile-card-actions .btn {
     padding: 0.4rem 0.75rem;
