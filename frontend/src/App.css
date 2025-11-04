@@ -1743,6 +1743,55 @@ a:hover { color: var(--primary-color); }
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+/* Unificación: outline-primary con borde neutro y hover claro (global) */
+.btn-outline-primary,
+.btn.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--border-color) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+.btn-outline-primary:hover,
+.btn.btn-outline-primary:hover {
+  background-color: #f8fafc !important;
+  color: var(--primary-color) !important;
+  border-color: var(--border-color) !important;
+}
+.btn-outline-primary:focus,
+.btn.btn-outline-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25) !important;
+}
+.btn-outline-primary:disabled,
+.btn.btn-outline-primary.disabled {
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Unificación en theme-dsign: outline-primary con mismo patrón */
+.theme-dsign .btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--border-color) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+.theme-dsign .btn-outline-primary:hover {
+  background-color: #f8fafc !important;
+  color: var(--primary-color) !important;
+  border-color: var(--border-color) !important;
+}
+.theme-dsign .btn-outline-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25) !important;
+}
+.theme-dsign .btn-outline-primary:disabled,
+.theme-dsign .btn-outline-primary.disabled {
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
 .theme-dsign .btn-outline-secondary.btn-sm {
   padding: 6px 10px; /* que no quede demasiado pequeño */
   font-weight: 600;
