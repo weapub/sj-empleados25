@@ -310,8 +310,11 @@ const AttendanceList = () => {
               {sortedAttendances.length > 0 ? (
                 sortedAttendances.map(attendance => (
                   <tr key={attendance._id}>
-                    <td className="text-truncate" title={getName(attendance)}>
-                      <span className="employee-name-chip">{getName(attendance)}</span>
+                    <td>
+                      <div className="fw-semibold text-truncate" title={getName(attendance)}>
+                        {getName(attendance)}
+                      </div>
+                      <small className="text-muted">Legajo: {attendance.employee?.legajo || '-'}</small>
                     </td>
                     <td>{formatDate(attendance.date)}</td>
                     <td>

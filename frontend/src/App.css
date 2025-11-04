@@ -1474,6 +1474,10 @@ a:hover { color: var(--primary-color); }
   align-items: flex-start;
   gap: 0.25rem;
 }
+/* Remover márgenes laterales/verticales de badges y usar gap uniforme */
+.attendance-table td:nth-child(3) .badge {
+  margin: 0 !important;
+}
 /* Cursor de orden en cabeceras con role="button" en todas las tablas */
 .payroll-table th[role="button"],
 .attendance-table th[role="button"],
