@@ -180,6 +180,11 @@ button,
   border: 1px solid var(--border-color);
 }
 a:hover { color: var(--primary-color); }
+/* Override utilitario Bootstrap: reducir padding horizontal de .px-4 */
+.px-4 {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
 
 /* Cards con padding similar al template */
 .card {
@@ -530,26 +535,26 @@ a:hover { color: var(--primary-color); }
 
 /* Botón secundario neutro */
 .theme-dsign .btn-secondary {
-  background-color: #6b7280 !important; /* slate-500 */
-  border-color: #6b7280 !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
+  background-color: #ffffff !important; /* override: secundario blanco */
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .theme-dsign .btn-secondary:hover {
-  background-color: #4b5563 !important; /* slate-600 */
-  border-color: #4b5563 !important;
+  background-color: #f8fafc !important; /* gris muy claro */
+  border-color: var(--border-color) !important;
 }
 
 .theme-dsign .btn-secondary:focus {
-  box-shadow: 0 0 0 0.2rem rgba(75, 85, 99, 0.35) !important; /* slate-600 ring */
+  box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25) !important; /* ring acorde al tema */
 }
 
 .theme-dsign .btn-secondary:disabled,
 .theme-dsign .btn-secondary.disabled {
-  background-color: #9ca3af !important; /* gray-400 */
-  border-color: #9ca3af !important;
-  color: #ffffff !important;
+  background-color: #e5e7eb !important; /* gris claro para disabled */
+  border-color: #e5e7eb !important;
+  color: #9ca3af !important;
 }
 
 /* Botón de éxito desaturado */
