@@ -586,6 +586,30 @@ a:hover { color: var(--primary-color); }
   color: #064e3b !important; /* readable sobre verde claro */
 }
 
+/* Botón info desaturado (tema) */
+.theme-dsign .btn-info {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.theme-dsign .btn-info:hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.theme-dsign .btn-info:focus {
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.35) !important; /* ring azul suave */
+}
+
+.theme-dsign .btn-info:disabled,
+.theme-dsign .btn-info.disabled {
+  background-color: #bfdbfe !important; /* blue-200 tenue */
+  border-color: #bfdbfe !important;
+  color: #1e3a8a !important; /* readable sobre azul claro */
+}
+
 /* Mejoras para cards */
 .card {
   background: #ffffff;
@@ -689,6 +713,18 @@ a:hover { color: var(--primary-color); }
 .btn-success {
   background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
   color: #ffffff;
+}
+
+/* Info: fondo azul y texto blanco para contraste adecuado */
+.btn-info {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: #ffffff;
+}
+
+.btn-info:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-warning {
