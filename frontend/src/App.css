@@ -712,6 +712,32 @@ a:hover { color: var(--primary-color); }
   transform: translateY(-1px);
 }
 
+/* Outline secondary: texto oscuro y borde neutro global */
+.btn-outline-secondary,
+.btn.btn-outline-secondary {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  background-color: transparent;
+  box-shadow: none;
+}
+.btn-outline-secondary:hover,
+.btn.btn-outline-secondary:hover {
+  background-color: #f8fafc;
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+.btn-outline-secondary:focus,
+.btn.btn-outline-secondary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25);
+}
+.btn-outline-secondary:disabled,
+.btn.btn-outline-secondary.disabled {
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  background-color: transparent;
+  box-shadow: none;
+}
+
 /* Mejoras para tablas */
 .table {
   background: var(--card-bg);
@@ -1697,16 +1723,25 @@ a:hover { color: var(--primary-color); }
 
 /* Botón Reset orden y Ver certificado usan outline-secondary */
 .theme-dsign .btn-outline-secondary {
-  color: #334155; /* slate-700 */
-  border-color: #7c8da6; /* slate-ish */
-  background-color: transparent;
-  box-shadow: none;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
-.theme-dsign .btn-outline-secondary:hover,
+.theme-dsign .btn-outline-secondary:hover {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  background-color: #f8fafc !important; /* leve relleno para mejor visibilidad */
+}
 .theme-dsign .btn-outline-secondary:focus {
-  color: #1f2937; /* slate-800 */
-  border-color: #6b7c94;
-  background-color: #e9eff7; /* leve relleno para mejor visibilidad */
+  box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25) !important; /* ring acorde al tema */
+}
+.theme-dsign .btn-outline-secondary:disabled,
+.theme-dsign .btn-outline-secondary.disabled {
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 .theme-dsign .btn-outline-secondary.btn-sm {
   padding: 6px 10px; /* que no quede demasiado pequeño */
