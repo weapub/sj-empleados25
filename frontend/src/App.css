@@ -117,7 +117,7 @@ button,
   color: #fff !important;
 }
 
-/* Texto blanco en otras variantes de botón para consistencia visual */
+/* Texto blanco en variantes con fondo intenso */
 .btn-success,
 .btn.btn-success,
 .btn-info,
@@ -125,10 +125,14 @@ button,
 .btn-warning,
 .btn.btn-warning,
 .btn-danger,
-.btn.btn-danger,
+.btn.btn-danger {
+  color: #fff !important;
+}
+
+/* Secundario con fondo blanco: texto oscuro para mejor contraste */
 .btn-secondary,
 .btn.btn-secondary {
-  color: #fff !important;
+  color: var(--text-primary) !important;
 }
 button:hover,
 .btn:hover {
@@ -537,13 +541,14 @@ a:hover { color: var(--primary-color); }
 .theme-dsign .btn-secondary {
   background-color: #ffffff !important; /* override: secundario blanco */
   border-color: var(--border-color) !important;
-  color: var(--text-secondary) !important;
+  color: var(--text-primary) !important; /* texto oscuro para fondo blanco */
   box-shadow: var(--shadow-sm) !important;
 }
 
 .theme-dsign .btn-secondary:hover {
   background-color: #f8fafc !important; /* gris muy claro */
   border-color: var(--border-color) !important;
+  color: var(--text-primary) !important; /* mantener contraste en hover */
 }
 
 .theme-dsign .btn-secondary:focus {
