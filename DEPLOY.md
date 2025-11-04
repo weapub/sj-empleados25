@@ -5,9 +5,9 @@ Este documento complementa el README con pasos prácticos para producción.
 ## 1) Frontend en Vercel
 - Root Directory: `frontend`
 - Build: `npm install && npm run build`
-- Output: `build/`
+- Output: `dist/`
 - Env vars (Project Settings → Environment Variables):
-  - `REACT_APP_API_URL=https://tu-backend.onrender.com` (sin sufijo `/api`; el cliente lo agrega)
+  - `VITE_API_URL=https://tu-backend.onrender.com` (sin sufijo `/api`; el cliente lo agrega)
   - Si ves "Login – Vercel" y el `manifest.json` responde `401`, desactiva **Preview Protection** en Vercel o usa un dominio de producción público.
 
 ## 2) Backend en Render/Railway
@@ -123,7 +123,7 @@ exports.create = async (req, res) => {
 
 ## 5) Seguridad y CORS
 - En backend, CORS: permite solo el dominio del frontend (no `*`).
-- No expongas secretos en frontend (`REACT_APP_*` son públicos).
+- No expongas secretos en frontend (`VITE_*` son públicos).
 
 Multiorigen CORS:
 ```
