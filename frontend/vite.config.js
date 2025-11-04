@@ -4,11 +4,11 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5454,
+    port: 5178,
     open: true,
   },
   preview: {
-    port: 5454,
+    port: 5178,
   },
   build: {
     rollupOptions: {

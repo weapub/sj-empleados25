@@ -143,7 +143,7 @@ const PayrollForm = () => {
               </Col>
               <Col md={3}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Periodo (YYYY-MM)</Form.Label>
+                  <Form.Label>Periodo (MM-YYYY)</Form.Label>
                   <Form.Control type="month" name="period" value={formData.period} onChange={handleChange} required />
                 </Form.Group>
               </Col>

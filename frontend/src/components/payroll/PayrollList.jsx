@@ -30,6 +30,13 @@ const formatDate = (iso) => {
   return d.toLocaleDateString('es-AR');
 };
 
+// Mostrar período en formato MM-YYYY para UI
+const formatPeriod = (period) => {
+  if (!period || !period.includes('-')) return period || '-';
+  const [y, m] = period.split('-');
+  return `${m}-${y}`;
+};
+
 const PayrollList = () => {
   const navigate = useNavigate();
   const [receipts, setReceipts] = useState([]);
@@ -212,8 +219,8 @@ const PayrollList = () => {
             </Form.Group>
           </Col>
           <Col md={6}>
-            <Form.Group>
-              <Form.Label>Filtrar por Período</Form.Label>
+              <Form.Group>
+              <Form.Label>Filtrar por Período (MM-YYYY)</Form.Label>
               <Form.Control type="month" value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value)} />
             </Form.Group>
           </Col>
@@ -274,7 +281,7 @@ const PayrollList = () => {
                           <small className="text-muted">Legajo: {r.employee?.legajo || '-'}</small>
                         </td>
                         <td>
-                          <div>{r.period}</div>
+                          <div>{formatPeriod(r.period)}</div>
                           <small className="text-muted">Días: {dim}</small>
                         </td>
                         <td>{formatDate(r.paymentDate)}</td>
@@ -343,7 +350,7 @@ const PayrollList = () => {
                     title={r.employee ? `${r.employee.nombre} ${r.employee.apellido}` : 'Sin empleado'}
                     subtitle={`Legajo: ${r.employee?.legajo || '-'}`}
                     fields={[
-                      { label: 'Período', value: r.period },
+                      { label: 'Período', value: formatPeriod(r.period) },
                       { label: 'Fecha de Pago', value: formatDate(r.paymentDate) },
                       { label: 'Horas Extras', value: formatCurrency(r.extraHours) },
                       { label: 'Otros Adicionales', value: formatCurrency(r.otherAdditions) },

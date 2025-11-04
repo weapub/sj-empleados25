@@ -14,6 +14,11 @@ const daysInMonth = (period) => {
 
 const formatCurrency = (value) => `$${Number(value || 0).toLocaleString('es-AR')}`;
 const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString('es-AR') : '-';
+const formatPeriod = (period) => {
+  if (!period || !period.includes('-')) return period || '-';
+  const [y, m] = period.split('-');
+  return `${m}-${y}`;
+};
 
 const PayrollDetail = () => {
   const { id } = useParams();
@@ -62,7 +67,7 @@ const PayrollDetail = () => {
           <h2>Recibo de Sueldo</h2>
           <div class="section grid">
             <div class="row"><span class="label">Empleado</span><span class="value">${receipt.employee ? `${receipt.employee.nombre} ${receipt.employee.apellido} (${receipt.employee.legajo})` : '-'}</span></div>
-            <div class="row"><span class="label">Periodo</span><span class="value">${receipt.period}</span></div>
+            <div class="row"><span class="label">Periodo</span><span class="value">${formatPeriod(receipt.period)}</span></div>
             <div class="row"><span class="label">Fecha de Pago</span><span class="value">${formatDate(receipt.paymentDate)}</span></div>
             <div class="row"><span class="label">Firmado</span><span class="value">${receipt.signed ? 'Sí' : 'No'}</span></div>
             <div class="row"><span class="label">Fecha Firma</span><span class="value">${formatDate(receipt.signedDate)}</span></div>
@@ -122,7 +127,7 @@ const PayrollDetail = () => {
 
           <Row className="mb-3">
             <Col md={6}><strong>Empleado:</strong> {receipt.employee ? `${receipt.employee.nombre} ${receipt.employee.apellido} (${receipt.employee.legajo})` : '-'}</Col>
-            <Col md={3}><strong>Periodo:</strong> {receipt.period}</Col>
+            <Col md={3}><strong>Periodo:</strong> {formatPeriod(receipt.period)}</Col>
             <Col md={3}><strong>Fecha de Pago:</strong> {formatDate(receipt.paymentDate)}</Col>
           </Row>
           <Row className="mb-3">
