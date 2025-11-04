@@ -136,7 +136,7 @@ const EmployeeList = () => {
               <MobileCard
                 key={employee._id}
                 title={`${employee.nombre} ${employee.apellido}`}
-                subtitle={`Legajo: ${employee.legajo || '-'} | ${employee.email}`}
+                subtitle={`Legajo: ${employee.legajo || '-'}`}
                 fields={[
                   { label: 'Puesto', value: employee.puesto || 'No especificado' },
                   { label: 'Departamento', value: employee.departamento || 'No especificado' }
