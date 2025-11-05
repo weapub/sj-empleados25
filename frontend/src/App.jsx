@@ -5,19 +5,20 @@ import './App.css';
 
 // Componentes
 import Navbar from './components/layout/Navbar';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
-import Dashboard from './components/dashboard/Dashboard';
-import EmployeeList from './components/employees/EmployeeList';
-import EmployeeForm from './components/employees/EmployeeForm';
-import EmployeeDetail from './components/employees/EmployeeDetail';
-import AttendancePage from './components/attendance/AttendancePage';
-import DisciplinaryList from './components/disciplinary/DisciplinaryList';
-import DisciplinaryForm from './components/disciplinary/DisciplinaryForm';
-import PayrollList from './components/payroll/PayrollList';
-import PayrollForm from './components/payroll/PayrollForm';
-import PayrollDetail from './components/payroll/PayrollDetail';
-import EmployeeAccountPage from './components/account/EmployeeAccountPage';
+// Carga diferida de vistas principales para reducir el bundle inicial
+const Login = React.lazy(() => import('./components/auth/Login'));
+const Register = React.lazy(() => import('./components/auth/Register'));
+const Dashboard = React.lazy(() => import('./components/dashboard/Dashboard'));
+const EmployeeList = React.lazy(() => import('./components/employees/EmployeeList'));
+const EmployeeForm = React.lazy(() => import('./components/employees/EmployeeForm'));
+const EmployeeDetail = React.lazy(() => import('./components/employees/EmployeeDetail'));
+const AttendancePage = React.lazy(() => import('./components/attendance/AttendancePage'));
+const DisciplinaryList = React.lazy(() => import('./components/disciplinary/DisciplinaryList'));
+const DisciplinaryForm = React.lazy(() => import('./components/disciplinary/DisciplinaryForm'));
+const PayrollList = React.lazy(() => import('./components/payroll/PayrollList'));
+const PayrollForm = React.lazy(() => import('./components/payroll/PayrollForm'));
+const PayrollDetail = React.lazy(() => import('./components/payroll/PayrollDetail'));
+const EmployeeAccountPage = React.lazy(() => import('./components/account/EmployeeAccountPage'));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -68,6 +69,7 @@ function App() {
         <div className="app-shell flex">
           <div className="app-content flex-1">
             <div className="container mt-4 px-4 md:px-6">
+              <React.Suspense fallback={<div className="d-flex justify-content-center align-items-center py-5"><div className="spinner-border" role="status"><span className="visually-hidden">Cargando...</span></div></div>}>
               <Routes>
                 <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
                 <Route path="/login" element={!isAuthenticated ? <Login login={login} /> : <Navigate to="/" />} />
@@ -86,6 +88,7 @@ function App() {
                 <Route path="/payroll/:id" element={isAuthenticated ? <PayrollDetail /> : <Navigate to="/login" />} />
                 <Route path="/employee-account" element={isAuthenticated ? <EmployeeAccountPage /> : <Navigate to="/login" />} />
               </Routes>
+              </React.Suspense>
             </div>
           </div>
         </div>

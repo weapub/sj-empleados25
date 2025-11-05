@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const compression = require('compression');
 
 const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
@@ -66,6 +67,9 @@ app.use(
 // Parsear cuerpos application/x-www-form-urlencoded además de JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Comprimir respuestas para reducir tamaño de transferencia
+app.use(compression());
 
 // Static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
