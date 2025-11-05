@@ -77,10 +77,12 @@ export const getCurrentUser = async () => {
 };
 
 // Servicios de empleados
-export const getEmployees = async () => {
+export const getEmployees = async ({ page = 1, limit = 25 } = {}) => {
   setAuthToken(localStorage.getItem('token'));
-  const response = await axios.get(`${API_URL}/employees`);
-  return response.data;
+  const response = await axios.get(`${API_URL}/employees`, {
+    params: { page, limit },
+  });
+  return response.data; // { data, total, page, totalPages }
 };
 
 export const getEmployeeById = async (id) => {

@@ -4,9 +4,9 @@ import { Card } from 'react-bootstrap';
 // Tarjeta de sección unificada con título, icono y acciones en el header
 const SectionCard = ({ title, icon = null, headerRight = null, children, className = '' }) => {
   return (
-    <Card className={`shadow-sm border border-slate-200/70 rounded-xl ${className}`}>
+    <Card className={`section-card shadow-sm border border-slate-200/70 rounded-xl ${className}`}>
       {(title || icon || headerRight) && (
-        <Card.Header className="bg-white rounded-top">
+        <Card.Header className="section-card-header bg-white rounded-top">
           <div className="d-flex align-items-center justify-content-between">
             <div className="d-flex align-items-center gap-2">
               {icon && <span className="text-slate-700">{icon}</span>}

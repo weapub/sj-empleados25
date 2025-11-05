@@ -12,6 +12,7 @@ const Dashboard = React.lazy(() => import('./components/dashboard/Dashboard'));
 const EmployeeList = React.lazy(() => import('./components/employees/EmployeeList'));
 const EmployeeForm = React.lazy(() => import('./components/employees/EmployeeForm'));
 const EmployeeDetail = React.lazy(() => import('./components/employees/EmployeeDetail'));
+// Carga diferida estándar
 const AttendancePage = React.lazy(() => import('./components/attendance/AttendancePage'));
 const DisciplinaryList = React.lazy(() => import('./components/disciplinary/DisciplinaryList'));
 const DisciplinaryForm = React.lazy(() => import('./components/disciplinary/DisciplinaryForm'));

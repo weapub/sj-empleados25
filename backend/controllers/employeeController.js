@@ -1,11 +1,23 @@
 const Employee = require('../models/Employee');
 const EmployeeEvent = require('../models/EmployeeEvent');
 
-// Obtener todos los empleados
+// Obtener empleados con paginación
 exports.getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find();
-    res.status(200).json(employees);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limitRaw = parseInt(req.query.limit, 10);
+    const limit = Math.min(Math.max(limitRaw || 25, 1), 100);
+
+    const [data, total] = await Promise.all([
+      Employee.find()
+        .sort({ apellido: 1, nombre: 1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Employee.countDocuments(),
+    ]);
+
+    const totalPages = Math.max(Math.ceil(total / limit), 1);
+    res.status(200).json({ data, total, page, totalPages });
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener empleados', error: error.message });
   }

@@ -10,6 +10,47 @@ Este documento complementa el README con pasos prácticos para producción.
   - `VITE_API_URL=https://tu-backend.onrender.com` (sin sufijo `/api`; el cliente lo agrega)
   - Si ves "Login – Vercel" y el `manifest.json` responde `401`, desactiva **Preview Protection** en Vercel o usa un dominio de producción público.
 
+## 9) Despliegue por GitHub Actions (Vercel)
+
+Este repo ya incluye workflows para desplegar el frontend en Vercel:
+
+- `.github/workflows/deploy-frontend.yml` → Producción (push a `main` o `workflow_dispatch`)
+- `.github/workflows/deploy-frontend-preview.yml` → Previews (PRs contra `main`)
+
+### Requisitos en Vercel
+- Crea el proyecto en Vercel apuntando a este repo.
+- En `Project Settings → Environment Variables` define:
+  - `VITE_API_URL` (Production y Preview): URL base pública del backend, sin `/api`.
+- Opcional: desactiva **Preview Protection** para que las APIs puedan ser llamadas sin login Vercel.
+
+### Secretos en GitHub (Actions)
+En el repo: `Settings → Secrets and variables → Actions`, añade estos secretos:
+- `VERCEL_TOKEN` → Token personal de Vercel.
+- `VERCEL_ORG_ID` → ID de tu organización en Vercel.
+- `VERCEL_PROJECT_ID` → ID del proyecto en Vercel.
+
+Los workflows usan `working-directory: frontend` y la acción `amondnet/vercel-action@v25`, por lo que no necesitas modificar comandos.
+
+### Disparar despliegues
+- Producción: haz `push` a `main` o ejecuta el workflow manualmente (tab **Actions** → **Run workflow**).
+- Preview: abre un Pull Request hacia `main`; el workflow publicará la URL de preview en el propio PR.
+
+### Backend y CORS (necesario para que funcione en Vercel)
+- En `backend/.env` configura:
+  - `CORS_ORIGIN=https://tu-frontend.vercel.app` (puede ser lista separada por comas para multi-dominios)
+  - `CORS_ORIGIN_PATTERNS=https://*.vercel.app` para permitir previews dinámicos
+- Verifica el backend público (Render/Koyeb/Railway):
+  - `GET /` → debe responder OK
+  - `GET /api/_debug/routes` → lista las rutas
+
+### Validaciones rápidas
+- Abre la URL de Vercel y confirma que el login funciona y las páginas protegidas muestran datos.
+- Si aparece `401` en llamadas XHR:
+  - Revisa que el token JWT esté almacenado en `localStorage` y que el header `x-auth-token` se envíe.
+  - Revisa CORS del backend (dominio Vercel y patrones). 
+  - Confirma que `VITE_API_URL` apunte al backend correcto y sin `/api`.
+
+
 ## 2) Backend en Render/Railway
 - Root Directory: `backend`
 - Runtime: Node

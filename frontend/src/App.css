@@ -1453,9 +1453,25 @@ input[type="month"] {
 .mobile-card-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  /* Espaciado uniforme entre botones, controlado responsivamente */
+  gap: clamp(0.25rem, 1.6vw, 0.5rem);
   padding-top: 0.75rem;
   border-top: 1px solid var(--border-color);
+}
+
+/* Unificar espaciado dentro de MobileCard usando gap en lugar de márgenes laterales */
+.mobile-card-actions .btn {
+  margin-right: 0 !important;
+}
+.mobile-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  /* Ajuste de espaciado entre chips responsivo */
+  gap: clamp(0.15rem, 1.2vw, 0.35rem);
+}
+.mobile-card-badges .badge,
+.mobile-card-badges .badge-soft {
+  margin-right: 0 !important;
 }
 
 /* Ocultar tablas en móviles y mostrar tarjetas */
@@ -1960,8 +1976,8 @@ input[type="month"] {
   box-shadow: var(--shadow-md);
 }
 .kpi-icon {
-  width: 36px;
-  height: 36px;
+  width: clamp(32px, 3.2vw, 40px);
+  height: clamp(32px, 3.2vw, 40px);
   border-radius: 10px;
   display: inline-flex;
   align-items: center;
@@ -1971,10 +1987,10 @@ input[type="month"] {
   box-shadow: none;
 }
 .kpi-title {
-  font-size: .75rem;
+  font-size: clamp(0.7rem, 1.4vw, 0.85rem);
 }
 .kpi-value {
-  font-size: 1.5rem;
+  font-size: clamp(1.3rem, 2.6vw, 1.7rem);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.2;
@@ -1982,11 +1998,11 @@ input[type="month"] {
 .kpi-delta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: clamp(4px, 1.2vw, 6px);
   padding: 4px 10px;
   border-radius: 999px;
   font-weight: 600;
-  font-size: .8rem;
+  font-size: clamp(0.75rem, 1.8vw, 0.9rem);
   border: none;
   background: transparent;
   opacity: .85;
@@ -2138,6 +2154,83 @@ input[type="month"] {
 }
 
 /* =============================================
+   Responsive harmonization (PC/Mobile)
+   Tipografías y tamaños con clamp para mejor escala
+   ============================================= */
+.page-title {
+  font-size: clamp(1.4rem, 2.8vw, 2rem);
+  line-height: 1.25;
+}
+.section-title {
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  line-height: 1.3;
+}
+.card-header h5 {
+  font-size: clamp(1rem, 2vw, 1.15rem);
+}
+.mobile-card-title {
+  font-size: clamp(0.95rem, 2.2vw, 1.05rem);
+}
+
+/* Botones: padding y fuente responsivos */
+.btn {
+  padding: clamp(0.35rem, 1.2vw, 0.625rem) clamp(0.6rem, 2vw, 1.25rem);
+  font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+  line-height: 1.4;
+}
+
+/* Badges: tamaño de fuente y alto de línea accesible */
+.badge,
+.badge-soft {
+  font-size: clamp(0.72rem, 1.6vw, 0.85rem);
+  line-height: 1.4;
+}
+
+/* Formularios: tamaño de fuente coherente */
+.form-control,
+.form-select,
+.form-label {
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+}
+
+/* Navbar: tamaño de marca y enlaces responsivos */
+.navbar-brand {
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+}
+.navbar .nav-link {
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
+}
+
+/* =============================================
+   SectionCard header spacing (responsive)
+   ============================================= */
+.section-card .section-card-header {
+  padding: clamp(0.5rem, 1.8vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+}
+.section-card .section-card-header .d-flex.gap-2 {
+  gap: clamp(0.25rem, 1.4vw, 0.5rem);
+}
+.section-card .section-card-header h5 {
+  margin-bottom: 0;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+}
+
+/* Tablets: permitir saltos de línea en celdas de tabla para legibilidad */
+@media (min-width: 768px) and (max-width: 992px) {
+  .table th,
+  .table td {
+    white-space: normal !important;
+    word-break: break-word;
+  }
+}
+
+/* Tablas: mejorar legibilidad en tablet sin ocultar tabla */
+@media (max-width: 992px) {
+  .table { table-layout: fixed; }
+  .table th, .table td { word-break: break-word; }
+}
+
+/* =============================================
    gy-4 rows — espaciados, iconos y visibilidad
    ============================================= */
 .row.gy-4 {
@@ -2160,4 +2253,26 @@ input[type="month"] {
   .row.gy-4 { --bs-gutter-y: 0.75rem; }
   .row.gy-4 .kpi-card .kpi-icon { width: 38px; height: 38px; }
   .row.gy-4 .kpi-card .kpi-value { font-size: 1.2rem; }
+}
+/* KPI card body padding responsivo */
+.kpi-card .card-body {
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+/* Spacing responsive para secciones del Dashboard */
+.section-box .row.gy-4 {
+  row-gap: clamp(0.75rem, 2.4vw, 1.5rem);
+}
+.quick-actions-card .row.gy-3 {
+  row-gap: clamp(0.5rem, 1.8vw, 1rem);
+}
+.quick-actions-card .card-header {
+  padding: clamp(0.5rem, 1.8vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+}
+.quick-actions-card .card-header .inline-flex {
+  gap: clamp(0.25rem, 1.4vw, 0.5rem);
+}
+.quick-actions-card .card-header h3 {
+  margin-bottom: 0;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
 }

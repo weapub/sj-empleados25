@@ -12,12 +12,18 @@ const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (targetPage = page) => {
     try {
       setLoading(true);
-      const data = await getEmployees();
-      setEmployees(data);
+      const resp = await getEmployees({ page: targetPage, limit: 25 });
+      setEmployees(resp.data || []);
+      setTotal(resp.total || 0);
+      setTotalPages(resp.totalPages || 1);
+      setPage(resp.page || targetPage);
       setError('');
     } catch (err) {
       setError('Error al cargar los empleados');
@@ -28,20 +34,26 @@ const EmployeeList = () => {
   };
 
   useEffect(() => {
-    fetchEmployees();
+    fetchEmployees(1);
   }, []);
 
   const handleDelete = async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este empleado?')) {
       try {
         await deleteEmployee(id);
-        setEmployees(employees.filter(employee => employee._id !== id));
+        // Refrescar la página actual tras eliminar
+        fetchEmployees(page);
       } catch (err) {
         setError('Error al eliminar el empleado');
         console.error(err);
       }
     }
   };
+
+  const canPrev = page > 1;
+  const canNext = page < totalPages;
+  const goPrev = () => { if (canPrev) fetchEmployees(page - 1); };
+  const goNext = () => { if (canNext) fetchEmployees(page + 1); };
 
   if (loading) {
     return (
@@ -71,7 +83,7 @@ const EmployeeList = () => {
 
       {error && <Alert variant="danger">{error}</Alert>}
 
-      {employees.length === 0 ? (
+      {total === 0 ? (
         <Alert variant="light" className="shadow-sm">No hay empleados registrados</Alert>
       ) : (
         <>
@@ -125,6 +137,13 @@ const EmployeeList = () => {
                   </tbody>
                 </Table>
               </div>
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <small className="text-muted">Total: {total} — Página {page} de {totalPages}</small>
+                <div>
+                  <Button variant="outline-secondary" size="sm" className="me-2" disabled={!canPrev} onClick={goPrev}>Anterior</Button>
+                  <Button variant="outline-secondary" size="sm" disabled={!canNext} onClick={goNext}>Siguiente</Button>
+                </div>
+              </div>
             </SectionCard>
             </div>
           </div>
@@ -160,6 +179,13 @@ const EmployeeList = () => {
                 ]}
               />
             ))}
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <small className="text-muted">Total: {total} — Página {page} de {totalPages}</small>
+              <div>
+                <Button variant="outline-secondary" size="sm" className="me-2" disabled={!canPrev} onClick={goPrev}>Anterior</Button>
+                <Button variant="outline-secondary" size="sm" disabled={!canNext} onClick={goNext}>Siguiente</Button>
+              </div>
+            </div>
           </div>
         </>
       )}

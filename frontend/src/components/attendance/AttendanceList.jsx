@@ -8,7 +8,7 @@ import { getAttendances, getEmployees, deleteAttendance } from '../../services/a
 import PageHeader from '../common/PageHeader';
 import SectionCard from '../common/SectionCard';
 import { Clock, Plus } from 'lucide-react';
-import { List } from 'react-window';
+import { FixedSizeList as List } from 'react-window';
 
 const AttendanceList = () => {
   const [attendances, setAttendances] = useState([]);
