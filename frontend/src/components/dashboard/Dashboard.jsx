@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, Button, Row, Col, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { getDashboardMetrics } from '../../services/api';
@@ -7,7 +6,6 @@ import { LayoutDashboard, Users, UserCheck, CalendarX, Clock, UserX, AlertTriang
 import MetricCardAlt from '../common/MetricCardAlt';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState({
     empleadosActivos: 0,
     inasistenciasMes: 0,
@@ -43,15 +41,6 @@ const Dashboard = () => {
       } catch (error) {
         // Ignorar cancelaciones explícitas para evitar ruido en consola
         if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') {
-          return;
-        }
-        // Si el backend responde 401, limpiar token y enviar a login
-        if (error?.response?.status === 401) {
-          try {
-            localStorage.removeItem('token');
-          } catch (_) {}
-          // Forzar navegación limpia para que App reevalúe autenticación
-          navigate('/login', { replace: true });
           return;
         }
         console.error('Error al cargar estadísticas:', error);
