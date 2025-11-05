@@ -7,6 +7,25 @@ const TRIMMED = String(RAW_BASE).replace(/\/+$/, '');
 const BASE_NO_API = TRIMMED.replace(/\/api\/?$/i, '');
 const API_URL = `${BASE_NO_API}/api`;
 
+// Interceptor global: ante 401, limpiar token y enviar a login
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    if (status === 401) {
+      try {
+        localStorage.removeItem('token');
+      } catch (_) {}
+      delete axios.defaults.headers.common['x-auth-token'];
+      const isLogin = typeof window !== 'undefined' && window.location?.pathname === '/login';
+      if (!isLogin && typeof window !== 'undefined') {
+        window.location.replace('/login');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Configurar axios con token
 const setAuthToken = token => {
   if (token) {
