@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { getDashboardMetrics } from '../../services/api';
 import { LayoutDashboard, Users, UserCheck, CalendarX, Clock, UserX, AlertTriangle, AlertCircle, Receipt, TrendingUp } from 'lucide-react';
 import MetricCardAlt from '../common/MetricCardAlt';
+import { isCanceledError } from '../../utils/http';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -40,7 +41,7 @@ const Dashboard = () => {
         });
       } catch (error) {
         // Ignorar cancelaciones explícitas para evitar ruido en consola
-        if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') {
+        if (isCanceledError(error)) {
           return;
         }
         console.error('Error al cargar estadísticas:', error);
