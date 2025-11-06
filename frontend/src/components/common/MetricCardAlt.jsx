@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Col } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 // Tarjeta KPI alternativa: diseño compacto con barra de acento lateral
 const MetricCardAlt = ({
@@ -9,14 +10,15 @@ const MetricCardAlt = ({
   color = '#2563eb',
   loading = false,
   delta,
+  to = null,
+  onClick,
 }) => {
   const isDown = typeof delta === 'string' && delta.trim().startsWith('-');
   const deltaClass = isDown ? 'kpi-delta down' : 'kpi-delta up';
   const deltaSymbol = isDown ? '▼' : '▲';
 
-  return (
-    <Col lg={3} md={6} sm={6} className="mb-4">
-      <Card className="kpi-card h-100">
+  const CardInner = (
+      <Card className="kpi-card h-100" style={{ cursor: to || onClick ? 'pointer' : 'default' }} onClick={onClick}>
         <Card.Body className="p-4">
           <div className="d-flex align-items-center justify-content-between mb-2">
             <div className="kpi-icon" style={{ borderColor: color }}>
@@ -38,8 +40,17 @@ const MetricCardAlt = ({
           </div>
       </Card.Body>
     </Card>
-  </Col>
-);
+  );
+
+  return (
+    <Col lg={3} md={6} sm={6} className="mb-4">
+      {to ? (
+        <Link to={to} className="text-decoration-none" style={{ color: 'inherit' }}>
+          {CardInner}
+        </Link>
+      ) : CardInner}
+    </Col>
+  );
 };
 
 export default MetricCardAlt;

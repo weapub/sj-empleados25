@@ -55,8 +55,8 @@ const Dashboard = () => {
     };
   }, []);
 
-  const renderMetricCard = (title, value, icon, color, delta) => (
-    <MetricCardAlt title={title} value={value} icon={icon} color={color} loading={stats.loading} delta={delta} />
+  const renderMetricCard = (title, value, icon, color, delta, to = null) => (
+    <MetricCardAlt title={title} value={value} icon={icon} color={color} loading={stats.loading} delta={delta} to={to} />
   );
 
   return (
@@ -95,10 +95,10 @@ const Dashboard = () => {
             Gestión Disciplinaria y Administrativa
           </h2>
           <Row className="gy-4">
-            {renderMetricCard('Apercibimientos', stats.apercibimientos, <AlertTriangle />, '#ea580c', deltas.apercibimientos)}
-            {renderMetricCard('Sanciones Activas', stats.sancionesActivas, <AlertCircle />, '#ec4899', deltas.sancionesActivas)}
-            {renderMetricCard('Recibos Pendientes', stats.recibosPendientes, <Receipt />, '#10b981', deltas.recibosPendientes)}
-            {renderMetricCard('Total Histórico', stats.totalHistorico, <TrendingUp />, '#0891b2', deltas.totalHistorico)}
+            {renderMetricCard('Apercibimientos', stats.apercibimientos, <AlertTriangle />, '#ea580c', deltas.apercibimientos, '/disciplinary')}
+            {renderMetricCard('Sanciones Activas', stats.sancionesActivas, <AlertCircle />, '#ec4899', deltas.sancionesActivas, '/disciplinary')}
+            {renderMetricCard('Recibos Pendientes', stats.recibosPendientes, <Receipt />, '#10b981', deltas.recibosPendientes, '/payroll')}
+            {renderMetricCard('Total Histórico', stats.totalHistorico, <TrendingUp />, '#0891b2', deltas.totalHistorico, '/disciplinary')}
           </Row>
         </div>
       </div>
