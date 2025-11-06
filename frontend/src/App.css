@@ -2334,6 +2334,80 @@ input[type="month"] {
   .btn-sm { padding: 0.22rem 0.44rem; font-size: 0.75rem; }
 
   /* Badges más compactos en PC */
-  .badge,
+.badge,
   .badge-soft { padding: 0.35rem 0.55rem; font-size: 0.72rem; }
+}
+
+/* =============================================
+   Mobile touch-friendly (2025-11 enhancement)
+   Mejora visual y accesibilidad en botones y body
+   ============================================= */
+@media (max-width: 576px) {
+  /* Body: confort de lectura y control de espacios */
+  body {
+    font-size: 15.5px;
+    line-height: 1.65;
+    padding-left: 8px;
+    padding-right: 8px;
+    background: linear-gradient(180deg, var(--light-bg) 0%, #ffffff 100%);
+  }
+
+  /* Contenedores más respirados en XS */
+  .container,
+  .container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  /* Botones: objetivos táctiles 44px, radio suave y contraste claro */
+  button,
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .btn-sm {
+    min-height: 40px;
+    padding: 0.5rem 0.85rem;
+    border-radius: 10px;
+  }
+
+  /* Variantes con fondo intenso: asegurar legibilidad */
+  .btn-primary,
+  .btn-success,
+  .btn-info,
+  .btn-warning,
+  .btn-danger {
+    color: #fff !important;
+  }
+
+  /* Navbar y enlaces: área táctil más cómoda */
+  .navbar .nav-link {
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+  }
+
+  /* CTA móvil flotante para acciones primarias */
+  .mobile-cta {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 1030; /* por encima de contenido, debajo de modales */
+  }
+
+  .mobile-cta-btn {
+    width: 100%;
+    min-height: 48px; /* área táctil cómoda */
+    border-radius: 14px;
+    font-weight: 700;
+  }
+
+  /* Asegura espacio inferior cuando hay CTA flotante */
+  .has-mobile-cta {
+    padding-bottom: 96px; /* evita solapamiento con el CTA */
+  }
 }

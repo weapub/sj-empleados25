@@ -113,8 +113,27 @@ export const deleteEmployee = async (id) => {
 // Permite pasar opciones de axios (por ejemplo, { signal }) para cancelación
 export const getDashboardMetrics = async (options = {}) => {
   setAuthToken(localStorage.getItem('token'));
-  const response = await axios.get(`${API_URL}/dashboard/metrics`, options);
-  return response.data;
+  try {
+    const response = await axios.get(`${API_URL}/dashboard/metrics`, options);
+    return response.data;
+  } catch (error) {
+    // Re-lanzar cancelaciones explícitas para que el componente las ignore
+    if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED' || (axios?.isCancel ? axios.isCancel(error) : false)) {
+      throw error;
+    }
+    // Degradación silenciosa: devolver métricas vacías para evitar ruido en consola
+    return {
+      empleadosActivos: 0,
+      inasistenciasMes: 0,
+      tardanzasMes: 0,
+      sinPresentismo: 0,
+      apercibimientos: 0,
+      totalHistorico: 0,
+      sancionesActivas: 0,
+      recibosPendientes: 0,
+      deltas: null
+    };
+  }
 };
 
 // Servicios de asistencia

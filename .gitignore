@@ -10,11 +10,16 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+# Any env backups or variants
+.env.backup
+.env.*.backup
+*.env.backup
 
 # Backend specific
 backend/uploads/
 backend/logs/
 backend/.env
+backend/.env.backup
 
 # Frontend specific
 frontend/build/

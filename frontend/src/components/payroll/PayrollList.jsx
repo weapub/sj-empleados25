@@ -190,10 +190,21 @@ const PayrollList = () => {
         subtitle="Gestione, filtre y ordene los recibos emitidos"
         actions={(
           <Button variant="primary" className="shadow-sm" onClick={() => navigate('/payroll/new')}>
-            <Plus size={16} className="me-1" /> Nuevo Recibo
+            <Plus size={16} className="me-1" /> Registrar Nuevo Recibo +
           </Button>
         )}
       />
+
+      {/* Botón flotante móvil para registrar nuevo recibo */}
+      <div className="d-md-none mobile-cta">
+        <Button
+          variant="primary"
+          className="mobile-cta-btn shadow-lg"
+          onClick={() => navigate('/payroll/new')}
+        >
+          <Plus size={18} className="me-2" /> Registrar Nuevo Recibo +
+        </Button>
+      </div>
 
       <div className="section-box mb-3">
       <div className="section-band" />
@@ -335,7 +346,7 @@ const PayrollList = () => {
           </div>
 
           {/* Vista móvil */}
-          <div className="d-md-none">
+          <div className="d-md-none has-mobile-cta">
             {filteredReceipts.length === 0 ? (
               <p className="text-center">No hay recibos registrados</p>
             ) : (

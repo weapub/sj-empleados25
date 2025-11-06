@@ -36,7 +36,13 @@ const AttendanceForm = () => {
     const loadEmployees = async () => {
       try {
         const data = await getEmployees();
-        setEmployees(data);
+        // getEmployees puede devolver { data, total, page, totalPages } o un array
+        const employeesArray = Array.isArray(data)
+          ? data
+          : (data && Array.isArray(data.data))
+            ? data.data
+            : [];
+        setEmployees(employeesArray);
         // No marcar loading false aún si estamos en edición; esperemos a cargar el registro
         if (!isEdit) setLoading(false);
       } catch (err) {
@@ -193,7 +199,7 @@ const AttendanceForm = () => {
                   required
                 >
                   <option value="">Seleccionar Empleado</option>
-                  {employees.map(employee => (
+                  {(Array.isArray(employees) ? employees : []).map(employee => (
                     <option key={employee._id} value={employee._id}>
                       {employee.nombre} {employee.apellido} - Legajo: {employee.legajo}
                     </option>
