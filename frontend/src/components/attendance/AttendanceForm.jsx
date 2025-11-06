@@ -92,6 +92,30 @@ const AttendanceForm = () => {
     loadAttendance();
   }, [id, isEdit]);
 
+  // Limpiar campos que no aplican al cambiar el tipo
+  useEffect(() => {
+    setFormData(prev => {
+      const next = { ...prev };
+      if (prev.type !== 'tardanza') {
+        next.scheduledEntry = '';
+        next.actualEntry = '';
+      }
+      if (prev.type !== 'licencia medica') {
+        next.certificateExpiry = '';
+      }
+      if (prev.type !== 'vacaciones') {
+        next.vacationsStart = '';
+        next.vacationsEnd = '';
+      }
+      if (prev.type !== 'sancion recibida') {
+        next.suspensionDays = '';
+        // Mantener returnToWorkDate si viene de licencia; si no aplica, limpiarlo
+        next.returnToWorkDate = '';
+      }
+      return next;
+    });
+  }, [formData.type]);
+
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     
@@ -171,7 +195,8 @@ const AttendanceForm = () => {
       }, 2000);
       
     } catch (err) {
-      setError(isEdit ? 'Error al actualizar el registro de asistencia' : 'Error al crear el registro de asistencia');
+      const serverMsg = err?.response?.data?.msg || err?.message;
+      setError(serverMsg || (isEdit ? 'Error al actualizar el registro de asistencia' : 'Error al crear el registro de asistencia'));
     }
   };
 

@@ -39,8 +39,14 @@ const DisciplinaryForm = () => {
 
   const loadEmployees = async () => {
     try {
-      const response = await getEmployees();
-      setEmployees(response);
+      const data = await getEmployees();
+      // getEmployees puede devolver { data, total, page, totalPages } o un array
+      const employeesArray = Array.isArray(data)
+        ? data
+        : (data && Array.isArray(data.data))
+          ? data.data
+          : [];
+      setEmployees(employeesArray);
     } catch (error) {
       console.error('Error al cargar empleados:', error);
     }
@@ -148,7 +154,7 @@ const DisciplinaryForm = () => {
                     disabled={isEdit}
                   >
                     <option value="">Seleccione un empleado</option>
-                    {employees.map((employee) => (
+                    {(Array.isArray(employees) ? employees : []).map((employee) => (
                       <option key={employee._id} value={employee._id}>
                         {employee.nombre} {employee.apellido} - Legajo: {employee.legajo}
                       </option>
