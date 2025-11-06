@@ -16,7 +16,8 @@ const Dashboard = () => {
     totalHistorico: 0,
     sancionesActivas: 0,
     recibosPendientes: 0,
-    loading: true
+    loading: true,
+    error: false
   });
   // Deltas para emular variaciones como en la imagen
   const [deltas, setDeltas] = useState({
@@ -38,7 +39,8 @@ const Dashboard = () => {
         setStats(prev => ({
           ...prev,
           ...metrics,
-          loading: false
+          loading: false,
+          error: false
         }));
       } catch (error) {
         // Ignorar cancelaciones explícitas para evitar ruido en consola
@@ -46,7 +48,7 @@ const Dashboard = () => {
           return;
         }
         console.error('Error al cargar estadísticas:', error);
-        setStats(prev => ({ ...prev, loading: false }));
+        setStats(prev => ({ ...prev, loading: false, error: true }));
       }
     };
 
@@ -57,7 +59,7 @@ const Dashboard = () => {
   }, []);
 
   const renderMetricCard = (title, value, icon, color, delta, to = null) => (
-    <MetricCardAlt title={title} value={value} icon={icon} color={color} loading={stats.loading} delta={delta} to={to} />
+    <MetricCardAlt title={title} value={value} icon={icon} color={color} loading={stats.loading} error={stats.error} delta={delta} to={to} />
   );
 
   return (

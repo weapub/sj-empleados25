@@ -9,6 +9,7 @@ const MetricCardAlt = ({
   icon,
   color = '#2563eb',
   loading = false,
+  error = false,
   delta,
   to = null,
   onClick,
@@ -18,13 +19,13 @@ const MetricCardAlt = ({
   const deltaSymbol = isDown ? '▼' : '▲';
 
   const CardInner = (
-      <Card className="kpi-card h-100" style={{ cursor: to || onClick ? 'pointer' : 'default' }} onClick={onClick}>
+      <Card className="kpi-card h-100" style={{ cursor: to || onClick ? 'pointer' : 'default' }} onClick={onClick} aria-busy={loading}>
         <Card.Body className="p-4">
           <div className="d-flex align-items-center justify-content-between mb-2">
             <div className="kpi-icon" style={{ borderColor: color }}>
               {icon && React.cloneElement(icon, { size: 22, color })}
             </div>
-            {delta && (
+            {delta && !loading && !error && (
               <span className={deltaClass}>
                 <span className="kpi-delta-symbol">{deltaSymbol}</span>
                 {delta}
@@ -36,8 +37,11 @@ const MetricCardAlt = ({
             {title}
           </div>
           <div className="kpi-value">
-            {loading ? '...' : value}
+            {loading ? '...' : (error ? '—' : value)}
           </div>
+          {!loading && error && (
+            <div className="text-muted small mt-1" aria-live="polite">Sin datos</div>
+          )}
       </Card.Body>
     </Card>
   );
