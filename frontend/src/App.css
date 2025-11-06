@@ -2313,6 +2313,17 @@ input[type="month"] {
     padding-right: clamp(0.75rem, 2vw, 1.25rem);
   }
 
+  /* Aumentar separación visual en la Navbar */
+  .navbar .navbar-brand {
+    margin-right: clamp(1rem, 3vw, 2rem);
+  }
+  .navbar .navbar-nav {
+    gap: clamp(0.25rem, 1vw, 0.5rem);
+  }
+  .navbar .nav-link {
+    margin: 0 clamp(0.25rem, 1vw, 0.5rem);
+  }
+
   /* Botones más compactos en PC */
   .btn { padding: 0.5rem 0.9rem; font-size: 0.85rem; }
   .btn-sm { padding: 0.22rem 0.44rem; font-size: 0.75rem; }
