@@ -27,6 +27,7 @@ Este documento complementa el README con pasos prácticos para producción.
 - Root Directory: `frontend`
 - Build: `npm install && npm run build`
 - Output: `dist/`
+- Dominio de producción: `https://sj-empleados-system.vercel.app/`
 - Env vars (Project Settings → Environment Variables):
   - `VITE_API_URL=https://tu-backend.onrender.com` (sin sufijo `/api`; el cliente lo agrega)
   - Si ves "Login – Vercel" y el `manifest.json` responde `401`, desactiva **Preview Protection** en Vercel o usa un dominio de producción público.
