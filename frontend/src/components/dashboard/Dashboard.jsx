@@ -35,10 +35,11 @@ const Dashboard = () => {
     const fetchStats = async () => {
       try {
         const metrics = await getDashboardMetrics({ signal: controller.signal });
-        setStats({
+        setStats(prev => ({
+          ...prev,
           ...metrics,
           loading: false
-        });
+        }));
       } catch (error) {
         // Ignorar cancelaciones explícitas para evitar ruido en consola
         if (isCanceledError(error)) {

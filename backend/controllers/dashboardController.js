@@ -1,5 +1,7 @@
 const Employee = require('../models/Employee');
 const Attendance = require('../models/Attendance');
+const Disciplinary = require('../models/Disciplinary');
+const PayrollReceipt = require('../models/PayrollReceipt');
 
 // Obtener todas las métricas para el dashboard
 exports.getDashboardMetrics = async (req, res) => {
@@ -36,7 +38,7 @@ exports.getDashboardMetrics = async (req, res) => {
       type: 'vacaciones',
       date: { $gte: firstDayOfMonth }
     });
-    
+
     const sanciones = await Attendance.countDocuments({ 
       type: 'sancion recibida',
       date: { $gte: firstDayOfMonth }
@@ -51,6 +53,22 @@ exports.getDashboardMetrics = async (req, res) => {
     // Total histórico de registros
     const totalHistorico = await Attendance.countDocuments();
     
+    // Apercibimientos (mes actual): medidas disciplinarias de tipo 'verbal' o 'formal'
+    const apercibimientos = await Disciplinary.countDocuments({
+      type: { $in: ['verbal', 'formal'] },
+      date: { $gte: firstDayOfMonth }
+    });
+
+    // Sanciones activas: medidas disciplinarias con suspensión vigente
+    const today = new Date();
+    const sancionesActivas = await Disciplinary.countDocuments({
+      durationDays: { $ne: null },
+      returnToWorkDate: { $ne: null, $gte: today }
+    });
+
+    // Recibos pendientes: recibos no firmados
+    const recibosPendientes = await PayrollReceipt.countDocuments({ signed: false });
+
     const metrics = {
       empleadosActivos,
       inasistenciasMes,
@@ -60,7 +78,10 @@ exports.getDashboardMetrics = async (req, res) => {
       vacaciones,
       sanciones,
       sinPresentismo,
-      totalHistorico
+      totalHistorico,
+      apercibimientos,
+      sancionesActivas,
+      recibosPendientes
     };
 
     res.json(metrics);
