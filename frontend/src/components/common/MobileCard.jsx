@@ -20,7 +20,7 @@ const MobileCard = ({
 
         {/* Badges */}
         {badges.length > 0 && (
-          <div className="mobile-card-badges mb-3">
+          <div className="mobile-card-badges mb-3 d-flex flex-wrap gap-2">
             {badges.map((badge, index) => {
               const variantKey = (badge.variant || 'primary').toLowerCase();
               // Map "dark" to a neutral soft style; keep real "secondary" as its own
@@ -28,7 +28,7 @@ const MobileCard = ({
               return badge.soft ? (
                 <span
                   key={index}
-                  className={`badge badge-soft ${badge.variantClass || softClass} me-2 mb-1`}
+                  className={`badge badge-soft ${badge.variantClass || softClass}`}
                 >
                   <span className="dot"></span>
                   {badge.text}
@@ -37,7 +37,7 @@ const MobileCard = ({
                 <Badge 
                   key={index} 
                   bg={badge.variant || 'secondary'} 
-                  className="me-2 mb-1"
+                  className=""
                 >
                   {badge.text}
                 </Badge>
@@ -60,18 +60,17 @@ const MobileCard = ({
 
         {/* Acciones */}
         {actions.length > 0 && (
-          <div className="mobile-card-actions">
+          <div className="mobile-card-actions d-flex flex-wrap gap-2">
             {actions.map((action, index) => (
               <Button
                 key={index}
                 variant={action.variant || 'outline-primary'}
                 size="sm"
-                className="me-2 mb-1"
+                className=""
                 onClick={action.onClick}
                 disabled={action.disabled}
               >
-                {action.icon && <span className="me-1">{action.icon}</span>}
-                {action.text}
+                {action.icon && action.icon} <span>{action.text}</span>
               </Button>
             ))}
           </div>

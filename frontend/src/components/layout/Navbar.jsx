@@ -33,54 +33,51 @@ const NavbarComponent = ({ isAuthenticated, logout }) => {
               <>
                 <Nav.Link as={NavLink} to="/" end className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-1 rounded-full ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}>
                   {({ isActive }) => (<>
-                    <FaChartLine size={isActive ? 18 : 16} className="shrink-0 me-2" />
+                    <FaChartLine size={isActive ? 18 : 16} className="shrink-0" />
                     <span>Dashboard</span>
                   </>)}
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/employees" className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-1 rounded-full ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}>
                   {({ isActive }) => (<>
-                    <FaUsers size={isActive ? 18 : 16} className="shrink-0 me-2" />
+                    <FaUsers size={isActive ? 18 : 16} className="shrink-0" />
                     <span>Empleados</span>
                   </>)}
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/disciplinary" className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-1 rounded-full ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}>
                   {({ isActive }) => (<>
-                    <FaExclamationTriangle size={isActive ? 18 : 16} className="shrink-0 me-2" />
+                    <FaExclamationTriangle size={isActive ? 18 : 16} className="shrink-0" />
                     <span>Medidas Disciplinarias</span>
                   </>)}
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/attendance" className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-1 rounded-full ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}>
                   {({ isActive }) => (<>
-                    <FaClock size={isActive ? 18 : 16} className="shrink-0 me-2" />
+                    <FaClock size={isActive ? 18 : 16} className="shrink-0" />
                     <span>Asistencias</span>
                   </>)}
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/payroll" className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-1 rounded-full ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}>
                   {({ isActive }) => (<>
-                    <FaFileInvoiceDollar size={isActive ? 18 : 16} className="shrink-0 me-2" />
+                    <FaFileInvoiceDollar size={isActive ? 18 : 16} className="shrink-0" />
                     <span>Recibos</span>
                   </>)}
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/employee-account" className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-1 rounded-full ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`}>
                   {({ isActive }) => (<>
-                    <FaWallet size={isActive ? 18 : 16} className="shrink-0 me-2" />
+                    <FaWallet size={isActive ? 18 : 16} className="shrink-0" />
                     <span>Cuenta Corriente</span>
                   </>)}
                 </Nav.Link>
                 <Button variant="outline-dark" onClick={logout} className="ms-2 shadow-sm rounded-full px-3 py-1">
-                  <FaSignOutAlt className="me-2" />
-                  Cerrar Sesión
+                  <FaSignOutAlt /> <span>Cerrar Sesión</span>
                 </Button>
               </>
             ) : (
               <>
-                <Nav.Link as={NavLink} to="/login" className="px-2 py-1 hover:bg-slate-50 rounded-md">
-                  <FaSignInAlt className="me-2" />
-                  Iniciar Sesión
+                <Nav.Link as={NavLink} to="/login" className="inline-flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded-md">
+                  <FaSignInAlt /> <span>Iniciar Sesión</span>
                 </Nav.Link>
-                <Nav.Link as={NavLink} to="/register" className="px-2 py-1 hover:bg-slate-50 rounded-md">
-                  <FaUserPlus className="me-2" />
-                  Registrarse
+                <Nav.Link as={NavLink} to="/register" className="inline-flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded-md">
+                  <FaUserPlus /> <span>Registrarse</span>
                 </Nav.Link>
               </>
             )}
