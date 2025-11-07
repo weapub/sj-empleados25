@@ -16,8 +16,8 @@ const NavbarComponent = ({ isAuthenticated, logout }) => {
             <img
               src={BRAND_LOGO_PATH}
               alt={BRAND_NAME}
-              width={20}
-              height={20}
+              width={22}
+              height={22}
               className="rounded shadow-sm align-middle shrink-0"
               onError={() => setLogoOk(false)}
             />
