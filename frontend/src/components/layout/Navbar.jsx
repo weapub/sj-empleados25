@@ -67,8 +67,8 @@ const NavbarComponent = ({ isAuthenticated, logout }) => {
                     <span>Cuenta Corriente</span>
                   </>)}
                 </Nav.Link>
-                <Button variant="outline-dark" onClick={logout} className="ms-2 shadow-sm rounded-full px-3 py-1">
-                  <FaSignOutAlt /> <span>Cerrar Sesión</span>
+                <Button variant="outline-dark" onClick={logout} className="ms-2 shadow-sm rounded-full px-3 py-1 inline-flex items-center gap-2">
+                  <FaSignOutAlt className="shrink-0" /> <span>Cerrar Sesión</span>
                 </Button>
               </>
             ) : (
