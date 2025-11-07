@@ -7,6 +7,8 @@ import './App.css';
 import Navbar from './components/layout/Navbar';
 // Preview de plantilla Tailwind
 const TemplatePreview = React.lazy(() => import('./components/template/TemplatePreview'));
+// Preview Dashboard con layout TailAdmin
+const TemplateDashboard = React.lazy(() => import('./components/template/TemplateDashboard'));
 // Carga diferida de vistas principales para reducir el bundle inicial
 const Login = React.lazy(() => import('./components/auth/Login'));
 const Register = React.lazy(() => import('./components/auth/Register'));
@@ -79,6 +81,8 @@ function App() {
                 <Route path="/register" element={!isAuthenticated ? <Register login={login} /> : <Navigate to="/" />} />
                 {/* Vista de preview de plantilla (solo autenticados) */}
                 <Route path="/_template-preview" element={isAuthenticated ? <TemplatePreview /> : <Navigate to="/login" />} />
+                {/* Vista de preview del Dashboard con layout TailAdmin */}
+                <Route path="/_template-dashboard" element={isAuthenticated ? <TemplateDashboard /> : <Navigate to="/login" />} />
                 <Route path="/employees" element={isAuthenticated ? <EmployeeList /> : <Navigate to="/login" />} />
                 <Route path="/employees/new" element={isAuthenticated ? <EmployeeForm /> : <Navigate to="/login" />} />
                 <Route path="/employees/edit/:id" element={isAuthenticated ? <EmployeeForm /> : <Navigate to="/login" />} />
