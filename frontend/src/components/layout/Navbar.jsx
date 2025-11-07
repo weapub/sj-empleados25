@@ -18,11 +18,11 @@ const NavbarComponent = ({ isAuthenticated, logout }) => {
               alt={BRAND_NAME}
               width={22}
               height={22}
-              className="rounded shadow-sm align-middle shrink-0"
+              className="rounded shadow-sm align-middle"
               onError={() => setLogoOk(false)}
             />
           ) : (
-            <FaUsers className="shrink-0" size={18} />
+            <FaUsers />
           )}
           <span>{BRAND_NAME}</span>
         </Navbar.Brand>
@@ -74,10 +74,10 @@ const NavbarComponent = ({ isAuthenticated, logout }) => {
             ) : (
               <>
                 <Nav.Link as={NavLink} to="/login" className="inline-flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded-md">
-                  <FaSignInAlt className="shrink-0" /> <span>Iniciar Sesión</span>
+                  <FaSignInAlt /> <span>Iniciar Sesión</span>
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/register" className="inline-flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded-md">
-                  <FaUserPlus className="shrink-0" /> <span>Registrarse</span>
+                  <FaUserPlus /> <span>Registrarse</span>
                 </Nav.Link>
               </>
             )}
