@@ -1,0 +1,70 @@
+name: Daily Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Todos los días a las 03:00 UTC
+  workflow_dispatch: {}
+
+# Necesario para poder crear tags/branches y subir artefactos
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create backup tag and branch
+        shell: bash
+        run: |
+          set -e
+          DATE=$(date -u +'%Y%m%d-%H%M')
+          TAG="backup-${DATE}"
+          BRANCH="backup/${DATE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Crear tag anotado y branch desde HEAD
+          git tag -a "$TAG" -m "Automated backup $DATE"
+          git branch "$BRANCH"
+          # Empujar tag y branch
+          git push origin "$TAG"
+          git push origin "$BRANCH"
+          # Exportar variables para siguientes pasos
+          echo "TAG_NAME=$TAG" >> "$GITHUB_ENV"
+          echo "BRANCH_NAME=$BRANCH" >> "$GITHUB_ENV"
+
+      - name: Create source ZIP (git tracked)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p backup
+          git archive --format=zip --output "backup/sj-empleados-system-src-${TAG_NAME}.zip" HEAD
+
+      - name: Package env files or examples (if present)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p backup
+          FILES=()
+          [ -f frontend/.env ] && FILES+=("frontend/.env")
+          [ -f backend/.env ] && FILES+=("backend/.env")
+          if [ ${#FILES[@]} -gt 0 ]; then
+            zip -r "backup/sj-empleados-system-env-${TAG_NAME}.zip" "${FILES[@]}"
+          else
+            EXAMPLES=()
+            [ -f frontend/.env.example ] && EXAMPLES+=("frontend/.env.example")
+            [ -f backend/.env.example ] && EXAMPLES+=("backend/.env.example")
+            if [ ${#EXAMPLES[@]} -gt 0 ]; then
+              zip -r "backup/sj-empleados-system-env-examples-${TAG_NAME}.zip" "${EXAMPLES[@]}"
+            fi
+          fi
+
+      - name: Upload backup artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ env.TAG_NAME }}
+          path: backup/
