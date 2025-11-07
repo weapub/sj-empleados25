@@ -79,10 +79,9 @@ function App() {
                 <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
                 <Route path="/login" element={!isAuthenticated ? <Login login={login} /> : <Navigate to="/" />} />
                 <Route path="/register" element={!isAuthenticated ? <Register login={login} /> : <Navigate to="/" />} />
-                {/* Vista de preview de plantilla (solo autenticados) */}
-                <Route path="/_template-preview" element={isAuthenticated ? <TemplatePreview /> : <Navigate to="/login" />} />
-                {/* Vista de preview del Dashboard con layout TailAdmin */}
-                <Route path="/_template-dashboard" element={isAuthenticated ? <TemplateDashboard /> : <Navigate to="/login" />} />
+                {/* Vistas de preview públicas para facilitar evaluación */}
+                <Route path="/_template-preview" element={<TemplatePreview />} />
+                <Route path="/_template-dashboard" element={<TemplateDashboard />} />
                 <Route path="/employees" element={isAuthenticated ? <EmployeeList /> : <Navigate to="/login" />} />
                 <Route path="/employees/new" element={isAuthenticated ? <EmployeeForm /> : <Navigate to="/login" />} />
                 <Route path="/employees/edit/:id" element={isAuthenticated ? <EmployeeForm /> : <Navigate to="/login" />} />
