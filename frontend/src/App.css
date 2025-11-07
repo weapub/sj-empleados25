@@ -2149,7 +2149,7 @@ input[type="month"] {
   .mobile-view .mobile-card, .mobile-card { margin-bottom: 0.5rem; }
 
   /* Campos más compactos en MobileCard */
-  .mobile-card-fields { gap: 0.3rem; margin-bottom: 0.4rem !important; }
+  .mobile-card-fields { gap: 0.25rem; margin-bottom: 0.4rem !important; }
   .mobile-card .field-label,
   .mobile-card .field-value { font-size: 0.88rem; line-height: 1.35; }
 
@@ -2162,11 +2162,11 @@ input[type="month"] {
   }
 
   /* Badges más compactos en MobileCard */
-  .mobile-card-badges { gap: 0.18rem; margin-bottom: 0.4rem !important; }
+  .mobile-card-badges { gap: 0.15rem; margin-bottom: 0.4rem !important; }
   .mobile-card-badges .badge,
   .mobile-card-badges .badge-soft {
-    padding: 0.24rem 0.4rem;
-    font-size: 0.74rem;
+    padding: 0.22rem 0.38rem;
+    font-size: 0.72rem;
     line-height: 1.25;
   }
 }
