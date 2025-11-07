@@ -80,8 +80,8 @@ const Dashboard = () => {
         <div className="section-band" />
         <div className="p-3 p-md-4">
           <h2 className="section-title font-semibold text-slate-700 inline-flex items-center gap-2">
-            <Users size={20} className="me-2" />
-            Métricas de Personal
+            <Users size={20} />
+            <span>Métricas de Personal</span>
           </h2>
           <Row className="gy-4">
             {renderMetricCard('Empleados Activos', stats.empleadosActivos, <UserCheck />, '#059669', deltas.empleadosActivos)}
@@ -97,8 +97,8 @@ const Dashboard = () => {
         <div className="section-band" />
         <div className="p-3 p-md-4">
           <h2 className="section-title font-semibold text-slate-700 inline-flex items-center gap-2">
-            <AlertTriangle size={20} className="me-2" />
-            Gestión Disciplinaria y Administrativa
+            <AlertTriangle size={20} />
+            <span>Gestión Disciplinaria y Administrativa</span>
           </h2>
           <Row className="gy-4">
             {renderMetricCard('Apercibimientos', stats.apercibimientos, <AlertTriangle />, '#ea580c', deltas.apercibimientos, '/disciplinary')}

@@ -11,20 +11,20 @@ const NavbarComponent = ({ isAuthenticated, logout }) => {
   return (
     <Navbar bg="light" variant="light" expand="lg" className="shadow-sm border-b border-slate-200/70">
       <Container className="py-1 px-2 md:px-4">
-        <Navbar.Brand as={Link} to="/" className="font-semibold tracking-tight text-slate-700">
+        <Navbar.Brand as={Link} to="/" className="font-semibold tracking-tight text-slate-700 inline-flex items-center gap-2">
           {logoOk ? (
             <img
               src={BRAND_LOGO_PATH}
               alt={BRAND_NAME}
               width={22}
               height={22}
-              className="me-2 rounded shadow-sm align-middle"
+              className="rounded shadow-sm align-middle"
               onError={() => setLogoOk(false)}
             />
           ) : (
-            <FaUsers className="me-2" />
+            <FaUsers />
           )}
-          {BRAND_NAME}
+          <span>{BRAND_NAME}</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">

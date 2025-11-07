@@ -184,9 +184,9 @@ const EmployeeAccountPage = () => {
               <Col lg={8} md={6} className="mb-3">
                 <Card className="h-100 shadow-sm border border-slate-200/70">
                   <Card.Header>
-                    <h5 className="mb-0">
-                      <FaCog className="me-2" />
-                      Configuración de Deducción Semanal
+                    <h5 className="mb-0 inline-flex items-center gap-2">
+                      <FaCog />
+                      <span>Configuración de Deducción Semanal</span>
                     </h5>
                   </Card.Header>
                   <Card.Body>
@@ -208,9 +208,9 @@ const EmployeeAccountPage = () => {
                           </Form.Group>
                         </Col>
                         <Col md={4} className="d-flex align-items-end">
-                          <Button type="submit" variant="primary" className="w-100 shadow-sm">
-                            <FaCog className="me-2" />
-                            Actualizar
+                          <Button type="submit" variant="primary" className="w-100 shadow-sm inline-flex items-center gap-2">
+                            <FaCog />
+                            <span>Actualizar</span>
                           </Button>
                         </Col>
                       </Row>
@@ -254,9 +254,9 @@ const EmployeeAccountPage = () => {
                       onChange={(e) => setPurchaseDate(e.target.value)} 
                     />
                   </Form.Group>
-                  <Button type="submit" variant="primary" className="w-100 shadow-sm">
-                    <FaShoppingCart size={16} className="me-2" />
-                    Registrar Compra
+                  <Button type="submit" variant="primary" className="w-100 shadow-sm inline-flex items-center gap-2">
+                    <FaShoppingCart size={16} />
+                    <span>Registrar Compra</span>
                   </Button>
                 </Form>
               </SectionCard>
@@ -292,9 +292,9 @@ const EmployeeAccountPage = () => {
                       onChange={(e) => setPaymentDate(e.target.value)} 
                     />
                   </Form.Group>
-                  <Button type="submit" variant="primary" className="w-100 shadow-sm">
-                    <FaMoneyBillWave size={16} className="me-2" />
-                    Realizar Pago
+                  <Button type="submit" variant="primary" className="w-100 shadow-sm inline-flex items-center gap-2">
+                    <FaMoneyBillWave size={16} />
+                    <span>Realizar Pago</span>
                   </Button>
                 </Form>
               </SectionCard>
