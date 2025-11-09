@@ -2187,6 +2187,19 @@ input[type="month"] {
 @media (max-width: 576px) {
   /* Tablas XS aún más compactas */
   .table th, .table td { padding: 0.35rem 0.18rem; }
+  /* Encabezados de página y sección más compactos en XS */
+  .page-title {
+    font-size: clamp(1.15rem, 3.6vw, 1.6rem);
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+  }
+  .section-title {
+    font-size: clamp(1rem, 3.2vw, 1.3rem);
+    line-height: 1.25;
+    margin-bottom: 0.9rem;
+  }
+  /* Reducir espacio del encabezado del dashboard en XS */
+  .dashboard-header { margin-bottom: 1.6rem; }
 }
 
 /* =============================================
