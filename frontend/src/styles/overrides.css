@@ -97,3 +97,12 @@
   border-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 24%, #e5e7eb) !important;
   color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
 }
+
+/* Navbar: color de texto blanco al hacer hover en nav-link */
+.navbar .nav-link:hover {
+  color: #ffffff !important;
+}
+.navbar .nav-link:hover svg,
+.navbar .nav-link:hover i {
+  color: #ffffff !important;
+}
