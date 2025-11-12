@@ -216,3 +216,90 @@
   background-color: color-mix(in srgb, var(--info-color, #3b82f6) 76%, #000000) !important;
   border-color: color-mix(in srgb, var(--info-color, #3b82f6) 76%, #000000) !important;
 }
+
+/* Variantes outline planas y coherentes */
+.btn-outline-secondary {
+  border-color: var(--border-color, #e5e7eb) !important;
+  color: var(--text-primary, #0f172a) !important;
+  background-color: transparent !important;
+}
+.btn-outline-secondary:hover {
+  background-color: #f8fafc !important;
+  color: var(--text-primary, #0f172a) !important;
+}
+.btn-outline-secondary:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(100, 116, 139, 0.25) !important; /* slate */
+}
+.btn-outline-secondary:disabled, .btn-outline-secondary.disabled {
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-success {
+  border-color: var(--success-color, #10b981) !important;
+  color: var(--success-color, #10b981) !important;
+  background-color: transparent !important;
+}
+.btn-outline-success:hover {
+  background-color: color-mix(in srgb, var(--success-color, #10b981) 12%, #ffffff) !important;
+}
+.btn-outline-success:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25) !important;
+}
+.btn-outline-success:disabled, .btn-outline-success.disabled {
+  color: color-mix(in srgb, var(--success-color, #10b981) 52%, #9ca3af) !important;
+  border-color: color-mix(in srgb, var(--success-color, #10b981) 52%, #e5e7eb) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-warning {
+  border-color: var(--warning-color, #f59e0b) !important;
+  color: var(--warning-color, #f59e0b) !important;
+  background-color: transparent !important;
+}
+.btn-outline-warning:hover {
+  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) 12%, #ffffff) !important;
+}
+.btn-outline-warning:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25) !important;
+}
+.btn-outline-warning:disabled, .btn-outline-warning.disabled {
+  color: color-mix(in srgb, var(--warning-color, #f59e0b) 48%, #9ca3af) !important;
+  border-color: color-mix(in srgb, var(--warning-color, #f59e0b) 48%, #e5e7eb) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-danger {
+  border-color: var(--danger-color, #ef4444) !important;
+  color: var(--danger-color, #ef4444) !important;
+  background-color: transparent !important;
+}
+.btn-outline-danger:hover {
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) 12%, #ffffff) !important;
+}
+.btn-outline-danger:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
+}
+.btn-outline-danger:disabled, .btn-outline-danger.disabled {
+  color: color-mix(in srgb, var(--danger-color, #ef4444) 52%, #9ca3af) !important;
+  border-color: color-mix(in srgb, var(--danger-color, #ef4444) 52%, #e5e7eb) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-info {
+  border-color: var(--info-color, #3b82f6) !important;
+  color: var(--info-color, #3b82f6) !important;
+  background-color: transparent !important;
+}
+.btn-outline-info:hover {
+  background-color: color-mix(in srgb, var(--info-color, #3b82f6) 12%, #ffffff) !important;
+}
+.btn-outline-info:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}
+.btn-outline-info:disabled, .btn-outline-info.disabled {
+  color: color-mix(in srgb, var(--info-color, #3b82f6) 52%, #9ca3af) !important;
+  border-color: color-mix(in srgb, var(--info-color, #3b82f6) 52%, #e5e7eb) !important;
+  background-color: transparent !important;
+}

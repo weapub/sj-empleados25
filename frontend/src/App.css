@@ -761,41 +761,36 @@ input[type="month"] {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--primary-color);
   color: #ffffff;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background-color: color-mix(in srgb, var(--primary-color) 88%, #000000);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
+  background-color: var(--success-color);
   color: #ffffff;
 }
 
 /* Info: fondo azul y texto blanco para contraste adecuado */
 .btn-info {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  background-color: #3b82f6;
   color: #ffffff;
 }
 
 .btn-info:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background-color: color-mix(in srgb, #3b82f6 88%, #000000);
 }
 
 .btn-warning {
-  background: linear-gradient(135deg, var(--warning-color) 0%, #b45309 100%);
-  color: #ffffff;
+  background-color: var(--warning-color);
+  color: #111827;
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, var(--danger-color) 0%, #b91c1c 100%);
+  background-color: var(--danger-color);
   color: #ffffff;
 }
 
