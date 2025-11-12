@@ -71,6 +71,7 @@ const EmployeeList = () => {
         icon={<Users size={20} />}
         title="Empleados"
         subtitle="Gestione el registro y edición de empleados"
+        accentColor="#3b82f6"
         actions={(
           <Link to="/employees/new" className="d-none d-md-inline-flex">
             <Button variant="primary" className="shadow-sm">

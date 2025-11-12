@@ -103,6 +103,7 @@ const DisciplinaryList = () => {
         icon={<Gavel size={20} />}
         title="Medidas Disciplinarias"
         subtitle="Registre, consulte y gestione las medidas disciplinarias"
+        accentColor="#ef4444"
         actions={(
           <Button 
             variant="primary"

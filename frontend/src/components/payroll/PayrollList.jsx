@@ -188,6 +188,7 @@ const PayrollList = () => {
         icon={<Receipt size={20} />}
         title="Recibos de Sueldo"
         subtitle="Gestione, filtre y ordene los recibos emitidos"
+        accentColor="#10b981"
         actions={(
           <Button variant="primary" className="shadow-sm" onClick={() => navigate('/payroll/new')}>
             <Plus size={16} /> <span>Registrar Nuevo Recibo</span>

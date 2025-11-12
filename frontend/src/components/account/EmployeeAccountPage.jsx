@@ -134,6 +134,7 @@ const EmployeeAccountPage = () => {
         icon={<FaWallet />}
         title="Cuenta Corriente del Empleado"
         subtitle="Gestión de adelantos, compras y pagos"
+        accentColor="#0ea5e9"
       />
 
       {error && <Alert variant="danger">{error}</Alert>}

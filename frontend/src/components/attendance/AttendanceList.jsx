@@ -237,6 +237,7 @@ const AttendanceList = () => {
         icon={<Clock size={20} />}
         title="Inasistencias y Tardanzas"
         subtitle="Filtre, ordene y gestione los registros de asistencia"
+        accentColor="#f59e0b"
         actions={(
           <Link to="/attendance/new">
             <Button variant="primary" className="shadow-sm">
