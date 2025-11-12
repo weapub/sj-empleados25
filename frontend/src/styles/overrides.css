@@ -58,3 +58,42 @@
 .badge.bg-info { background-color: #eff6ff !important; color: #1e40af !important; border-color: #bfdbfe !important; }
 /* Add secondary variant for non-soft badges */
 .badge.bg-secondary { background-color: #f1f5f9 !important; color: #334155 !important; border-color: #e5e7eb !important; }
+
+/* =============================================
+   Acento unificado en navegación y breadcrumbs
+   ============================================= */
+/* Pills activos: usar acento de sección y texto blanco */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background-color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+  border-color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+  color: #ffffff !important;
+}
+
+/* Tabs activos: borde y texto con acento (sin fondo forzado) */
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+  border-color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+}
+
+/* Breadcrumb activo: texto con acento */
+.breadcrumb .breadcrumb-item.active {
+  color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+}
+
+/* Badges primarias: acento de sección con texto blanco */
+.badge.bg-primary,
+.badge.text-bg-primary {
+  background-color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+  border-color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+  color: #ffffff !important;
+}
+
+/* Badges soft primarias: tono suave con texto en acento */
+.badge-soft-primary,
+.badge-soft .badge-soft-primary {
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 16%, #ffffff) !important;
+  border-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 24%, #e5e7eb) !important;
+  color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+}
