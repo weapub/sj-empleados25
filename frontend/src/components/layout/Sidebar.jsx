@@ -46,72 +46,109 @@ const Sidebar = ({ isAuthenticated, logout }) => {
       </div>
 
       <nav className="sidebar-nav grid gap-2 px-3 py-3 flex-1">
-        <NavLink to="/" end className={({ isActive }) =>
-          `inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
-        }>
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
+          }
+          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
+        >
           {({ isActive }) => (
             <>
-              <FaChartLine size={isActive ? 18 : 16} className="shrink-0" />
+              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
+                <FaChartLine size={isActive ? 18 : 16} />
+              </span>
               <span>Dashboard</span>
               <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
             </>
           )}
         </NavLink>
 
-        <NavLink to="/employees" className={({ isActive }) =>
-          `inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
-        }>
+        <NavLink
+          to="/employees"
+          className={({ isActive }) =>
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
+          }
+          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
+        >
           {({ isActive }) => (
             <>
-              <FaUsers size={isActive ? 18 : 16} className="shrink-0" />
+              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
+                <FaUsers size={isActive ? 18 : 16} />
+              </span>
               <span>Empleados</span>
               <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
             </>
           )}
         </NavLink>
 
-        <NavLink to="/disciplinary" className={({ isActive }) =>
-          `inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
-        }>
+        <NavLink
+          to="/disciplinary"
+          className={({ isActive }) =>
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
+          }
+          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
+        >
           {({ isActive }) => (
             <>
-              <FaExclamationTriangle size={isActive ? 18 : 16} className="shrink-0" />
+              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
+                <FaExclamationTriangle size={isActive ? 18 : 16} />
+              </span>
               <span>Disciplinarias</span>
               <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
             </>
           )}
         </NavLink>
 
-        <NavLink to="/attendance" className={({ isActive }) =>
-          `inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
-        }>
+        <NavLink
+          to="/attendance"
+          className={({ isActive }) =>
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
+          }
+          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
+        >
           {({ isActive }) => (
             <>
-              <FaClock size={isActive ? 18 : 16} className="shrink-0" />
+              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
+                <FaClock size={isActive ? 18 : 16} />
+              </span>
               <span>Asistencias</span>
               <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
             </>
           )}
         </NavLink>
 
-        <NavLink to="/payroll" className={({ isActive }) =>
-          `inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
-        }>
+        <NavLink
+          to="/payroll"
+          className={({ isActive }) =>
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
+          }
+          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
+        >
           {({ isActive }) => (
             <>
-              <FaFileInvoiceDollar size={isActive ? 18 : 16} className="shrink-0" />
+              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
+                <FaFileInvoiceDollar size={isActive ? 18 : 16} />
+              </span>
               <span>Recibos</span>
               <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
             </>
           )}
         </NavLink>
 
-        <NavLink to="/employee-account" className={({ isActive }) =>
-          `inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
-        }>
+        <NavLink
+          to="/employee-account"
+          className={({ isActive }) =>
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
+          }
+          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
+        >
           {({ isActive }) => (
             <>
-              <FaWallet size={isActive ? 18 : 16} className="shrink-0" />
+              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
+                <FaWallet size={isActive ? 18 : 16} />
+              </span>
               <span>Cuenta Corriente</span>
               <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
             </>

@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 
 // Encabezado de página unificado con icono, título, subtítulo y acciones opcionales
 const PageHeader = ({ icon = null, title, subtitle = '', actions = null, className = '', accentColor = '#64748b' }) => {
+  // Propagar acento a nivel global para coherencia con Navbar y botones
+  useEffect(() => {
+    try {
+      const root = document.documentElement;
+      if (root) {
+        root.style.setProperty('--leaflet-accent', accentColor);
+      }
+    } catch (_) {}
+  }, [accentColor]);
+
   return (
     <div className={`page-header mb-4 leaflet-panel ${className}`} style={{ ['--leaflet-accent']: accentColor }}>
       <div className="leaflet-header p-3 rounded-md">

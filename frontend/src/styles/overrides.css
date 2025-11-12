@@ -8,14 +8,17 @@
   border: 1px solid var(--border-color, #e5e7eb);
 }
 .btn-primary {
-  background-color: var(--primary-color, #3b82f6) !important;
-  border-color: var(--primary-color, #3b82f6) !important;
+  /* Usar el acento de sección si está definido; fallback a color primario */
+  background-color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+  border-color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
   color: #ffffff !important;
   box-shadow: none !important;
 }
 .btn-primary:hover {
-  background-color: var(--primary-dark, #1e40af) !important;
-  border-color: var(--primary-dark, #1e40af) !important;
+  /* Mantener coherencia suavizando brillo si no hay tono oscuro */
+  background-color: var(--leaflet-accent, var(--primary-dark, #1e40af)) !important;
+  border-color: var(--leaflet-accent, var(--primary-dark, #1e40af)) !important;
+  filter: brightness(0.95);
 }
 .btn-secondary {
   background-color: #ffffff !important;
