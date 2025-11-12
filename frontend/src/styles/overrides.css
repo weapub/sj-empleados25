@@ -174,12 +174,10 @@
   transform: none !important; /* sin movimiento vertical */
 }
 .btn-primary:hover {
-  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 88%, #000000) !important;
-  border-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 88%, #000000) !important;
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 90%, #000000) !important;
 }
 .btn-primary:active {
-  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 76%, #000000) !important;
-  border-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 76%, #000000) !important;
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 80%, #000000) !important;
 }
 .btn:focus-visible {
   outline: none !important;
@@ -198,38 +196,30 @@
 
 /* Variantes adicionales con acabado plano */
 .btn-success:hover {
-  background-color: color-mix(in srgb, var(--success-color, #10b981) 88%, #000000) !important;
-  border-color: color-mix(in srgb, var(--success-color, #10b981) 88%, #000000) !important;
+  background-color: color-mix(in srgb, var(--success-color, #10b981) 90%, #000000) !important;
 }
 .btn-success:active {
-  background-color: color-mix(in srgb, var(--success-color, #10b981) 76%, #000000) !important;
-  border-color: color-mix(in srgb, var(--success-color, #10b981) 76%, #000000) !important;
+  background-color: color-mix(in srgb, var(--success-color, #10b981) 80%, #000000) !important;
 }
 .btn-warning:hover {
-  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) 88%, #000000) !important;
-  border-color: color-mix(in srgb, var(--warning-color, #f59e0b) 88%, #000000) !important;
+  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) 90%, #000000) !important;
   color: #111827 !important;
 }
 .btn-warning:active {
-  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) 76%, #000000) !important;
-  border-color: color-mix(in srgb, var(--warning-color, #f59e0b) 76%, #000000) !important;
+  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) 80%, #000000) !important;
   color: #111827 !important;
 }
 .btn-danger:hover {
-  background-color: color-mix(in srgb, var(--danger-color, #ef4444) 88%, #000000) !important;
-  border-color: color-mix(in srgb, var(--danger-color, #ef4444) 88%, #000000) !important;
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) 90%, #000000) !important;
 }
 .btn-danger:active {
-  background-color: color-mix(in srgb, var(--danger-color, #ef4444) 76%, #000000) !important;
-  border-color: color-mix(in srgb, var(--danger-color, #ef4444) 76%, #000000) !important;
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) 80%, #000000) !important;
 }
 .btn-info:hover {
-  background-color: color-mix(in srgb, var(--info-color, #3b82f6) 88%, #000000) !important;
-  border-color: color-mix(in srgb, var(--info-color, #3b82f6) 88%, #000000) !important;
+  background-color: color-mix(in srgb, var(--info-color, #3b82f6) 90%, #000000) !important;
 }
 .btn-info:active {
-  background-color: color-mix(in srgb, var(--info-color, #3b82f6) 76%, #000000) !important;
-  border-color: color-mix(in srgb, var(--info-color, #3b82f6) 76%, #000000) !important;
+  background-color: color-mix(in srgb, var(--info-color, #3b82f6) 80%, #000000) !important;
 }
 
 /* Variantes outline planas y coherentes */
