@@ -2311,6 +2311,46 @@ input[type="month"] {
   .kpi-value { font-size: 1.15rem; }
 }
 
+/* =============================================
+   Leaflet style variant for KPI cards
+   ============================================= */
+.kpi-card.leaflet {
+  background: #fff;
+  border: 1px solid rgba(15,23,42,0.08);
+  box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+}
+.kpi-card.leaflet::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--primary-dark), var(--accent-color));
+  opacity: 0.75;
+}
+.kpi-card.leaflet::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 16px solid rgba(241,245,249,0.95);
+  border-left: 16px solid transparent;
+  filter: drop-shadow(0 1px 1px rgba(15,23,42,0.06));
+}
+.kpi-card.leaflet .card-body {
+  padding: clamp(0.8rem, 2.2vw, 1.2rem);
+}
+.kpi-card.leaflet .kpi-icon {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+}
+@media (max-width: 576px) {
+  .kpi-card.leaflet .card-body { padding: 0.72rem 0.9rem; }
+  .kpi-card.leaflet .kpi-icon { width: 34px; height: 34px; }
+}
+
 /* Spacing responsive para secciones del Dashboard */
 .section-box .row.gy-4 {
   row-gap: clamp(0.75rem, 2.4vw, 1.5rem);
