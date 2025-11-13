@@ -149,6 +149,29 @@
   /* Outline ghost: tintar sobre blanco en hover/active */
   --btn-outline-hover-tint: 12%;
   --btn-outline-active-tint: 20%;
+
+  /* Overrides por variante: permiten ajustes finos si se requiere */
+  --btn-primary-hover-darken: var(--btn-solid-hover-darken);
+  --btn-primary-active-darken: var(--btn-solid-active-darken);
+  --btn-success-hover-darken: var(--btn-solid-hover-darken);
+  --btn-success-active-darken: var(--btn-solid-active-darken);
+  --btn-warning-hover-darken: 88%;
+  --btn-warning-active-darken: 78%;
+  --btn-danger-hover-darken: var(--btn-solid-hover-darken);
+  --btn-danger-active-darken: var(--btn-solid-active-darken);
+  --btn-info-hover-darken: var(--btn-solid-hover-darken);
+  --btn-info-active-darken: var(--btn-solid-active-darken);
+
+  --btn-primary-outline-hover-tint: var(--btn-outline-hover-tint);
+  --btn-primary-outline-active-tint: var(--btn-outline-active-tint);
+  --btn-success-outline-hover-tint: var(--btn-outline-hover-tint);
+  --btn-success-outline-active-tint: var(--btn-outline-active-tint);
+  --btn-warning-outline-hover-tint: var(--btn-outline-hover-tint);
+  --btn-warning-outline-active-tint: var(--btn-outline-active-tint);
+  --btn-danger-outline-hover-tint: var(--btn-outline-hover-tint);
+  --btn-danger-outline-active-tint: var(--btn-outline-active-tint);
+  --btn-info-outline-hover-tint: var(--btn-outline-hover-tint);
+  --btn-info-outline-active-tint: var(--btn-outline-active-tint);
 }
 
 /* Variantes: primary y secondary coherentes */
@@ -172,11 +195,11 @@
   background-color: transparent !important;
 }
 .btn-outline-primary:hover {
-  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-outline-hover-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-primary-outline-hover-tint), #ffffff) !important;
 }
 /* Active ligeramente más marcado para feedback claro */
 .btn-outline-primary:active, .btn-outline-primary.active {
-  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-outline-active-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-primary-outline-active-tint), #ffffff) !important;
 }
 
 /* Estados: hover, active, focus y disabled */
@@ -184,10 +207,10 @@
   transform: none !important; /* sin movimiento vertical */
 }
 .btn-primary:hover {
-  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-solid-hover-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-primary-hover-darken), #000000) !important;
 }
 .btn-primary:active {
-  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-solid-active-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) var(--btn-primary-active-darken), #000000) !important;
 }
 .btn:focus-visible {
   outline: none !important;
@@ -206,30 +229,30 @@
 
 /* Variantes adicionales con acabado plano */
 .btn-success:hover {
-  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-solid-hover-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-success-hover-darken), #000000) !important;
 }
 .btn-success:active {
-  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-solid-active-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-success-active-darken), #000000) !important;
 }
 .btn-warning:hover {
-  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-solid-hover-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-warning-hover-darken), #000000) !important;
   color: #111827 !important;
 }
 .btn-warning:active {
-  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-solid-active-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-warning-active-darken), #000000) !important;
   color: #111827 !important;
 }
 .btn-danger:hover {
-  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-solid-hover-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-danger-hover-darken), #000000) !important;
 }
 .btn-danger:active {
-  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-solid-active-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-danger-active-darken), #000000) !important;
 }
 .btn-info:hover {
-  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-solid-hover-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-info-hover-darken), #000000) !important;
 }
 .btn-info:active {
-  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-solid-active-darken), #000000) !important;
+  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-info-active-darken), #000000) !important;
 }
 
 /* Variantes outline planas y coherentes */
@@ -262,11 +285,11 @@
   background-color: transparent !important;
 }
 .btn-outline-success:hover {
-  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-outline-hover-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-success-outline-hover-tint), #ffffff) !important;
 }
 /* Active ligeramente más marcado */
 .btn-outline-success:active, .btn-outline-success.active {
-  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-outline-active-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--success-color, #10b981) var(--btn-success-outline-active-tint), #ffffff) !important;
 }
 .btn-outline-success:focus-visible {
   box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25) !important;
@@ -283,11 +306,11 @@
   background-color: transparent !important;
 }
 .btn-outline-warning:hover {
-  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-outline-hover-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-warning-outline-hover-tint), #ffffff) !important;
 }
 /* Active ligeramente más marcado */
 .btn-outline-warning:active, .btn-outline-warning.active {
-  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-outline-active-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--warning-color, #f59e0b) var(--btn-warning-outline-active-tint), #ffffff) !important;
 }
 .btn-outline-warning:focus-visible {
   box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25) !important;
@@ -304,11 +327,11 @@
   background-color: transparent !important;
 }
 .btn-outline-danger:hover {
-  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-outline-hover-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-danger-outline-hover-tint), #ffffff) !important;
 }
 /* Active ligeramente más marcado */
 .btn-outline-danger:active, .btn-outline-danger.active {
-  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-outline-active-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--danger-color, #ef4444) var(--btn-danger-outline-active-tint), #ffffff) !important;
 }
 .btn-outline-danger:focus-visible {
   box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
@@ -325,11 +348,11 @@
   background-color: transparent !important;
 }
 .btn-outline-info:hover {
-  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-outline-hover-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-info-outline-hover-tint), #ffffff) !important;
 }
 /* Active ligeramente más marcado */
 .btn-outline-info:active, .btn-outline-info.active {
-  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-outline-active-tint), #ffffff) !important;
+  background-color: color-mix(in srgb, var(--info-color, #3b82f6) var(--btn-info-outline-active-tint), #ffffff) !important;
 }
 .btn-outline-info:focus-visible {
   box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
