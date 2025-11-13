@@ -16,15 +16,28 @@ const DisciplinaryList = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [serverTotal, setServerTotal] = useState();
+  const [serverTotalPages, setServerTotalPages] = useState();
+
   useEffect(() => {
     loadDisciplinaries();
-  }, []);
+  }, [page, pageSize]);
 
   const loadDisciplinaries = async () => {
     try {
       setLoading(true);
-      const response = await getAllDisciplinaries();
-      setDisciplinaries(response);
+      const response = await getAllDisciplinaries({ page, limit: pageSize });
+      if (Array.isArray(response)) {
+        setDisciplinaries(response);
+        setServerTotal(undefined);
+        setServerTotalPages(undefined);
+      } else {
+        setDisciplinaries(Array.isArray(response.data) ? response.data : []);
+        setServerTotal(response.total);
+        setServerTotalPages(response.totalPages);
+      }
       setLoading(false);
     } catch (error) {
       console.error('Error al cargar medidas disciplinarias:', error);
@@ -214,6 +227,30 @@ const DisciplinaryList = () => {
                     )}
                   </tbody>
                 </Table>
+                <div className="d-flex justify-content-between align-items-center mt-2">
+                  <div className="text-muted small">
+                    {typeof serverTotal === 'number' ? `Total: ${serverTotal}` : ''}
+                  </div>
+                  <div>
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      className="me-2"
+                      disabled={page <= 1}
+                      onClick={() => setPage(Math.max(page - 1, 1))}
+                    >
+                      Anterior
+                    </Button>
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      disabled={typeof serverTotalPages === 'number' ? page >= serverTotalPages : false}
+                      onClick={() => setPage(page + 1)}
+                    >
+                      Siguiente
+                    </Button>
+                  </div>
+                </div>
               </div>
               </SectionCard>
             </div>

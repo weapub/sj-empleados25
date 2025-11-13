@@ -39,30 +39,60 @@ const AttendanceList = () => {
     return () => window.removeEventListener('resize', measure);
   }, []);
 
+  // Cargar empleados una vez
   useEffect(() => {
-    const loadData = async () => {
+    const loadEmployees = async () => {
       try {
-        const [attendancesData, employeesData] = await Promise.all([
-          getAttendances(),
-          getEmployees()
-        ]);
-        setAttendances(attendancesData);
-        // getEmployees puede devolver { data, total, page, totalPages } o un array
+        const employeesData = await getEmployees();
         const employeesArray = Array.isArray(employeesData)
           ? employeesData
           : (employeesData && Array.isArray(employeesData.data))
             ? employeesData.data
             : [];
         setEmployees(employeesArray);
+      } catch (err) {
+        // No bloquear por error de empleados; se mostrará mensaje general si falla todo
+      }
+    };
+    loadEmployees();
+  }, []);
+
+  // Cargar asistencias con paginación del servidor y filtros
+  useEffect(() => {
+    const loadAttendances = async () => {
+      try {
+        setLoading(true);
+        const params = {
+          page,
+          limit: pageSize,
+          employeeId: filter.employeeId || undefined,
+          type: filter.type || undefined,
+          justified: filter.justified || undefined,
+          sortBy,
+          sortDir,
+        };
+        const attendancesResp = await getAttendances(params);
+        if (Array.isArray(attendancesResp)) {
+          setAttendances(attendancesResp);
+          setServerTotal(undefined);
+          setLoading(false);
+          return;
+        }
+        const arr = Array.isArray(attendancesResp.data) ? attendancesResp.data : [];
+        setAttendances(arr);
+        setServerTotal(attendancesResp.total);
+        setServerTotalPages(attendancesResp.totalPages);
         setLoading(false);
       } catch (err) {
         setError('Error al cargar los datos');
         setLoading(false);
       }
     };
+    loadAttendances();
+  }, [page, pageSize, filter.employeeId, filter.type, filter.justified, sortBy, sortDir]);
 
-    loadData();
-  }, []);
+  const [serverTotal, setServerTotal] = useState();
+  const [serverTotalPages, setServerTotalPages] = useState();
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -198,12 +228,13 @@ const AttendanceList = () => {
     return 0;
   });
 
-  // Paginación en cliente
-  const totalCount = sortedAttendances.length;
-  const totalPages = Math.max(Math.ceil(totalCount / pageSize), 1);
+  // Paginación: si el servidor ya paginó, usar todo el arreglo y los metadatos
+  const usingServerPagination = typeof serverTotal === 'number' && typeof serverTotalPages === 'number';
+  const totalCount = usingServerPagination ? serverTotal : sortedAttendances.length;
+  const totalPages = usingServerPagination ? serverTotalPages : Math.max(Math.ceil(totalCount / pageSize), 1);
   const start = (page - 1) * pageSize;
   const end = start + pageSize;
-  const pagedAttendances = sortedAttendances.slice(start, end);
+  const pagedAttendances = usingServerPagination ? sortedAttendances : sortedAttendances.slice(start, end);
   const canPrev = page > 1;
   const canNext = page < totalPages;
   const goPrev = () => { if (canPrev) setPage(page - 1); };

@@ -111,15 +111,53 @@ exports.createDisciplinary = async (req, res) => {
   }
 };
 
-// Obtener todas las medidas disciplinarias
+// Obtener medidas disciplinarias con soporte de paginación y filtros básicos
 exports.getAllDisciplinaries = async (req, res) => {
   try {
-    const disciplinaries = await Disciplinary.find()
-      .populate({ path: 'employee', select: 'nombre apellido legajo', options: { lean: true } })
-      .sort({ date: -1 })
-      .lean();
-    
-    res.json(disciplinaries);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limitRaw = parseInt(req.query.limit, 10);
+    const limit = Math.min(Math.max(limitRaw || 0, 0), 200); // 0 = sin límite para compatibilidad
+
+    const hasQueryParams = (
+      req.query.page || req.query.limit || req.query.employeeId || req.query.type ||
+      typeof req.query.signed !== 'undefined' || req.query.sortBy || req.query.sortDir
+    );
+
+    const filter = {};
+    if (req.query.employeeId) {
+      filter.employee = req.query.employeeId;
+    }
+    if (req.query.type) {
+      filter.type = req.query.type;
+    }
+    if (typeof req.query.signed !== 'undefined' && req.query.signed !== '') {
+      filter.signed = String(req.query.signed) === 'true';
+    }
+
+    const sortBy = (req.query.sortBy || 'date');
+    const sortDir = (req.query.sortDir || 'desc').toLowerCase() === 'asc' ? 1 : -1;
+    const sort = sortBy === 'date' ? { date: sortDir } : { date: -1 };
+
+    if (!hasQueryParams) {
+      const disciplinaries = await Disciplinary.find(filter)
+        .populate({ path: 'employee', select: 'nombre apellido legajo', options: { lean: true } })
+        .sort({ date: -1 })
+        .lean();
+      return res.json(disciplinaries);
+    }
+
+    const [data, total] = await Promise.all([
+      Disciplinary.find(filter)
+        .populate({ path: 'employee', select: 'nombre apellido legajo', options: { lean: true } })
+        .sort(sort)
+        .skip(limit > 0 ? (page - 1) * limit : 0)
+        .limit(limit > 0 ? limit : 0)
+        .lean(),
+      Disciplinary.countDocuments(filter),
+    ]);
+
+    const totalPages = limit > 0 ? Math.max(Math.ceil(total / limit), 1) : 1;
+    res.status(200).json({ data, total, page, totalPages });
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: 'Error en el servidor' });

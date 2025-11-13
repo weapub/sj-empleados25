@@ -137,10 +137,10 @@ export const getDashboardMetrics = async (options = {}) => {
 };
 
 // Servicios de asistencia
-export const getAttendances = async () => {
+export const getAttendances = async (params = {}) => {
   setAuthToken(localStorage.getItem('token'));
-  const response = await axios.get(`${API_URL}/attendance`);
-  return response.data;
+  const response = await axios.get(`${API_URL}/attendance`, { params });
+  return response.data; // puede ser array o { data, total, page, totalPages }
 };
 
 export const getAttendancesByEmployee = async (employeeId) => {
@@ -174,10 +174,10 @@ export const createDisciplinary = async (formData) => {
   return response.data;
 };
 
-export const getAllDisciplinaries = async () => {
+export const getAllDisciplinaries = async (params = {}) => {
   setAuthToken(localStorage.getItem('token'));
-  const response = await axios.get(`${API_URL}/disciplinary`);
-  return response.data;
+  const response = await axios.get(`${API_URL}/disciplinary`, { params });
+  return response.data; // puede ser array o { data, total, page, totalPages }
 };
 
 export const getDisciplinariesByEmployee = async (employeeId) => {
