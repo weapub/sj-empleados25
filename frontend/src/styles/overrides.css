@@ -154,12 +154,12 @@
   --btn-primary-hover-darken: var(--btn-solid-hover-darken);
   --btn-primary-active-darken: var(--btn-solid-active-darken);
   --btn-success-hover-darken: var(--btn-solid-hover-darken);
-  --btn-success-active-darken: var(--btn-solid-active-darken);
+  --btn-success-active-darken: 85%;
   --btn-warning-hover-darken: 88%;
   --btn-warning-active-darken: 78%;
   --btn-danger-hover-darken: var(--btn-solid-hover-darken);
   --btn-danger-active-darken: var(--btn-solid-active-darken);
-  --btn-info-hover-darken: var(--btn-solid-hover-darken);
+  --btn-info-hover-darken: 88%;
   --btn-info-active-darken: var(--btn-solid-active-darken);
 
   --btn-primary-outline-hover-tint: var(--btn-outline-hover-tint);
