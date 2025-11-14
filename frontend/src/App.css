@@ -1740,6 +1740,13 @@ input[type="month"] {
   background-color: rgba(96,165,250,0.12);
 }
 
+/* Utilidad: botón más compacto dentro de tema soft-glass */
+.theme-soft-glass .btn-compact {
+  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
 /* KPIs compactos y suaves */
 .theme-soft-glass .kpi-card {
   border: 1px solid var(--border-color);

@@ -435,7 +435,7 @@ const AttendanceList = () => {
                       ) : '-'}
                     </td>
                     <td>
-                      <Link to={`/attendance/edit/${attendance._id}`} className="btn btn-sm btn-primary me-2 shadow-sm">
+                      <Link to={`/attendance/edit/${attendance._id}`} className="btn btn-sm btn-primary me-2 shadow-sm btn-compact">
                         Editar
                       </Link>
                       <Button 
