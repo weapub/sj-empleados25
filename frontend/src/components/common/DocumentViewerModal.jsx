@@ -1,10 +1,12 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Modal, Button, ButtonGroup } from 'react-bootstrap';
 import { Download, Printer, ZoomIn, ZoomOut, RotateCcw, RefreshCcw, ExternalLink, X } from 'lucide-react';
-import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+// Usar la versión ESM de PDF.js y un worker de Vite para evitar eval
+import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
+import PdfJsWorker from 'pdfjs-dist/build/pdf.worker.mjs?worker';
 
-// Configurar worker de PDF.js desde CDN para evitar bundling del worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Configurar el worker de PDF.js a través de Vite (sin eval)
+pdfjsLib.GlobalWorkerOptions.workerPort = new PdfJsWorker();
 
 const isPdfUrl = (url) => {
   if (!url) return false;
