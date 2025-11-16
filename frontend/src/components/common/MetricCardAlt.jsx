@@ -52,7 +52,7 @@ const MetricCardAlt = ({
   );
 
   return (
-    <Col xs={6} sm={6} md={6} lg={3} className="mb-4">
+    <Col xs={6} sm={6} md={6} lg={3} className="mt-3 mb-0">
       {to ? (
         <Link to={to} className="text-decoration-none" style={{ color: 'inherit' }}>
           {CardInner}

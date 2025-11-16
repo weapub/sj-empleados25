@@ -990,6 +990,10 @@ input[type="month"] {
 .section-box .section-body {
   padding: 1rem;
 }
+/* Mayor coherencia: espacio debajo del título de sección */
+.section-box .section-title {
+  margin-bottom: clamp(0.75rem, 2.2vw, 1.25rem);
+}
 
 /* Spinner mejorado */
 .spinner-border {
@@ -2380,13 +2384,26 @@ input[type="month"] {
   background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
 }
 @media (max-width: 576px) {
-  .kpi-card.leaflet .card-body { padding: 0.72rem 0.9rem; }
+  /* Aplicar aspecto cuadrado solo en móviles XS */
+  .kpi-card.leaflet {
+    aspect-ratio: 1 / 1;
+    height: auto !important;
+    display: flex;
+  }
+  .kpi-card.leaflet .card-body {
+    padding: 0.72rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .kpi-card.leaflet .kpi-icon { width: 34px; height: 34px; }
 }
 
 /* Spacing responsive para secciones del Dashboard */
 .section-box .row.gy-4 {
-  row-gap: clamp(0.75rem, 2.4vw, 1.5rem);
+  /* Horizontal y vertical coherentes, con vertical ligeramente menor */
+  --bs-gutter-x: clamp(0.9rem, 2.6vw, 1.6rem);
+  --bs-gutter-y: clamp(0.6rem, 2vw, 1.1rem);
 }
 .quick-actions-card .row.gy-3 {
   row-gap: clamp(0.5rem, 1.8vw, 1rem);
