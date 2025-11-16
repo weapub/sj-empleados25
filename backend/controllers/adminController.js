@@ -71,12 +71,16 @@ exports.sendPresentismoMonthlyReport = async (req, res) => {
     const employees = await Employee.find({ _id: { $in: employeeIds } }).select('nombre apellido dni telefono');
     const message = buildPresentismoReportMessage(startDate, employees);
 
-    // Destinatarios (admins) desde env
-    const rawRecipients = (process.env.PRESENTISMO_WHATSAPP_TO || '').split(',').map((s) => s.trim()).filter(Boolean);
+    // Destinatarios desde BD (fallback a env si no hay ninguno)
+    const PresentismoRecipient = require('../models/PresentismoRecipient');
+    const dbRecipientsDocs = await PresentismoRecipient.find({ active: true }).select('phone').lean();
+    const dbRecipients = dbRecipientsDocs.map((r) => (r.phone || '').trim()).filter(Boolean);
+    const envRecipients = (process.env.PRESENTISMO_WHATSAPP_TO || '').split(',').map((s) => s.trim()).filter(Boolean);
+    const rawRecipients = dbRecipients.length > 0 ? dbRecipients : envRecipients;
     if (rawRecipients.length === 0) {
       return res.status(400).json({
-        msg: 'Configurar PRESENTISMO_WHATSAPP_TO con números destino separados por coma',
-        hint: 'Ej: PRESENTISMO_WHATSAPP_TO="+54911xxxxxxx,+549351xxxxxxx"'
+        msg: 'No hay destinatarios configurados (BD o env) para el informe',
+        hint: 'Configure destinatarios en el panel o setee PRESENTISMO_WHATSAPP_TO'
       });
     }
 
@@ -107,9 +111,78 @@ exports.sendPresentismoMonthlyReport = async (req, res) => {
       sent,
       errors,
       results,
+      source: dbRecipients.length > 0 ? 'db' : 'env'
     });
   } catch (e) {
     console.error('[Admin] sendPresentismoMonthlyReport error:', e);
+    return res.status(500).json({ msg: 'Error interno', error: e.message });
+  }
+};
+
+// CRUD destinatarios de Presentismo
+exports.getPresentismoRecipients = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Acceso denegado. Solo admin.' });
+    }
+    const PresentismoRecipient = require('../models/PresentismoRecipient');
+    const list = await PresentismoRecipient.find().sort({ createdAt: -1 }).lean();
+    return res.json(list);
+  } catch (e) {
+    return res.status(500).json({ msg: 'Error interno', error: e.message });
+  }
+};
+
+exports.createPresentismoRecipient = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Acceso denegado. Solo admin.' });
+    }
+    const PresentismoRecipient = require('../models/PresentismoRecipient');
+    const { name = '', roleLabel = '', phone = '', active = true } = req.body || {};
+    const trimmedPhone = String(phone || '').trim();
+    if (!trimmedPhone) {
+      return res.status(400).json({ msg: 'El teléfono es requerido' });
+    }
+    const doc = await PresentismoRecipient.create({ name, roleLabel, phone: trimmedPhone, active: Boolean(active), createdBy: req.user?._id });
+    return res.status(201).json(doc);
+  } catch (e) {
+    return res.status(500).json({ msg: 'Error interno', error: e.message });
+  }
+};
+
+exports.updatePresentismoRecipient = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Acceso denegado. Solo admin.' });
+    }
+    const PresentismoRecipient = require('../models/PresentismoRecipient');
+    const id = req.params.id;
+    const { name, roleLabel, phone, active } = req.body || {};
+    const update = {};
+    if (typeof name !== 'undefined') update.name = name;
+    if (typeof roleLabel !== 'undefined') update.roleLabel = roleLabel;
+    if (typeof phone !== 'undefined') update.phone = String(phone || '').trim();
+    if (typeof active !== 'undefined') update.active = Boolean(active);
+    const doc = await PresentismoRecipient.findByIdAndUpdate(id, update, { new: true });
+    if (!doc) return res.status(404).json({ msg: 'Destinatario no encontrado' });
+    return res.json(doc);
+  } catch (e) {
+    return res.status(500).json({ msg: 'Error interno', error: e.message });
+  }
+};
+
+exports.deletePresentismoRecipient = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Acceso denegado. Solo admin.' });
+    }
+    const PresentismoRecipient = require('../models/PresentismoRecipient');
+    const id = req.params.id;
+    const doc = await PresentismoRecipient.findByIdAndDelete(id);
+    if (!doc) return res.status(404).json({ msg: 'Destinatario no encontrado' });
+    return res.json({ msg: 'Eliminado', id });
+  } catch (e) {
     return res.status(500).json({ msg: 'Error interno', error: e.message });
   }
 };

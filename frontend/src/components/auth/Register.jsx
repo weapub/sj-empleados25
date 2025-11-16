@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { register } from '../../services/api';
+import { useDynamicViewportHeight } from '../../utils/useDynamicViewportHeight';
 
 const Register = ({ login: loginUser }) => {
+  useDynamicViewportHeight();
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -40,9 +42,9 @@ const Register = ({ login: loginUser }) => {
   };
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-12 col-sm-10 col-md-8 col-lg-6">
-        <Card>
+    <div className="flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 py-4 md:py-3 lg:py-2" style={{ minHeight: 'calc(var(--app-dvh) - 128px)' }}>
+      <div className="w-full max-w-md px-3">
+        <Card className="shadow-sm border border-slate-200">
           <Card.Header as="h5" className="text-center">Registrarse</Card.Header>
           <Card.Body>
             {error && <Alert variant="danger">{error}</Alert>}

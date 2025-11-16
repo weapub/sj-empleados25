@@ -5,6 +5,7 @@ import './App.css';
 
 // Componentes
 import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
 // Carga diferida de vistas principales para reducir el bundle inicial
 const Login = React.lazy(() => import('./components/auth/Login'));
 const Register = React.lazy(() => import('./components/auth/Register'));
@@ -20,6 +21,7 @@ const PayrollList = React.lazy(() => import('./components/payroll/PayrollList'))
 const PayrollForm = React.lazy(() => import('./components/payroll/PayrollForm'));
 const PayrollDetail = React.lazy(() => import('./components/payroll/PayrollDetail'));
 const EmployeeAccountPage = React.lazy(() => import('./components/account/EmployeeAccountPage'));
+const PresentismoRecipients = React.lazy(() => import('./components/admin/PresentismoRecipients'));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -69,7 +71,7 @@ function App() {
         <Navbar isAuthenticated={isAuthenticated} logout={logout} />
         <div className="app-shell flex">
           <div className="app-content flex-1">
-            <div className="container mt-4 px-4 md:px-6">
+            <div className={`container ${isAuthenticated ? 'mt-4' : 'mt-2'} px-4 md:px-6`}>
               <React.Suspense fallback={<div className="d-flex justify-content-center align-items-center py-5"><div className="spinner-border" role="status"><span className="visually-hidden">Cargando...</span></div></div>}>
               <Routes>
                 <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
@@ -88,11 +90,13 @@ function App() {
                 <Route path="/payroll/edit/:id" element={isAuthenticated ? <PayrollForm /> : <Navigate to="/login" />} />
                 <Route path="/payroll/:id" element={isAuthenticated ? <PayrollDetail /> : <Navigate to="/login" />} />
                 <Route path="/employee-account" element={isAuthenticated ? <EmployeeAccountPage /> : <Navigate to="/login" />} />
+                <Route path="/admin/presentismo/recipients" element={isAuthenticated ? <PresentismoRecipients /> : <Navigate to="/login" />} />
               </Routes>
               </React.Suspense>
             </div>
           </div>
         </div>
+        <Footer fixed={!isAuthenticated} />
       </div>
     </Router>
   );

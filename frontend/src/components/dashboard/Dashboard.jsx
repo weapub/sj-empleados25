@@ -183,6 +183,11 @@ const Dashboard = () => {
                 <Users size={20} /> <span>{sendingReport ? 'Enviando...' : 'Enviar informe Presentismo (WhatsApp)'}</span>
               </Button>
             </Col>
+            <Col lg={3} md={6} className="mb-3">
+              <Button as={Link} to="/admin/presentismo/recipients" variant="outline-secondary" className="w-100 py-2 rounded-md shadow-sm">
+                <Users size={20} /> <span>Configurar destinatarios Presentismo</span>
+              </Button>
+            </Col>
           </Row>
         </Card.Body>
       </Card>

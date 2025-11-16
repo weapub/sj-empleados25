@@ -286,3 +286,28 @@ export const sendPresentismoWhatsAppReport = async (month) => {
   const response = await axios.post(`${API_URL}/admin/presentismo/report/send`, payload);
   return response.data; // { msg, month, totalEmployees, destinations, sent, errors, results }
 };
+
+// Admin: CRUD destinatarios de Presentismo
+export const getPresentismoRecipients = async () => {
+  setAuthToken(localStorage.getItem('token'));
+  const response = await axios.get(`${API_URL}/admin/presentismo/recipients`);
+  return response.data;
+};
+
+export const createPresentismoRecipient = async (payload) => {
+  setAuthToken(localStorage.getItem('token'));
+  const response = await axios.post(`${API_URL}/admin/presentismo/recipients`, payload);
+  return response.data;
+};
+
+export const updatePresentismoRecipient = async (id, payload) => {
+  setAuthToken(localStorage.getItem('token'));
+  const response = await axios.put(`${API_URL}/admin/presentismo/recipients/${id}`, payload);
+  return response.data;
+};
+
+export const deletePresentismoRecipient = async (id) => {
+  setAuthToken(localStorage.getItem('token'));
+  const response = await axios.delete(`${API_URL}/admin/presentismo/recipients/${id}`);
+  return response.data;
+};

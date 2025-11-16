@@ -143,12 +143,16 @@ function start() {
         console.log('[CRON] Enviando informe mensual de presentismo (inasistencias)');
         const Attendance = require('../models/Attendance');
         const Employee = require('../models/Employee');
-        const rawRecipients = (process.env.PRESENTISMO_WHATSAPP_TO || '')
+        const PresentismoRecipient = require('../models/PresentismoRecipient');
+        const docs = await PresentismoRecipient.find({ active: true }).select('phone').lean();
+        const dbRecipients = docs.map((r) => (r.phone || '').trim()).filter(Boolean);
+        const envRecipients = (process.env.PRESENTISMO_WHATSAPP_TO || '')
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean);
+        const rawRecipients = dbRecipients.length > 0 ? dbRecipients : envRecipients;
         if (rawRecipients.length === 0) {
-          console.warn('[CRON] PRESENTISMO_WHATSAPP_TO no configurado; se omite envío');
+          console.warn('[CRON] Sin destinatarios configurados (BD/env); se omite envío');
           return;
         }
         const now = new Date();

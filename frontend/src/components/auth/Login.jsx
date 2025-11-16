@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { login } from '../../services/api';
+import { useDynamicViewportHeight } from '../../utils/useDynamicViewportHeight';
 
 const Login = ({ login: loginUser }) => {
+  useDynamicViewportHeight();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -40,7 +42,7 @@ const Login = ({ login: loginUser }) => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 py-8">
+    <div className="flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 py-4 md:py-3 lg:py-2" style={{ minHeight: 'calc(var(--app-dvh) - 128px)' }}>
       <div className="w-full max-w-md px-3">
         <Card className="shadow-sm border border-slate-200">
           <Card.Header as="h5" className="text-center bg-white font-semibold text-slate-700">Iniciar Sesión</Card.Header>
