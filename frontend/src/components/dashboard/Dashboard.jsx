@@ -32,6 +32,13 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
+    // Evitar solicitudes cuando no hay token (estado no autenticado)
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      setStats(prev => ({ ...prev, loading: false, error: false }));
+      return; // No solicitar métricas si no hay sesión
+    }
+
     const controller = new AbortController();
     const fetchStats = async () => {
       try {

@@ -50,7 +50,7 @@ const Sidebar = ({ isAuthenticated, logout }) => {
           to="/"
           end
           className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50 hover:text-white'}`
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
           }
           style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
         >
@@ -68,7 +68,7 @@ const Sidebar = ({ isAuthenticated, logout }) => {
         <NavLink
           to="/employees"
           className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50 hover:text-white'}`
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
           }
           style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
         >
@@ -86,7 +86,7 @@ const Sidebar = ({ isAuthenticated, logout }) => {
         <NavLink
           to="/disciplinary"
           className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50 hover:text-white'}`
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
           }
           style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
         >
@@ -140,7 +140,7 @@ const Sidebar = ({ isAuthenticated, logout }) => {
         <NavLink
           to="/employee-account"
           className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50'}`
+            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
           }
           style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
         >

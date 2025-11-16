@@ -104,13 +104,69 @@
   color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
 }
 
-/* Navbar: color de texto blanco al hacer hover en nav-link */
+/* Navbar: hover con contraste legible (texto oscuro) */
 .navbar .nav-link:hover {
-  color: #ffffff !important;
+  color: var(--text-primary) !important;
 }
 .navbar .nav-link:hover svg,
 .navbar .nav-link:hover i {
-  color: #ffffff !important;
+  color: var(--text-primary) !important;
+}
+
+/* Alineación izquierda consistente para enlaces en navbar */
+.navbar .nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+.navbar .nav-link svg, .navbar .nav-link i {
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   Overrides para theme-soft-glass: contraste en navbar
+   Fuerzan fondo blanco y texto oscuro para evitar "blanco sobre blanco"
+   ===================================================== */
+/* Fondo y borde del navbar dentro del contenedor App con theme-soft-glass */
+.App.theme-soft-glass .navbar {
+  background: rgba(248, 250, 252, 0.88) !important; /* #f8fafc con leve transparencia */
+  border-bottom: 1px solid rgba(229, 231, 235, 0.85) !important; /* slate-200 tenue */
+  backdrop-filter: saturate(160%) blur(6px) !important; /* glass sutil pero legible */
+  box-shadow: var(--shadow-sm, 0 6px 18px rgba(15,23,42,0.06)) !important;
+}
+/* Texto oscuro para brand y links dentro de theme-soft-glass */
+.App.theme-soft-glass .navbar .navbar-brand,
+.App.theme-soft-glass .navbar .nav-link {
+  color: var(--text-primary) !important;
+}
+/* Hover legible con fondo gris muy tenue */
+.App.theme-soft-glass .navbar .nav-link:hover {
+  background-color: rgba(17, 24, 39, 0.06) !important;
+  color: var(--text-primary) !important;
+  border-radius: 999px;
+}
+
+/* Estado activo coherente: chip suave con texto en acento */
+.App.theme-soft-glass .navbar .nav-link.active {
+  color: var(--leaflet-accent, var(--primary-color, #3b82f6)) !important;
+  background-color: color-mix(in srgb, var(--leaflet-accent, var(--primary-color, #3b82f6)) 16%, #ffffff) !important;
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+}
+
+/* Variables y fondo/texto globales para asegurar contraste */
+:root {
+  --text-primary: #0f172a;  /* slate-900 */
+  --text-secondary: #334155; /* slate-600 */
+  --light-bg: #f7f8fc;      /* gris muy tenue */
+  --border-color: #e5e7eb;  /* gray-200 */
+  --primary-color: #4f46e5; /* indigo-600 */
+}
+
+body {
+  background-color: var(--light-bg) !important;
+  color: var(--text-primary) !important;
 }
 
 /* =============================================
