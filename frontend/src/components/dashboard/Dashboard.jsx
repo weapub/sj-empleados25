@@ -41,10 +41,13 @@ const Dashboard = () => {
   const handleSendPresentismoReport = async () => {
     try {
       setSendingReport(true);
-      // Primero obtener previsualización
-      const preview = await previewPresentismoWhatsAppReport(undefined);
+      // Calcular mes actual en formato YYYY-MM
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      // Obtener previsualización para el mes actual
+      const preview = await previewPresentismoWhatsAppReport(currentMonth);
       setPreviewData(preview);
-      setModalMonth(preview?.month || '');
+      setModalMonth(currentMonth);
       setShowPreview(true);
     } catch (e) {
       Swal.fire({
