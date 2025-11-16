@@ -73,10 +73,13 @@ exports.sendPresentismoMonthlyReport = async (req, res) => {
 
     // Destinatarios desde BD (fallback a env si no hay ninguno)
     const PresentismoRecipient = require('../models/PresentismoRecipient');
-    const dbRecipientsDocs = await PresentismoRecipient.find({ active: true }).select('phone').lean();
+    const dbRecipientsDocs = await PresentismoRecipient.find({ active: true }).select('name roleLabel phone').lean();
     const dbRecipients = dbRecipientsDocs.map((r) => (r.phone || '').trim()).filter(Boolean);
     const envRecipients = (process.env.PRESENTISMO_WHATSAPP_TO || '').split(',').map((s) => s.trim()).filter(Boolean);
     const rawRecipients = dbRecipients.length > 0 ? dbRecipients : envRecipients;
+    const recipients = dbRecipients.length > 0
+      ? dbRecipientsDocs.map(r => ({ phone: String(r.phone || '').trim(), name: r.name || null, roleLabel: r.roleLabel || null }))
+      : envRecipients.map(p => ({ phone: p, name: null, roleLabel: null }));
     if (rawRecipients.length === 0) {
       return res.status(400).json({
         msg: 'No hay destinatarios configurados (BD o env) para el informe',
@@ -164,7 +167,8 @@ exports.previewPresentismoMonthlyReport = async (req, res) => {
       totalEmployees: employees.length,
       employees: employees.map((e) => ({ nombre: e.nombre, apellido: e.apellido })),
       message,
-      destinations: rawRecipients, // lista de números configurados
+      destinations: rawRecipients, // lista de números configurados (compat)
+      recipients, // objetos con { phone, name, roleLabel }
       source: dbRecipients.length > 0 ? 'db' : 'env'
     });
   } catch (e) {
