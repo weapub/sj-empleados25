@@ -180,20 +180,24 @@ body {
   gap: 0.5rem;
   font-weight: 600 !important;
   border-radius: 0.5rem !important; /* radio coherente */
-  padding: 0.5rem 1rem !important; /* padding coherente */
+  /* Tamaño más compacto en escritorio */
+  padding: 0.42rem 0.8rem !important;
+  font-size: 0.82rem !important;
   line-height: 1.4;
   transition: all 0.15s ease;
 }
 
 /* Tamaños */
 .btn-sm {
-  padding: 0.375rem 0.75rem !important;
-  font-size: 0.875rem !important;
+  /* Compacto para acciones secundarias */
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.78rem !important;
   border-radius: 0.375rem !important;
 }
 .btn-lg {
-  padding: 0.625rem 1.25rem !important;
-  font-size: 1rem !important;
+  /* Ligeramente más pequeño para coherencia general */
+  padding: 0.56rem 1.1rem !important;
+  font-size: 0.95rem !important;
   border-radius: 0.75rem !important;
 }
 
