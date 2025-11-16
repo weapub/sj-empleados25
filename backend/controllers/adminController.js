@@ -119,6 +119,51 @@ exports.sendPresentismoMonthlyReport = async (req, res) => {
   }
 };
 
+// POST /api/admin/presentismo/report/preview
+// Opcional: body { month: 'YYYY-MM' } para generar el mensaje y listado sin enviar
+exports.previewPresentismoMonthlyReport = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Acceso denegado. Solo admin.' });
+    }
+
+    // Determinar mes objetivo
+    const rawMonth = (req.body?.month || req.query?.month || '').trim();
+    let startDate;
+    if (rawMonth && /^\d{4}-\d{2}$/.test(rawMonth)) {
+      const [y, m] = rawMonth.split('-').map((v) => Number(v));
+      startDate = new Date(y, m - 1, 1);
+    } else {
+      const now = new Date();
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
+
+    // Buscar empleados con inasistencias que pierdan presentismo en el mes
+    const Attendance = require('../models/Attendance');
+    const Employee = require('../models/Employee');
+    const employeeIds = await Attendance.distinct('employee', {
+      type: 'inasistencia',
+      lostPresentismo: true,
+      date: { $gte: startDate, $lt: endDate }
+    });
+
+    const employees = await Employee.find({ _id: { $in: employeeIds } }).select('nombre apellido dni telefono').lean();
+    const message = buildPresentismoReportMessage(startDate, employees);
+
+    return res.json({
+      msg: 'Previsualización del informe de presentismo',
+      month: formatMonthYYYYMM(startDate),
+      totalEmployees: employees.length,
+      employees: employees.map((e) => ({ nombre: e.nombre, apellido: e.apellido })),
+      message,
+    });
+  } catch (e) {
+    console.error('[Admin] previewPresentismoMonthlyReport error:', e);
+    return res.status(500).json({ msg: 'Error interno', error: e.message });
+  }
+};
+
 // CRUD destinatarios de Presentismo
 exports.getPresentismoRecipients = async (req, res) => {
   try {

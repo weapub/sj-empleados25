@@ -18,6 +18,8 @@ router.post('/twilio/test-whatsapp-all', auth, adminController.broadcastTwilioWh
 
 // Enviar informe mensual de presentismo por WhatsApp (solo admin)
 router.post('/presentismo/report/send', auth, adminController.sendPresentismoMonthlyReport);
+// Previsualizar informe mensual de presentismo (solo admin)
+router.post('/presentismo/report/preview', auth, adminController.previewPresentismoMonthlyReport);
 
 // CRUD destinatarios de Presentismo (solo admin)
 router.get('/presentismo/recipients', auth, adminController.getPresentismoRecipients);

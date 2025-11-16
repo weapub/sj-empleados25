@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Row, Col, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { getDashboardMetrics, sendPresentismoWhatsAppReport } from '../../services/api';
+import { getDashboardMetrics, sendPresentismoWhatsAppReport, previewPresentismoWhatsAppReport } from '../../services/api';
 import { LayoutDashboard, Users, UserCheck, CalendarX, Clock, UserX, AlertTriangle, AlertCircle, Receipt, TrendingUp } from 'lucide-react';
 import MetricCardAlt from '../common/MetricCardAlt';
 import { isCanceledError } from '../../utils/http';
@@ -33,11 +33,33 @@ const Dashboard = () => {
   });
 
   const [sendingReport, setSendingReport] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
 
   const handleSendPresentismoReport = async () => {
     try {
       setSendingReport(true);
+      // Primero obtener previsualización
+      const preview = await previewPresentismoWhatsAppReport();
+      setPreviewData(preview);
+      setShowPreview(true);
+    } catch (e) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al preparar informe',
+        text: e?.response?.data?.msg || e.message || 'Error desconocido',
+      });
+    } finally {
+      setSendingReport(false);
+    }
+  };
+
+  const confirmSendReport = async () => {
+    try {
+      setSendingReport(true);
       const res = await sendPresentismoWhatsAppReport();
+      setShowPreview(false);
+      setPreviewData(null);
       Swal.fire({
         icon: 'success',
         title: 'Informe enviado',
@@ -191,6 +213,50 @@ const Dashboard = () => {
           </Row>
         </Card.Body>
       </Card>
+
+      {/* Modal de previsualización del informe de Presentismo */}
+      {showPreview && (
+        <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.35)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content shadow-lg">
+              <div className="modal-header">
+                <h5 className="modal-title">Previsualización informe de Presentismo</h5>
+                <button type="button" className="btn-close" onClick={() => setShowPreview(false)}></button>
+              </div>
+              <div className="modal-body">
+                {previewData ? (
+                  <div>
+                    <p className="text-muted">Mes: {previewData.month}</p>
+                    <p className="mb-2">Empleados sin presentismo: {previewData.totalEmployees}</p>
+                    {Array.isArray(previewData.employees) && previewData.employees.length > 0 ? (
+                      <ul className="list-group mb-3">
+                        {previewData.employees.map((e, idx) => (
+                          <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{e.apellido} {e.nombre}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-slate-600">No se registran pérdidas de presentismo por inasistencia en el período.</p>
+                    )}
+                    <div className="p-3 bg-light rounded border">
+                      <pre className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>{previewData.message}</pre>
+                    </div>
+                  </div>
+                ) : (
+                  <p>Cargando previsualización...</p>
+                )}
+              </div>
+              <div className="modal-footer">
+                <Button variant="secondary" onClick={() => setShowPreview(false)}>Cancelar</Button>
+                <Button variant="primary" onClick={confirmSendReport} disabled={sendingReport}>
+                  {sendingReport ? 'Enviando...' : 'Enviar por WhatsApp'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Container>
   );
 };

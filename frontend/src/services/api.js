@@ -287,6 +287,14 @@ export const sendPresentismoWhatsAppReport = async (month) => {
   return response.data; // { msg, month, totalEmployees, destinations, sent, errors, results }
 };
 
+// Admin: previsualizar informe mensual de presentismo (no envía WhatsApp)
+export const previewPresentismoWhatsAppReport = async (month) => {
+  setAuthToken(localStorage.getItem('token'));
+  const payload = month ? { month } : {};
+  const response = await axios.post(`${API_URL}/admin/presentismo/report/preview`, payload);
+  return response.data; // { msg, month, totalEmployees, employees[{nombre,apellido}], message }
+};
+
 // Admin: CRUD destinatarios de Presentismo
 export const getPresentismoRecipients = async () => {
   setAuthToken(localStorage.getItem('token'));
