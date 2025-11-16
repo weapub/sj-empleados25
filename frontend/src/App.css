@@ -303,7 +303,7 @@ a:hover { color: var(--primary-color); }
 /* Formularios glass y foco unificado */
 .theme-dsign .form-control,
 .theme-dsign .form-select {
-  background-color: #ffffff;
+  background-color: transparent;
   backdrop-filter: none;
   border: 1px solid var(--border-color);
 }
@@ -401,7 +401,7 @@ a:hover { color: var(--primary-color); }
 }
 .theme-dsign .form-control,
 .theme-dsign .form-select {
-  background-color: #ffffff;
+  background-color: transparent;
   backdrop-filter: none;
 }
 .theme-dsign .form-control:focus,
@@ -864,7 +864,7 @@ input[type="month"] {
   border-radius: var(--border-radius-sm);
   padding: 0.75rem 1rem;
   transition: all 0.2s ease;
-  background: #ffffff;
+  /* background: #000000; */
   color: var(--text-primary);
 }
 
