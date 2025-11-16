@@ -79,19 +79,33 @@ const Dashboard = () => {
   const confirmSendReport = async () => {
     try {
       setSendingReport(true);
-      const res = await sendPresentismoWhatsAppReport(modalMonth || undefined);
+      const message = previewData?.message || '';
+      const destinationRaw = Array.isArray(previewData?.destinations) && previewData.destinations.length > 0
+        ? previewData.destinations[0]
+        : '';
+      const phoneDigits = String(destinationRaw).replace(/\D/g, '');
+      if (!phoneDigits) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Sin destinatario configurado',
+          text: 'No hay número de WhatsApp configurado para abrir el mensaje.',
+        });
+        return;
+      }
+      const url = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
       setShowPreview(false);
       setPreviewData(null);
       Swal.fire({
         icon: 'success',
-        title: 'Informe enviado',
-        text: `Mes ${res.month}. Empleados: ${res.totalEmployees}. Destinos: ${res.destinations}.`,
+        title: 'WhatsApp abierto',
+        text: `Se abrió WhatsApp con el número configurado (${destinationRaw}).`,
       });
     } catch (e) {
       Swal.fire({
         icon: 'error',
-        title: 'Error al enviar informe',
-        text: e?.response?.data?.msg || e.message || 'Error desconocido',
+        title: 'No se pudo abrir WhatsApp',
+        text: e?.message || 'Error desconocido',
       });
     } finally {
       setSendingReport(false);
@@ -263,6 +277,11 @@ const Dashboard = () => {
                         </Button>
                       </div>
                     </div>
+                    {Array.isArray(previewData.destinations) && previewData.destinations.length > 0 ? (
+                      <p className="mb-2">Destino: {previewData.destinations[0]}</p>
+                    ) : (
+                      <p className="text-danger mb-2">No hay destinatario configurado. Configure uno en Administración.</p>
+                    )}
                     <p className="mb-2">Empleados sin presentismo: {previewData.totalEmployees}</p>
                     {Array.isArray(previewData.employees) && previewData.employees.length > 0 ? (
                       <ul className="list-group mb-3">
