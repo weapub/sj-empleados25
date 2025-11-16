@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Row, Col, Container } from 'react-bootstrap';
+import { Card, Button, Row, Col, Container, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { getDashboardMetrics, sendPresentismoWhatsAppReport, previewPresentismoWhatsAppReport } from '../../services/api';
 import { LayoutDashboard, Users, UserCheck, CalendarX, Clock, UserX, AlertTriangle, AlertCircle, Receipt, TrendingUp } from 'lucide-react';
@@ -35,12 +35,13 @@ const Dashboard = () => {
   const [sendingReport, setSendingReport] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(''); // YYYY-MM (opcional)
 
   const handleSendPresentismoReport = async () => {
     try {
       setSendingReport(true);
       // Primero obtener previsualización
-      const preview = await previewPresentismoWhatsAppReport();
+      const preview = await previewPresentismoWhatsAppReport(selectedMonth || undefined);
       setPreviewData(preview);
       setShowPreview(true);
     } catch (e) {
@@ -57,7 +58,7 @@ const Dashboard = () => {
   const confirmSendReport = async () => {
     try {
       setSendingReport(true);
-      const res = await sendPresentismoWhatsAppReport();
+      const res = await sendPresentismoWhatsAppReport(selectedMonth || undefined);
       setShowPreview(false);
       setPreviewData(null);
       Swal.fire({
@@ -180,6 +181,15 @@ const Dashboard = () => {
         </Card.Header>
         <Card.Body className="leaflet-body space-y-2">
           <Row className="gy-3">
+            <Col lg={3} md={6} className="mb-3">
+              <Form.Label className="mb-1">Mes del informe</Form.Label>
+              <Form.Control
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="w-100 py-2 rounded-md shadow-sm"
+              />
+            </Col>
             <Col lg={3} md={6} className="mb-3">
               <Button as={Link} to="/employees/new" variant="primary" className="w-100 py-3 rounded-md shadow-sm">
                 <UserCheck size={20} /> <span>Nuevo Empleado</span>
