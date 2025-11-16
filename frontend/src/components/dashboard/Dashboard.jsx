@@ -69,7 +69,16 @@ const Dashboard = () => {
   }, []);
 
   const renderMetricCard = (title, value, icon, color, delta, to = null) => (
-    <MetricCardAlt title={title} value={value} icon={icon} color={color} loading={stats.loading} error={stats.error} delta={delta} to={to} />
+    <MetricCardAlt
+      title={title}
+      value={value}
+      icon={icon}
+      color={color}
+      loading={stats.loading}
+      error={stats.error}
+      delta={delta}
+      to={to}
+    />
   );
 
   return (

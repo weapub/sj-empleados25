@@ -2338,8 +2338,10 @@ input[type="month"] {
 @media (max-width: 576px) {
   .kpi-card .card-body { padding: 0.7rem 0.85rem; }
   .kpi-icon { width: 34px; height: 34px; border-radius: 10px; }
-  .kpi-title { font-size: 0.78rem; }
-  .kpi-value { font-size: 1.15rem; }
+  .kpi-title { font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi-value { font-size: 1.04rem; }
+  /* Override para filas con gy-4, reduciendo aún más el valor */
+  .row.gy-4 .kpi-card .kpi-value { font-size: 1.02rem; }
 }
 
 /* =============================================
