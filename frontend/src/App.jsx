@@ -66,8 +66,8 @@ function App() {
       <div className="App theme-tailadmin min-h-screen">
         <Navbar isAuthenticated={isAuthenticated} logout={logout} />
         <div className="app-shell flex">
-          <div className="app-content flex-1">
-            <div className={`container ${isAuthenticated ? 'mt-4' : 'mt-2'} px-4 md:px-6`}>
+          <div className="app-content flex-1 bg-slate-50/50 min-h-screen">
+            <div className={`${isAuthenticated ? 'max-w-7xl mx-auto p-4 md:p-6 2xl:p-10' : 'container mt-2 px-4'}`}>
               <React.Suspense fallback={<div className="d-flex justify-content-center align-items-center py-5"><div className="spinner-border" role="status"><span className="visually-hidden">Cargando...</span></div></div>}>
               <Routes>
                 <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />

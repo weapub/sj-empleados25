@@ -115,13 +115,14 @@ a:hover {
   --text-primary: #1C2434;
   --text-secondary: #64748B;
   --border-color: #E2E8F0; /* stroke */
-  --shadow-default: 0px 8px 13px -3px rgba(0, 0, 0, 0.07);
-  --border-radius: 0px; /* TailAdmin standard is very sharp */
+  --shadow-default: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24);
+  --border-radius: 2px;
+  --font-body: 'Inter', sans-serif;
 }
 
 .App.theme-tailadmin {
   background-color: var(--light-bg);
-  color: var(--text-primary);
+  font-family: var(--font-body);
 }
 
 .theme-tailadmin .navbar {
@@ -130,42 +131,100 @@ a:hover {
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+.theme-tailadmin .navbar .navbar-brand {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+}
+
+.theme-tailadmin .navbar .nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+}
+
+.theme-tailadmin .navbar .nav-link:hover,
+.theme-tailadmin .navbar .nav-link.active {
+  color: var(--primary-color) !important;
+}
+
 .theme-tailadmin .card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-default);
-  border-radius: 2px;
-  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  padding: 0;
+  margin-bottom: 1.875rem;
 }
 
 .theme-tailadmin .card-header {
-  background-color: transparent;
+  background-color: #FFFFFF;
   border-bottom: 1px solid var(--border-color);
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.875rem;
   font-weight: 600;
+  color: var(--text-primary);
+}
+
+.theme-tailadmin .card-body {
+  padding: 1.875rem;
+  color: var(--text-secondary);
 }
 
 .theme-tailadmin .btn-primary {
   background-color: var(--primary-color) !important;
   border-color: var(--primary-color) !important;
-  border-radius: 4px;
   font-weight: 500;
+  color: #FFFFFF !important;
 }
 
 .theme-tailadmin .btn-primary:hover {
   background-color: var(--primary-dark) !important;
 }
 
+.theme-tailadmin .btn {
+  border-radius: 4px;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.theme-tailadmin .btn-outline-secondary {
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.theme-tailadmin .btn-outline-secondary:hover {
+  background-color: #F7F9FC !important;
+}
+
 .theme-tailadmin .form-control,
 .theme-tailadmin .form-select {
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
 }
 
 .theme-tailadmin .form-control:focus {
   border-color: var(--primary-color);
   box-shadow: none;
+  outline: none;
+}
+
+.theme-tailadmin .table {
+  margin-bottom: 0;
+}
+
+.theme-tailadmin .table thead th {
+  background-color: #F7F9FC;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.theme-tailadmin .table tbody td {
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
 /* Botones minimalistas con borde y radio 8px */
@@ -2705,4 +2764,54 @@ button.btn.btn-sm {
   .mobile-card.mb-3 {
     margin-bottom: 0.5rem;
   }
+}
+
+
+  color: var(--text-secondary);
+}
+
+/* KPI Cards TailAdmin Style */
+.theme-tailadmin .kpi-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-default) !important;
+  border-radius: var(--border-radius) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.theme-tailadmin .kpi-card::before,
+.theme-tailadmin .kpi-card::after {
+  display: none !important; /* Eliminar efectos de otros temas (ej. leaflet) */
+}
+
+.theme-tailadmin .kpi-card .card-body {
+  padding: 1.5rem 1.875rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+
+.theme-tailadmin .kpi-icon {
+  width: 44px !important;
+  height: 44px !important;
+  background-color: var(--light-bg) !important;
+  border-radius: 50% !important;
+  color: var(--primary-color) !important;
+  margin-bottom: 1.25rem !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.theme-tailadmin .kpi-value {
+  font-size: 1.75rem !important;
+  margin-top: 0.25rem !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-tailadmin .table {
+  margin-bottom: 0;
 }
