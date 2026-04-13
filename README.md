@@ -87,6 +87,13 @@ Para subir este proyecto a GitHub sin exponer configuraciones locales o datos de
 - Ejecución: `npm start` en backend y `npm run dev` en frontend.
 - Puerto de desarrollo del frontend: `http://localhost:5178/` (configurado con `strictPort`).
 
+### Ejecución en Red Local (para pruebas en móviles)
+1. Obtén tu IP local (ej. `192.168.1.50` vía `ipconfig`).
+2. **Backend**: En `backend/.env`, establece `CORS_ORIGIN=http://192.168.1.50:5178`.
+3. **Frontend**: En `frontend/.env`, establece `VITE_API_URL=http://192.168.1.50:5000`.
+4. **Comando Frontend**: Ejecuta `npm run dev -- --host` en la carpeta `frontend/`.
+5. Accede desde tu móvil usando `http://192.168.1.50:5178`.
+
 ### Producción
 - No subas `.env` al repo; configura variables en el proveedor (Render/Railway/Vercel).
 - Frontend se construye con `vite build` (`frontend/`), backend se inicia con `node index.js` o `npm start` (`backend/`).

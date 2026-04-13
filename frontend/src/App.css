@@ -2766,10 +2766,6 @@ button.btn.btn-sm {
   }
 }
 
-
-  color: var(--text-secondary);
-}
-
 /* KPI Cards TailAdmin Style */
 .theme-tailadmin .kpi-card {
   background-color: var(--card-bg) !important;

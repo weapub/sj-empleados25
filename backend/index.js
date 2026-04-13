@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const path = require('path');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const compression = require('compression');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
@@ -71,11 +73,23 @@ app.use(express.json());
 // Comprimir respuestas para reducir tamaño de transferencia
 app.use(compression());
 
+// Seguridad: headers de protección
+app.use(helmet());
+
+// Rate limiting para endpoints de autenticación
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // 5 intentos por ventana
+  message: 'Demasiados intentos de inicio de sesión, intente más tarde',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/disciplinary', disciplinaryRoutes);
@@ -86,28 +100,28 @@ console.log('[Routes] Mounting account routes:', !!accountRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Debug: list registered routes
-app.get('/api/_debug/routes', (req, res) => {
-  try {
-    const routes = [];
-    app?._router?.stack?.forEach((middleware) => {
-      if (middleware?.route) {
-        const methods = Object.keys(middleware.route.methods || {}).join(',');
-        routes.push(`${methods} ${middleware.route.path}`);
-      } else if (middleware?.name === 'router' && middleware?.handle?.stack) {
-        middleware.handle.stack.forEach((handler) => {
-          if (handler?.route) {
+// Debug: list registered routes (solo desarrollo)
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/_debug/routes', (req, res) => {
+    try {
+      const routes = [];
+      app?._router?.stack?.forEach((middleware) => {
+        if (middleware?.route) {
+          const methods = Object.keys(middleware.route.methods || {}).join(',');
+          routes.push(`${methods} ${middleware.route.path}`);
+        } else if (middleware?.name === 'router' && middleware?.handle?.stack) {
+          middleware.handle.stack.forEach((handler) => {
             const methods = Object.keys(handler.route.methods || {}).join(',');
             routes.push(`[router] ${methods} ${handler.route.path}`);
           }
         });
       }
-    });
-    res.json({ routes });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+      res.json({ routes });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+}
 
 // Healthcheck básico en raíz
 app.get('/', (req, res) => {
