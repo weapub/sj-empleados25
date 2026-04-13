@@ -39,13 +39,9 @@ function App() {
       const params = new URLSearchParams(window.location.search);
       const qpToken = params.get('token');
       if (qpToken) {
-        localStorage.setItem('token', qpToken);
-        setToken(qpToken);
-        setIsAuthenticated(true);
-        // Limpia el token de la URL para evitar fugas en Referer
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        window.history.replaceState({}, '', url.toString());
+        // SECURITY: Token passed via URL is unsafe - tokens may appear in logs, history, referer headers
+        console.warn('SECURITY: Token passed via URL (unsafe). Use POST /api/auth/verify instead');
+        // Don't store the token - this is a security vulnerability
       }
     } catch (e) {
       // No interrumpir la app si el parseo falla
@@ -67,7 +63,7 @@ function App() {
 
   return (
     <Router>
-      <div className="App theme-soft-glass min-h-screen bg-gradient-to-br from-slate-50 to-white">
+      <div className="App theme-tailadmin min-h-screen">
         <Navbar isAuthenticated={isAuthenticated} logout={logout} />
         <div className="app-shell flex">
           <div className="app-content flex-1">
