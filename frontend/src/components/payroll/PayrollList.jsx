@@ -1,46 +1,59 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Table, Button, Badge, Row, Col, Form, Card } from 'react-bootstrap';
-import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, Receipt } from 'lucide-react';
+import {
+  Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Chip, IconButton, Tooltip, Typography, Button, CircularProgress, Alert,
+  TextField, MenuItem,
+} from '@mui/material';
+import {
+  Receipt as ReceiptIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  ArrowUpward as AscIcon,
+  ArrowDownward as DescIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getAllPayrollReceipts, deletePayrollReceipt } from '../../services/api';
-import MobileCard from '../common/MobileCard';
-import PageHeader from '../common/PageHeader';
-import SectionCard from '../common/SectionCard';
 
 const daysInMonth = (period) => {
-  // period in format YYYY-MM
   try {
-    const [yearStr, monthStr] = period.split('-');
-    const year = parseInt(yearStr, 10);
-    const month = parseInt(monthStr, 10);
-    return new Date(year, month, 0).getDate();
+    const [y, m] = period.split('-');
+    return new Date(parseInt(y, 10), parseInt(m, 10), 0).getDate();
   } catch (_) {
     return 30;
   }
 };
 
-const formatCurrency = (value) => {
-  return `$${Number(value || 0).toLocaleString('es-AR')}`;
-};
-
-const formatDate = (iso) => {
-  if (!iso) return '-';
-  const d = new Date(iso);
-  return d.toLocaleDateString('es-AR');
-};
-
-// Mostrar período en formato MM-YYYY para UI
+const formatCurrency = (value) => `$${Number(value || 0).toLocaleString('es-AR')}`;
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
 const formatPeriod = (period) => {
-  if (!period || !period.includes('-')) return period || '-';
+  if (!period || !period.includes('-')) return period || '—';
   const [y, m] = period.split('-');
   return `${m}-${y}`;
 };
+
+const chipSx = { borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600 };
+
+const SORT_OPTIONS = [
+  { value: 'employee',    label: 'Empleado' },
+  { value: 'period',      label: 'Período' },
+  { value: 'paymentDate', label: 'Fecha pago' },
+  { value: 'status',      label: 'Estado' },
+  { value: 'extra',       label: 'Horas extras' },
+  { value: 'other',       label: 'Otros' },
+  { value: 'discounts',   label: 'Descuentos' },
+  { value: 'advance',     label: 'Adelanto' },
+  { value: 'net',         label: 'Neto' },
+  { value: 'weekly',      label: 'Semanal' },
+];
 
 const PayrollList = () => {
   const navigate = useNavigate();
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
   const [filterPeriod, setFilterPeriod] = useState('');
   const [sortBy, setSortBy] = useState('paymentDate');
@@ -50,38 +63,34 @@ const PayrollList = () => {
     try {
       setLoading(true);
       const data = await getAllPayrollReceipts();
-      setReceipts(data);
-    } catch (err) {
-      console.error('Error al cargar recibos:', err);
+      setReceipts(Array.isArray(data) ? data : []);
+    } catch (_) {
+      setError('Error al cargar los recibos');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadReceipts();
-  }, []);
+  useEffect(() => { loadReceipts(); }, []);
 
   const handleDelete = (id) => {
     Swal.fire({
       title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer',
+      text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      confirmButtonColor: '#FF4C51',
+      cancelButtonColor: '#8A8D93',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await deletePayrollReceipt(id);
-          Swal.fire('Eliminado', 'El recibo ha sido eliminado', 'success');
-          loadReceipts();
-        } catch (error) {
-          console.error('Error al eliminar:', error);
-          Swal.fire('Error', 'No se pudo eliminar el recibo', 'error');
-        }
+      if (!result.isConfirmed) return;
+      try {
+        await deletePayrollReceipt(id);
+        Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1500, showConfirmButton: false });
+        loadReceipts();
+      } catch (_) {
+        Swal.fire({ icon: 'error', title: 'Error al eliminar' });
       }
     });
   };
@@ -94,10 +103,8 @@ const PayrollList = () => {
 
   const parsePeriod = (period) => {
     if (!period) return new Date(0);
-    const [yearStr, monthStr] = period.split('-');
-    const year = parseInt(yearStr, 10);
-    const month = parseInt(monthStr, 10) - 1;
-    return new Date(year, month, 1);
+    const [y, m] = period.split('-');
+    return new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
   };
 
   const sortedReceipts = [...filteredReceipts].sort((a, b) => {
@@ -107,49 +114,17 @@ const PayrollList = () => {
       const bn = b.employee ? `${b.employee.nombre} ${b.employee.apellido}`.toLowerCase() : '';
       return an.localeCompare(bn) * dir;
     }
-    if (sortBy === 'period') {
-      return (parsePeriod(a.period) - parsePeriod(b.period)) * dir;
-    }
-    if (sortBy === 'paymentDate') {
-      const ad = a.paymentDate ? new Date(a.paymentDate).getTime() : 0;
-      const bd = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
-      return (ad - bd) * dir;
-    }
-    if (sortBy === 'extra') {
-      const an = Number(a.extraHours || 0);
-      const bn = Number(b.extraHours || 0);
-      return (an - bn) * dir;
-    }
-    if (sortBy === 'other') {
-      const an = Number(a.otherAdditions || 0);
-      const bn = Number(b.otherAdditions || 0);
-      return (an - bn) * dir;
-    }
-    if (sortBy === 'discounts') {
-      const an = Number(a.discounts || 0);
-      const bn = Number(b.discounts || 0);
-      return (an - bn) * dir;
-    }
-    if (sortBy === 'advance') {
-      const an = a.advanceRequested ? (Number(a.advanceAmount) || 0) : 0;
-      const bn = b.advanceRequested ? (Number(b.advanceAmount) || 0) : 0;
-      return (an - bn) * dir;
-    }
-    if (sortBy === 'net') {
-      const an = Number(a.netAmount || 0);
-      const bn = Number(b.netAmount || 0);
-      return (an - bn) * dir;
-    }
+    if (sortBy === 'period')      return (parsePeriod(a.period) - parsePeriod(b.period)) * dir;
+    if (sortBy === 'paymentDate') return ((a.paymentDate ? new Date(a.paymentDate).getTime() : 0) - (b.paymentDate ? new Date(b.paymentDate).getTime() : 0)) * dir;
+    if (sortBy === 'extra')       return (Number(a.extraHours || 0) - Number(b.extraHours || 0)) * dir;
+    if (sortBy === 'other')       return (Number(a.otherAdditions || 0) - Number(b.otherAdditions || 0)) * dir;
+    if (sortBy === 'discounts')   return (Number(a.discounts || 0) - Number(b.discounts || 0)) * dir;
+    if (sortBy === 'advance')     return ((a.advanceRequested ? Number(a.advanceAmount) || 0 : 0) - (b.advanceRequested ? Number(b.advanceAmount) || 0 : 0)) * dir;
+    if (sortBy === 'net')         return (Number(a.netAmount || 0) - Number(b.netAmount || 0)) * dir;
     if (sortBy === 'weekly') {
-      const dimA = daysInMonth(a.period);
-      const dimB = daysInMonth(b.period);
-      const netA = Number(a.netAmount) || 0;
-      const netB = Number(b.netAmount) || 0;
-      const advA = a.advanceRequested ? (Number(a.advanceAmount) || 0) : 0;
-      const advB = b.advanceRequested ? (Number(b.advanceAmount) || 0) : 0;
-      const an = Math.round(((netA / dimA) * 7) - advA);
-      const bn = Math.round(((netB / dimB) * 7) - advB);
-      return (an - bn) * dir;
+      const wA = Math.round(((Number(a.netAmount) || 0) / daysInMonth(a.period) * 7) - (a.advanceRequested ? Number(a.advanceAmount) || 0 : 0));
+      const wB = Math.round(((Number(b.netAmount) || 0) / daysInMonth(b.period) * 7) - (b.advanceRequested ? Number(b.advanceAmount) || 0 : 0));
+      return (wA - wB) * dir;
     }
     if (sortBy === 'status') {
       const score = (x) => (x.signed ? 2 : 0) + (x.hasPresentismo ? 1 : 0);
@@ -158,264 +133,256 @@ const PayrollList = () => {
     return 0;
   });
 
-  const handleSort = (field, e) => {
-    if (e && e.altKey) {
-      setSortBy('paymentDate');
-      setSortDir('desc');
-      return;
-    }
-    if (sortBy === field) {
-      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortBy(field);
-      setSortDir('desc');
-    }
-  };
+  const toggleSortDir = () => setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
 
-  const renderSort = (field) => {
-    if (sortBy !== field) return null;
-    return sortDir === 'asc' ? <ChevronUp size={16} className="ms-1" /> : <ChevronDown size={16} className="ms-1" />;
-  };
-
-  const resetSort = () => {
-    setSortBy('paymentDate');
-    setSortDir('desc');
-  };
+  const uniqueEmployees = receipts
+    .map(r => r.employee)
+    .filter(Boolean)
+    .reduce((acc, emp) => {
+      if (!acc.find(x => x._id === emp._id)) acc.push(emp);
+      return acc;
+    }, []);
 
   return (
-    <Container fluid className="mt-4 px-0 md:px-4">
-      <PageHeader
-        icon={<Receipt size={20} />}
-        title="Recibos de Sueldo"
-        subtitle="Gestione, filtre y ordene los recibos emitidos"
-        accentColor="#10b981"
-        actions={(
-          <Button variant="primary" className="shadow-sm" onClick={() => navigate('/payroll/new')}>
-            <Plus size={16} /> <span>Registrar Nuevo Recibo</span>
-          </Button>
-        )}
-      />
-
-      {/* Botón flotante móvil para registrar nuevo recibo */}
-      <div className="d-md-none mobile-cta">
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ReceiptIcon sx={{ fontSize: 22 }} />
+            Recibos de Sueldo
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>
+            Gestione, filtre y ordene los recibos emitidos
+          </Typography>
+        </Box>
         <Button
-          variant="primary"
-          className="mobile-cta-btn shadow-lg"
+          variant="contained"
+          startIcon={<AddIcon />}
+          sx={{ borderRadius: 2.5 }}
           onClick={() => navigate('/payroll/new')}
         >
-          <Plus size={18} /> <span>Registrar Nuevo Recibo +</span>
+          Registrar Nuevo Recibo
         </Button>
-      </div>
+      </Box>
 
-      <div className="section-box mb-3">
-      <div className="section-band" />
-      <div className="p-3 p-md-4">
-<SectionCard title="Filtros" icon={<Receipt size={20} />} className="mb-0" accentColor="#10b981">
-        <Row className="g-3 align-items-end">
-          <Col md={6}>
-            <Form.Group>
-              <Form.Label>Filtrar por Empleado</Form.Label>
-              <Form.Select value={filterEmployee} onChange={(e) => setFilterEmployee(e.target.value)}>
-                <option value="">Todos</option>
-                {receipts
-                  .map(r => r.employee)
-                  .filter(Boolean)
-                  .reduce((acc, emp) => {
-                    if (!acc.find(x => x._id === emp._id)) acc.push(emp);
-                    return acc;
-                  }, [])
-                  .map(emp => (
-                    <option key={emp._id} value={emp._id}>{emp.nombre} {emp.apellido} ({emp.legajo})</option>
-                  ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-              <Form.Group>
-              <Form.Label>Filtrar por Período (MM-YYYY)</Form.Label>
-              <Form.Control type="month" value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value)} />
-            </Form.Group>
-          </Col>
-          <Col md={12} className="d-flex justify-content-end">
-            <Button variant="outline-secondary" size="sm" onClick={resetSort} title="Resetear orden a Pago descendente">
-              Reset orden
-            </Button>
-          </Col>
-          </Row>
-      </SectionCard>
-      </div>
-      </div>
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
 
-      {loading ? (
-        <p className="p-3">Cargando...</p>
-      ) : (
-        <>
-          {/* Vista de escritorio */}
-          <div className="d-none d-md-block">
-            <div className="section-box">
-            <div className="section-band" />
-            <div className="p-3 p-md-4">
-<SectionCard title="Listado" icon={<Receipt size={20} />} accentColor="#10b981">
-            <div className="table-responsive">
-            <Table hover responsive className="payroll-table mb-0 align-middle text-sm">
-              <thead>
-                <tr>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('employee', e)}>Empleado {renderSort('employee')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('period', e)}>Período {renderSort('period')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('paymentDate', e)}>Pago {renderSort('paymentDate')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('status', e)}>Estado {renderSort('status')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('extra', e)}>Horas Extras {renderSort('extra')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('other', e)}>Otros {renderSort('other')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('discounts', e)}>Descuentos {renderSort('discounts')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('advance', e)}>Adelanto {renderSort('advance')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('net', e)}>Neto {renderSort('net')}</th>
-                  <th role="button" title="Ordenar (Alt+Click para reset)" onClick={(e) => handleSort('weekly', e)}>Semanal {renderSort('weekly')}</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredReceipts.length === 0 ? (
-                  <tr>
-                    <td colSpan="11" className="text-center">No hay recibos registrados</td>
-                  </tr>
+      {/* Filtros */}
+      <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider', mb: 2.5 }}>
+        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="subtitle2" fontWeight={700}>Filtros</Typography>
+        </Box>
+        <Box sx={{ px: 2.5, py: 2, display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end' }}>
+          <TextField
+            select
+            size="small"
+            label="Empleado"
+            value={filterEmployee}
+            onChange={e => setFilterEmployee(e.target.value)}
+            sx={{ minWidth: 220 }}
+          >
+            <MenuItem value="">Todos</MenuItem>
+            {uniqueEmployees.map(emp => (
+              <MenuItem key={emp._id} value={emp._id}>
+                {emp.nombre} {emp.apellido} ({emp.legajo})
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            size="small"
+            label="Período (MM-YYYY)"
+            type="month"
+            value={filterPeriod}
+            onChange={e => setFilterPeriod(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => { setSortBy('paymentDate'); setSortDir('desc'); }}
+          >
+            Reset orden
+          </Button>
+        </Box>
+      </Paper>
+
+      {/* Tabla */}
+      <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden', borderColor: 'divider' }}>
+        {/* Barra de ordenamiento */}
+        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Typography variant="body2" color="text.secondary">Ordenar por:</Typography>
+          <TextField
+            select
+            size="small"
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            sx={{ minWidth: 160 }}
+          >
+            {SORT_OPTIONS.map(o => (
+              <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+            ))}
+          </TextField>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={toggleSortDir}
+            startIcon={sortDir === 'asc' ? <AscIcon /> : <DescIcon />}
+          >
+            {sortDir === 'asc' ? 'Ascendente' : 'Descendente'}
+          </Button>
+        </Box>
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                  <TableCell>Empleado</TableCell>
+                  <TableCell>Período</TableCell>
+                  <TableCell>Pago</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell>Horas Extras</TableCell>
+                  <TableCell>Otros</TableCell>
+                  <TableCell>Descuentos</TableCell>
+                  <TableCell>Adelanto</TableCell>
+                  <TableCell>Neto</TableCell>
+                  <TableCell>Semanal</TableCell>
+                  <TableCell align="right">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sortedReceipts.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={11} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                      No hay recibos registrados
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   sortedReceipts.map((r) => {
-                  const dim = daysInMonth(r.period);
-                  const netToPay = Number(r.netAmount) || 0;
-                  const advance = r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0;
-                  const weekly = Math.round(((netToPay / dim) * 7) - advance);
+                    const dim = daysInMonth(r.period);
+                    const netToPay = Number(r.netAmount) || 0;
+                    const advance = r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0;
+                    const weekly = Math.round(((netToPay / dim) * 7) - advance);
+
                     return (
-                      <tr key={r._id}>
-                        <td>
-                          <div className="fw-semibold text-truncate" title={r.employee ? `${r.employee.nombre} ${r.employee.apellido}` : ''}>
-                            {r.employee ? `${r.employee.nombre} ${r.employee.apellido}` : '-'}
-                          </div>
-                          <small className="text-muted">Legajo: {r.employee?.legajo || '-'}</small>
-                        </td>
-                        <td>
-                          <div>{formatPeriod(r.period)}</div>
-                          <small className="text-muted">Días: {dim}</small>
-                        </td>
-                        <td>{formatDate(r.paymentDate)}</td>
-                        <td>
-                          <div className="d-flex flex-column gap-1">
-                            <span className={`badge badge-soft ${r.hasPresentismo ? 'badge-soft-success' : 'badge-soft-danger'}`}>
-                              <span className="dot"></span>
-                              {r.hasPresentismo ? 'Con Presentismo' : 'Sin Presentismo'}
-                            </span>
-                            <span className={`badge badge-soft ${r.signed ? 'badge-soft-info' : 'badge-soft-warning'}`}>
-                              <span className="dot"></span>
-                              {r.signed ? `Firmado` : 'Sin Firmar'}
-                            </span>
-                          </div>
-                        </td>
-                        <td>{formatCurrency(r.extraHours)}</td>
-                        <td>{formatCurrency(r.otherAdditions)}</td>
-                        <td>{formatCurrency(r.discounts)}</td>
-                        <td>
-                          <div className="d-flex flex-column">
-                            <span className={`badge badge-soft ${r.advanceRequested ? 'badge-soft-warning' : 'badge-soft-info'} mb-1`}>
-                              <span className="dot"></span>
-                              {r.advanceRequested ? 'Con Adelanto' : 'Sin Adelanto'}
-                            </span>
-                            <span>{formatCurrency(r.advanceAmount)}</span>
-                          </div>
-                        </td>
-                        <td className="text-success fw-bold">{formatCurrency(netToPay)}</td>
-                        <td>{formatCurrency(weekly)}</td>
-                        <td>
-                          <Button variant="success" size="sm" className="me-2" onClick={() => navigate(`/payroll/${r._id}`)}>
-                            Ver
-                          </Button>
-                          <Button variant="outline-primary" size="sm" className="me-2" onClick={() => navigate(`/payroll/edit/${r._id}`)}>
-                            <Pencil size={16} />
-                          </Button>
-                          <Button variant="outline-danger" size="sm" onClick={() => handleDelete(r._id)}>
-                            <Trash2 size={16} />
-                          </Button>
-                        </td>
-                      </tr>
+                      <TableRow key={r._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={600}>
+                            {r.employee ? `${r.employee.nombre} ${r.employee.apellido}` : '—'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Legajo: {r.employee?.legajo || '—'}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2">{formatPeriod(r.period)}</Typography>
+                          <Typography variant="caption" color="text.secondary">Días: {dim}</Typography>
+                        </TableCell>
+
+                        <TableCell>{formatDate(r.paymentDate)}</TableCell>
+
+                        <TableCell>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            <Chip
+                              label={r.hasPresentismo ? 'Con Presentismo' : 'Sin Presentismo'}
+                              size="small"
+                              sx={{
+                                ...chipSx,
+                                ...(r.hasPresentismo
+                                  ? { bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }
+                                  : { bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }),
+                              }}
+                            />
+                            <Chip
+                              label={r.signed ? 'Firmado' : 'Sin Firmar'}
+                              size="small"
+                              sx={{
+                                ...chipSx,
+                                ...(r.signed
+                                  ? { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' }
+                                  : { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }),
+                              }}
+                            />
+                          </Box>
+                        </TableCell>
+
+                        <TableCell>{formatCurrency(r.extraHours)}</TableCell>
+                        <TableCell>{formatCurrency(r.otherAdditions)}</TableCell>
+                        <TableCell>{formatCurrency(r.discounts)}</TableCell>
+
+                        <TableCell>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            <Chip
+                              label={r.advanceRequested ? 'Con Adelanto' : 'Sin Adelanto'}
+                              size="small"
+                              sx={{
+                                ...chipSx,
+                                ...(r.advanceRequested
+                                  ? { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }
+                                  : { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' }),
+                              }}
+                            />
+                            <Typography variant="caption">{formatCurrency(r.advanceAmount)}</Typography>
+                          </Box>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={700} color="success.main">
+                            {formatCurrency(netToPay)}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2">{formatCurrency(weekly)}</Typography>
+                        </TableCell>
+
+                        <TableCell align="right">
+                          <Tooltip title="Ver detalle">
+                            <IconButton
+                              size="small"
+                              sx={{ color: 'success.main' }}
+                              onClick={() => navigate(`/payroll/${r._id}`)}
+                            >
+                              <ViewIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Editar">
+                            <IconButton
+                              size="small"
+                              sx={{ color: 'warning.main' }}
+                              onClick={() => navigate(`/payroll/edit/${r._id}`)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Eliminar">
+                            <IconButton
+                              size="small"
+                              sx={{ color: 'error.main' }}
+                              onClick={() => handleDelete(r._id)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
                     );
                   })
                 )}
-              </tbody>
+              </TableBody>
             </Table>
-            </div>
-            </SectionCard>
-            </div>
-            </div>
-          </div>
-
-          {/* Vista móvil */}
-          <div className="d-md-none has-mobile-cta">
-            {filteredReceipts.length === 0 ? (
-              <p className="text-center">No hay recibos registrados</p>
-            ) : (
-              filteredReceipts.map((r) => {
-                const dim = daysInMonth(r.period);
-                const netToPay = Number(r.netAmount) || 0;
-                const advance = r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0;
-                const weekly = Math.round(((netToPay / dim) * 7) - advance);
-                return (
-                  <MobileCard
-                    key={r._id}
-                    title={r.employee ? `${r.employee.nombre} ${r.employee.apellido}` : 'Sin empleado'}
-                    subtitle={`Legajo: ${r.employee?.legajo || '-'}`}
-                    accentColor="#10b981"
-                    fields={[
-                      { label: 'Período', value: formatPeriod(r.period) },
-                      { label: 'Fecha de Pago', value: formatDate(r.paymentDate) },
-                      { label: 'Horas Extras', value: formatCurrency(r.extraHours) },
-                      { label: 'Otros Adicionales', value: formatCurrency(r.otherAdditions) },
-                      { label: 'Descuentos', value: formatCurrency(r.discounts) },
-                      { label: 'Monto Adelanto', value: formatCurrency(r.advanceAmount) },
-                      { label: 'Monto Semanal', value: formatCurrency(weekly) }
-                    ]}
-                    badges={[
-                      { 
-                        text: `Neto: ${formatCurrency(netToPay)}`, 
-                        soft: true,
-                        variant: 'success'
-                      },
-                      { 
-                        text: r.hasPresentismo ? 'Con Presentismo' : 'Sin Presentismo', 
-                        soft: true,
-                        variant: r.hasPresentismo ? 'success' : 'danger'
-                      },
-                      { 
-                        text: r.signed ? 'Firmado' : 'Sin Firmar', 
-                        soft: true,
-                        variant: r.signed ? 'info' : 'warning'
-                      }
-                    ]}
-                    actions={[
-                      {
-                        text: 'Ver',
-                        variant: 'success',
-                        size: 'sm',
-                        onClick: () => navigate(`/payroll/${r._id}`)
-                      },
-                      {
-                        text: <Pencil size={16} />,
-                        variant: 'outline-primary',
-                        size: 'sm',
-                        onClick: () => navigate(`/payroll/edit/${r._id}`)
-                      },
-                      {
-                        text: <Trash2 size={16} />,
-                        variant: 'outline-danger',
-                        size: 'sm',
-                        onClick: () => handleDelete(r._id)
-                      }
-                    ]}
-                  />
-                );
-              })
-            )}
-          </div>
-        </>
-      )}
-    </Container>
+          </TableContainer>
+        )}
+      </Paper>
+    </Box>
   );
 };
 

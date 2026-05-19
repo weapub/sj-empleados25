@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
+import {
+  Box, Paper, Typography, Button, TextField, MenuItem, Switch,
+  FormControlLabel, Alert, CircularProgress, Grid,
+} from '@mui/material';
+import {
+  AccessTime as ClockIcon,
+  Save as SaveIcon,
+  ArrowBack as BackIcon,
+  UploadFile as UploadIcon,
+} from '@mui/icons-material';
 import DocumentViewerModal from '../common/DocumentViewerModal';
 import { getEmployees, createAttendance, getAttendances, updateAttendance } from '../../services/api';
 
@@ -8,13 +17,15 @@ const AttendanceForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [currentDocUrl, setCurrentDocUrl] = useState('');
   const [viewerOpen, setViewerOpen] = useState(false);
-  
+  const [selectedFileName, setSelectedFileName] = useState('');
+
   const [formData, setFormData] = useState({
     employeeId: '',
     date: new Date().toISOString().split('T')[0],
@@ -29,28 +40,21 @@ const AttendanceForm = () => {
     vacationsStart: '',
     vacationsEnd: '',
     suspensionDays: '',
-    returnToWorkDate: ''
+    returnToWorkDate: '',
   });
 
   useEffect(() => {
     const loadEmployees = async () => {
       try {
         const data = await getEmployees();
-        // getEmployees puede devolver { data, total, page, totalPages } o un array
-        const employeesArray = Array.isArray(data)
-          ? data
-          : (data && Array.isArray(data.data))
-            ? data.data
-            : [];
-        setEmployees(employeesArray);
-        // No marcar loading false aún si estamos en edición; esperemos a cargar el registro
+        const arr = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        setEmployees(arr);
         if (!isEdit) setLoading(false);
-      } catch (err) {
+      } catch (_) {
         setError('Error al cargar los empleados');
         setLoading(false);
       }
     };
-
     loadEmployees();
   }, [isEdit]);
 
@@ -60,7 +64,8 @@ const AttendanceForm = () => {
       if (!isEdit) return;
       try {
         const all = await getAttendances();
-        const att = all.find((a) => a._id === id);
+        const arr = Array.isArray(all) ? all : (Array.isArray(all?.data) ? all.data : []);
+        const att = arr.find((a) => a._id === id);
         if (!att) {
           setError('Registro de asistencia no encontrado');
           setLoading(false);
@@ -80,10 +85,10 @@ const AttendanceForm = () => {
           vacationsStart: toYMD(att.vacationsStart),
           vacationsEnd: toYMD(att.vacationsEnd),
           suspensionDays: att.suspensionDays ?? '',
-          returnToWorkDate: toYMD(att.returnToWorkDate)
+          returnToWorkDate: toYMD(att.returnToWorkDate),
         });
         setCurrentDocUrl(att.justificationDocument || '');
-      } catch (err) {
+      } catch (_) {
         setError('Error al cargar el registro de asistencia');
       } finally {
         setLoading(false);
@@ -96,54 +101,35 @@ const AttendanceForm = () => {
   useEffect(() => {
     setFormData(prev => {
       const next = { ...prev };
-      if (prev.type !== 'tardanza') {
-        next.scheduledEntry = '';
-        next.actualEntry = '';
-      }
-      if (prev.type !== 'licencia medica') {
-        next.certificateExpiry = '';
-      }
-      if (prev.type !== 'vacaciones') {
-        next.vacationsStart = '';
-        next.vacationsEnd = '';
-      }
-      if (prev.type !== 'sancion recibida') {
-        next.suspensionDays = '';
-        // Mantener returnToWorkDate si viene de licencia; si no aplica, limpiarlo
-        next.returnToWorkDate = '';
-      }
+      if (prev.type !== 'tardanza') { next.scheduledEntry = ''; next.actualEntry = ''; }
+      if (prev.type !== 'licencia medica') { next.certificateExpiry = ''; }
+      if (prev.type !== 'vacaciones') { next.vacationsStart = ''; next.vacationsEnd = ''; }
+      if (prev.type !== 'sancion recibida') { next.suspensionDays = ''; next.returnToWorkDate = ''; }
       return next;
     });
   }, [formData.type]);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    
     if (type === 'file') {
-      setFormData({
-        ...formData,
-        [name]: files[0]
-      });
+      setFormData(prev => ({ ...prev, [name]: files[0] }));
+      setSelectedFileName(files[0]?.name || '');
     } else if (type === 'checkbox') {
-      setFormData({
-        ...formData,
-        [name]: checked
-      });
+      setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleSwitchChange = (name) => (e) => {
+    setFormData(prev => ({ ...prev, [name]: e.target.checked }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    
     try {
-      // Crear FormData para enviar archivos
       const submitData = new FormData();
       submitData.append('employeeId', formData.employeeId);
       submitData.append('date', formData.date);
@@ -158,11 +144,8 @@ const AttendanceForm = () => {
       if (formData.vacationsEnd) submitData.append('vacationsEnd', formData.vacationsEnd);
       if (formData.suspensionDays) submitData.append('suspensionDays', formData.suspensionDays);
       if (formData.returnToWorkDate) submitData.append('returnToWorkDate', formData.returnToWorkDate);
-      
-      if (formData.justificationDocument) {
-        submitData.append('justificationDocument', formData.justificationDocument);
-      }
-      
+      if (formData.justificationDocument) submitData.append('justificationDocument', formData.justificationDocument);
+
       if (isEdit) {
         await updateAttendance(id, submitData);
         setSuccess('Registro de asistencia actualizado correctamente');
@@ -170,293 +153,322 @@ const AttendanceForm = () => {
         await createAttendance(submitData);
         setSuccess('Registro de asistencia creado correctamente');
       }
-      
-      // Resetear formulario
-      setFormData({
-        employeeId: '',
-        date: new Date().toISOString().split('T')[0],
-        type: 'inasistencia',
-        justified: false,
-        lostPresentismo: true,
-        comments: '',
-        justificationDocument: null,
-        scheduledEntry: '',
-        actualEntry: '',
-        certificateExpiry: '',
-        vacationsStart: '',
-        vacationsEnd: '',
-        suspensionDays: '',
-        returnToWorkDate: ''
-      });
-      
-      // Redirigir después de 2 segundos
-      setTimeout(() => {
-        navigate('/attendance');
-      }, 2000);
-      
+      navigate('/attendance');
     } catch (err) {
       const serverMsg = err?.response?.data?.msg || err?.message;
-      setError(serverMsg || (isEdit ? 'Error al actualizar el registro de asistencia' : 'Error al crear el registro de asistencia'));
+      setError(serverMsg || (isEdit ? 'Error al actualizar el registro' : 'Error al crear el registro'));
     }
   };
 
-  if (loading) return <div className="p-3">Cargando...</div>;
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
-    <div className="container-fluid px-2 md:px-4 space-y-4">
-      <Card className="shadow-sm border border-slate-200/70">
-        <Card.Header>
-          <h4 className="mb-0 text-xl font-semibold tracking-tight">{isEdit ? 'Editar Inasistencia/Tardanza' : 'Registrar Inasistencia/Tardanza'}</h4>
-        </Card.Header>
-        <Card.Body className="pt-3">
-          {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{success}</Alert>}
-          
-          <Form onSubmit={handleSubmit}>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Empleado</Form.Label>
-                <Form.Select 
-                  name="employeeId"
-                  value={formData.employeeId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Seleccionar Empleado</option>
-                  {(Array.isArray(employees) ? employees : []).map(employee => (
-                    <option key={employee._id} value={employee._id}>
-                      {employee.nombre} {employee.apellido} - Legajo: {employee.legajo}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Fecha</Form.Label>
-                <Form.Control
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Tipo</Form.Label>
-                <Form.Select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="inasistencia">Inasistencia</option>
-                  <option value="tardanza">Tardanza</option>
-                  <option value="licencia medica">Licencia Médica</option>
-                  <option value="vacaciones">Vacaciones</option>
-                  <option value="sancion recibida">Sanción Recibida</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Certificado Médico</Form.Label>
-                <Form.Control
-                  type="file"
-                  name="justificationDocument"
-                  onChange={handleChange}
-                  accept=".jpg,.jpeg,.png,.pdf"
-                />
-                <Form.Text className="text-muted">
-                  Formatos permitidos: JPG, PNG, PDF (máx. 5MB)
-                </Form.Text>
-                {currentDocUrl && (
-                  <div className="mt-2">
-                    <Button variant="outline-secondary" size="sm" className="shadow-sm" onClick={() => setViewerOpen(true)}>
-                      Ver certificado actual
-                    </Button>
-                  </div>
-                )}
-              </Form.Group>
-            </Col>
-          </Row>
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ClockIcon sx={{ fontSize: 22 }} />
+          {isEdit ? 'Editar Inasistencia / Tardanza' : 'Registrar Inasistencia / Tardanza'}
+        </Typography>
+      </Box>
 
-          {formData.type === 'tardanza' && (
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Hora de entrada establecida</Form.Label>
-                  <Form.Control
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+
+      <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider' }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+          <Grid container spacing={2.5}>
+
+            {/* Empleado */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                label="Empleado *"
+                name="employeeId"
+                value={formData.employeeId}
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="">Seleccionar Empleado</MenuItem>
+                {employees.map(emp => (
+                  <MenuItem key={emp._id} value={emp._id}>
+                    {emp.nombre} {emp.apellido} — Legajo: {emp.legajo}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            {/* Fecha */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha *"
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+
+            {/* Tipo */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                label="Tipo *"
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="inasistencia">Inasistencia</MenuItem>
+                <MenuItem value="tardanza">Tardanza</MenuItem>
+                <MenuItem value="licencia medica">Licencia Médica</MenuItem>
+                <MenuItem value="vacaciones">Vacaciones</MenuItem>
+                <MenuItem value="sancion recibida">Sanción Recibida</MenuItem>
+              </TextField>
+            </Grid>
+
+            {/* Certificado */}
+            <Grid item xs={12} md={6}>
+              <Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                  Certificado médico (JPG, PNG, PDF — máx. 5 MB)
+                </Typography>
+                <Button
+                  component="label"
+                  variant="outlined"
+                  size="small"
+                  startIcon={<UploadIcon />}
+                  sx={{ borderRadius: 2 }}
+                >
+                  {selectedFileName || 'Seleccionar archivo'}
+                  <input
+                    type="file"
+                    name="justificationDocument"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    hidden
+                    onChange={handleChange}
+                  />
+                </Button>
+                {currentDocUrl && (
+                  <Button
+                    size="small"
+                    variant="text"
+                    sx={{ ml: 1 }}
+                    onClick={() => setViewerOpen(true)}
+                  >
+                    Ver actual
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+
+            {/* Campos condicionales: Tardanza */}
+            {formData.type === 'tardanza' && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Hora de entrada establecida *"
                     type="time"
                     name="scheduledEntry"
                     value={formData.scheduledEntry}
                     onChange={handleChange}
                     required
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Hora de entrada registrada</Form.Label>
-                  <Form.Control
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Hora de entrada registrada *"
                     type="time"
                     name="actualEntry"
                     value={formData.actualEntry}
                     onChange={handleChange}
                     required
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
-                </Form.Group>
-              </Col>
-            </Row>
-          )}
+                </Grid>
+              </>
+            )}
 
-          {formData.type === 'licencia medica' && (
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Vencimiento del certificado</Form.Label>
-                  <Form.Control
+            {/* Campos condicionales: Licencia Médica */}
+            {formData.type === 'licencia medica' && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Vencimiento del certificado"
                     type="date"
                     name="certificateExpiry"
                     value={formData.certificateExpiry}
                     onChange={handleChange}
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de reincorporación</Form.Label>
-                  <Form.Control
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Fecha de reincorporación"
                     type="date"
                     name="returnToWorkDate"
                     value={formData.returnToWorkDate}
                     onChange={handleChange}
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
-                </Form.Group>
-              </Col>
-            </Row>
-          )}
+                </Grid>
+              </>
+            )}
 
-          {formData.type === 'vacaciones' && (
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Inicio de vacaciones</Form.Label>
-                  <Form.Control
+            {/* Campos condicionales: Vacaciones */}
+            {formData.type === 'vacaciones' && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Inicio de vacaciones"
                     type="date"
                     name="vacationsStart"
                     value={formData.vacationsStart}
                     onChange={handleChange}
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fin de vacaciones</Form.Label>
-                  <Form.Control
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Fin de vacaciones"
                     type="date"
                     name="vacationsEnd"
                     value={formData.vacationsEnd}
                     onChange={handleChange}
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
-                </Form.Group>
-              </Col>
-            </Row>
-          )}
+                </Grid>
+              </>
+            )}
 
-          {formData.type === 'sancion recibida' && (
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Días de suspensión</Form.Label>
-                  <Form.Control
+            {/* Campos condicionales: Sanción */}
+            {formData.type === 'sancion recibida' && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Días de suspensión"
                     type="number"
-                    min="0"
                     name="suspensionDays"
                     value={formData.suspensionDays}
                     onChange={handleChange}
+                    slotProps={{ input: { inputProps: { min: 0 } } }}
                   />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de reincorporación</Form.Label>
-                  <Form.Control
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Fecha de reincorporación"
                     type="date"
                     name="returnToWorkDate"
                     value={formData.returnToWorkDate}
                     onChange={handleChange}
+                    slotProps={{ inputLabel: { shrink: true } }}
                   />
-                </Form.Group>
-              </Col>
-            </Row>
-          )}
-          
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Check
-                  type="checkbox"
-                  label="Justificado"
-                  name="justified"
-                  checked={formData.justified}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            </Col>
-            
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Check
-                  type="checkbox"
-                  label="Pierde Presentismo"
-                  name="lostPresentismo"
-                  checked={formData.lostPresentismo}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          
-          <Form.Group className="mb-3">
-            <Form.Label>Comentarios</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="comments"
-              value={formData.comments}
-              onChange={handleChange}
-            />
-          </Form.Group>
-          
-          <div className="d-flex justify-content-end mt-2">
-            <Button variant="secondary" className="me-2" onClick={() => navigate('/attendance')}>
-              Cancelar
-            </Button>
-            <Button variant="primary" type="submit">
-              Guardar
-            </Button>
-          </div>
-        </Form>
-        </Card.Body>
-        {currentDocUrl && (
-          <DocumentViewerModal
-            show={viewerOpen}
-            onHide={() => setViewerOpen(false)}
-            url={currentDocUrl}
-            title="Certificado médico"
-          />
-        )}
-      </Card>
-    </div>
+                </Grid>
+              </>
+            )}
+
+            {/* Switches */}
+            <Grid item xs={12} md={6}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.justified}
+                    onChange={handleSwitchChange('justified')}
+                    color="success"
+                  />
+                }
+                label="Justificado"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.lostPresentismo}
+                    onChange={handleSwitchChange('lostPresentismo')}
+                    color="error"
+                  />
+                }
+                label="Pierde Presentismo"
+              />
+            </Grid>
+
+            {/* Comentarios */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Comentarios"
+                name="comments"
+                value={formData.comments}
+                onChange={handleChange}
+                multiline
+                rows={3}
+              />
+            </Grid>
+
+            {/* Botones */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<BackIcon />}
+                  onClick={() => navigate('/attendance')}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="contained"
+                  type="submit"
+                  startIcon={<SaveIcon />}
+                  sx={{ borderRadius: 2.5 }}
+                >
+                  {isEdit ? 'Actualizar' : 'Guardar'}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </Paper>
+
+      {currentDocUrl && (
+        <DocumentViewerModal
+          show={viewerOpen}
+          onHide={() => setViewerOpen(false)}
+          url={currentDocUrl}
+          title="Certificado médico"
+        />
+      )}
+    </Box>
   );
 };
 

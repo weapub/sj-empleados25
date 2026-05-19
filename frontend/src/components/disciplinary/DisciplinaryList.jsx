@@ -1,367 +1,308 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Badge, Alert } from 'react-bootstrap';
-import { Pencil, Trash2, Eye, Plus, Gavel } from 'lucide-react';
+import {
+  Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, Chip, IconButton, Tooltip, Typography, Button,
+  CircularProgress, Alert, TextField, MenuItem,
+} from '@mui/material';
+import {
+  Gavel as GavelIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ArrowUpward as AscIcon,
+  ArrowDownward as DescIcon,
+  Visibility as ViewIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { getAllDisciplinaries, deleteDisciplinary } from '../../services/api';
-import { formatDate } from '../../utils/formatters';
-import { Link, useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import DocumentViewerModal from '../common/DocumentViewerModal';
-import PageHeader from '../common/PageHeader';
-import SectionCard from '../common/SectionCard';
-import MobileCard from '../common/MobileCard';
+import Swal from 'sweetalert2';
+
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
+
+const chipSx = { borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600 };
+
+const typeChipSx = (type) => {
+  switch (type) {
+    case 'verbal': return { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' };
+    case 'formal': return { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' };
+    case 'grave':  return { bgcolor: 'rgba(255,76,81,0.12)',  color: '#FF4C51' };
+    default:       return { bgcolor: 'rgba(138,141,147,0.12)',color: '#8A8D93' };
+  }
+};
+
+const typeLabel = (type) => {
+  switch (type) {
+    case 'verbal': return 'Verbal';
+    case 'formal': return 'Formal';
+    case 'grave':  return 'Grave';
+    default:       return type || '—';
+  }
+};
+
+const SORT_OPTIONS = [
+  { value: 'date',             label: 'Fecha' },
+  { value: 'employee',         label: 'Empleado' },
+  { value: 'type',             label: 'Tipo' },
+  { value: 'signed',           label: 'Firmado' },
+  { value: 'durationDays',     label: 'Duración' },
+  { value: 'returnToWorkDate', label: 'Fecha regreso' },
+];
 
 const DisciplinaryList = () => {
+  const navigate = useNavigate();
   const [disciplinaries, setDisciplinaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
-
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
-  const [serverTotal, setServerTotal] = useState();
-  const [serverTotalPages, setServerTotalPages] = useState();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage] = useState(50);
+  const [serverTotal, setServerTotal] = useState(0);
   const [sortBy, setSortBy] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
+  const [viewerUrl, setViewerUrl] = useState(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
-  useEffect(() => {
-    loadDisciplinaries();
-  }, [page, pageSize, sortBy, sortDir]);
-
-  const loadDisciplinaries = async () => {
+  const loadDisciplinaries = async (targetPage = page) => {
     try {
       setLoading(true);
-      const response = await getAllDisciplinaries({ page, limit: pageSize, sortBy, sortDir });
+      const response = await getAllDisciplinaries({
+        page: targetPage + 1,
+        limit: rowsPerPage,
+        sortBy,
+        sortDir,
+      });
       if (Array.isArray(response)) {
         setDisciplinaries(response);
-        setServerTotal(undefined);
-        setServerTotalPages(undefined);
+        setServerTotal(response.length);
       } else {
         setDisciplinaries(Array.isArray(response.data) ? response.data : []);
-        setServerTotal(response.total);
-        setServerTotalPages(response.totalPages);
+        setServerTotal(response.total || 0);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error('Error al cargar medidas disciplinarias:', error);
-      const backendMsg = error?.response?.data?.message || error?.response?.data?.msg;
-      setError(backendMsg || 'No se pudieron cargar las medidas disciplinarias');
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.response?.data?.msg;
+      setError(msg || 'No se pudieron cargar las medidas disciplinarias');
+    } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadDisciplinaries(page);
+  }, [page, sortBy, sortDir]);
 
   const handleDelete = (id) => {
     Swal.fire({
       title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer',
+      text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      confirmButtonColor: '#FF4C51',
+      cancelButtonColor: '#8A8D93',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await deleteDisciplinary(id);
-          Swal.fire('Eliminado', 'La medida disciplinaria ha sido eliminada', 'success');
-          loadDisciplinaries();
-        } catch (error) {
-          console.error('Error al eliminar:', error);
-          Swal.fire('Error', 'No se pudo eliminar la medida disciplinaria', 'error');
-        }
+      if (!result.isConfirmed) return;
+      try {
+        await deleteDisciplinary(id);
+        Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1500, showConfirmButton: false });
+        loadDisciplinaries(page);
+      } catch (_) {
+        Swal.fire({ icon: 'error', title: 'Error al eliminar' });
       }
     });
   };
 
-  const getBadgeColor = (type) => {
-    switch (type) {
-      case 'verbal':
-        return 'warning';
-      case 'formal':
-        return 'primary';
-      case 'grave':
-        return 'danger';
-      default:
-        return 'secondary';
-    }
-  };
-
-  const getTypeText = (type) => {
-    switch (type) {
-      case 'verbal':
-        return 'Verbal';
-      case 'formal':
-        return 'Formal';
-      case 'grave':
-        return 'Grave';
-      default:
-        return type;
-    }
-  };
-
-  const [viewerUrl, setViewerUrl] = useState(null);
-  const [viewerOpen, setViewerOpen] = useState(false);
-
-  const openViewer = (url) => {
-    setViewerUrl(url);
-    setViewerOpen(true);
-  };
-
-  const closeViewer = () => {
-    setViewerOpen(false);
-    setViewerUrl(null);
-  };
+  const toggleSortDir = () => setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
 
   return (
-    <Container fluid className="mt-4 px-0 md:px-4">
-      <PageHeader
-        icon={<Gavel size={20} />}
-        title="Medidas Disciplinarias"
-        subtitle="Registre, consulte y gestione las medidas disciplinarias"
-        accentColor="#ef4444"
-        actions={(
-          <Button 
-            variant="primary"
-            className="shadow-sm"
-            onClick={() => navigate('/disciplinary/new')}
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <GavelIcon sx={{ fontSize: 22 }} />
+            Medidas Disciplinarias
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>
+            Registre, consulte y gestione las medidas disciplinarias
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          sx={{ borderRadius: 2.5 }}
+          onClick={() => navigate('/disciplinary/new')}
+        >
+          Nueva Medida
+        </Button>
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
+
+      {/* Tabla */}
+      <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden', borderColor: 'divider' }}>
+        {/* Barra de ordenamiento */}
+        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Typography variant="body2" color="text.secondary">Ordenar por:</Typography>
+          <TextField
+            select
+            size="small"
+            value={sortBy}
+            onChange={(e) => { setSortBy(e.target.value); setPage(0); }}
+            sx={{ minWidth: 160 }}
           >
-            <Plus size={16} /> <span>Nueva Medida</span>
+            {SORT_OPTIONS.map(o => (
+              <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+            ))}
+          </TextField>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={toggleSortDir}
+            startIcon={sortDir === 'asc' ? <AscIcon /> : <DescIcon />}
+          >
+            {sortDir === 'asc' ? 'Ascendente' : 'Descendente'}
           </Button>
+        </Box>
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                  <TableCell>Empleado</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Hora</TableCell>
+                  <TableCell>Tipo</TableCell>
+                  <TableCell>Días susp.</TableCell>
+                  <TableCell>Reincorporación</TableCell>
+                  <TableCell>Firmado</TableCell>
+                  <TableCell>Fecha firma</TableCell>
+                  <TableCell>Documento</TableCell>
+                  <TableCell align="right">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {disciplinaries.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                      No hay medidas disciplinarias registradas
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  disciplinaries.map((d) => (
+                    <TableRow key={d._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                      <TableCell>
+                        {d.employee ? (
+                          <>
+                            <Typography variant="body2" fontWeight={600}>
+                              {d.employee.nombre} {d.employee.apellido}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Legajo: {d.employee.legajo || '—'}
+                            </Typography>
+                          </>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">Empleado no disponible</Typography>
+                        )}
+                      </TableCell>
+
+                      <TableCell>{formatDate(d.date)}</TableCell>
+                      <TableCell>{d.time || '—'}</TableCell>
+
+                      <TableCell>
+                        <Chip
+                          label={typeLabel(d.type)}
+                          size="small"
+                          sx={{ ...chipSx, ...typeChipSx(d.type) }}
+                        />
+                      </TableCell>
+
+                      <TableCell>{d.durationDays ?? '—'}</TableCell>
+                      <TableCell>{formatDate(d.returnToWorkDate)}</TableCell>
+
+                      <TableCell>
+                        <Chip
+                          label={d.signed ? 'Firmado' : 'Sin firmar'}
+                          size="small"
+                          sx={{
+                            ...chipSx,
+                            ...(d.signed
+                              ? { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' }
+                              : { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }),
+                          }}
+                        />
+                      </TableCell>
+
+                      <TableCell>{formatDate(d.signedDate)}</TableCell>
+
+                      <TableCell>
+                        {d.document ? (
+                          <Tooltip title="Ver documento">
+                            <IconButton
+                              size="small"
+                              sx={{ color: 'success.main' }}
+                              onClick={() => { setViewerUrl(d.document); setViewerOpen(true); }}
+                            >
+                              <ViewIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Typography variant="caption" color="text.disabled">No disponible</Typography>
+                        )}
+                      </TableCell>
+
+                      <TableCell align="right">
+                        <Tooltip title="Editar">
+                          <IconButton
+                            size="small"
+                            sx={{ color: 'warning.main' }}
+                            onClick={() => navigate(`/disciplinary/edit/${d._id}`)}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Eliminar">
+                          <IconButton
+                            size="small"
+                            sx={{ color: 'error.main' }}
+                            onClick={() => handleDelete(d._id)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
-      />
 
-      {error && (
-        <Alert variant="danger" className="mb-3">{error}</Alert>
-      )}
+        <TablePagination
+          component="div"
+          count={serverTotal}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[]}
+          labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+          sx={{ borderTop: '1px solid', borderColor: 'divider' }}
+        />
+      </Paper>
 
-      {loading ? (
-        <p className="p-3">Cargando...</p>
-      ) : (
-        <>
-          {/* Vista de escritorio */}
-          <div className="d-none d-md-block">
-          <div className="section-box">
-            <div className="section-band" />
-            <div className="p-3 p-md-4">
-<SectionCard title="Listado" icon={<Gavel size={20} />} accentColor="#ef4444"> 
-              <div className="d-flex justify-content-end align-items-center mb-2 gap-2">
-                <label className="text-muted small mb-0">Ordenar por:</label>
-                <select
-                  className="form-select form-select-sm w-auto"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="date">Fecha</option>
-                  <option value="employee">Empleado</option>
-                  <option value="type">Tipo</option>
-                  <option value="signed">Firmado</option>
-                  <option value="durationDays">Duración</option>
-                  <option value="returnToWorkDate">Fecha regreso</option>
-                </select>
-                <Button
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={() => setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
-                  title="Cambiar dirección"
-                >
-                  {sortDir === 'asc' ? 'Asc ↑' : 'Desc ↓'}
-                </Button>
-              </div>
-              <div className="table-responsive">
-                <Table hover responsive className="disciplinary-table mb-0 align-middle text-sm">
-                  <thead>
-                    <tr>
-                      <th>Empleado</th>
-                      <th>Fecha</th>
-                      <th>Hora</th>
-                      <th>Tipo</th>
-                      <th>Días suspensión</th>
-                      <th>Reincorporación</th>
-                      <th>Firmado</th>
-                      <th>Fecha de Firma</th>
-                      <th>Documento</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {disciplinaries.length > 0 ? (
-                      disciplinaries.map((disciplinary) => (
-                        <tr key={disciplinary._id}>
-                          <td>
-                            {disciplinary.employee ? (
-                              <>
-                                <div className="fw-semibold text-truncate" title={`${disciplinary.employee.nombre} ${disciplinary.employee.apellido}`}>
-                                  {disciplinary.employee.nombre} {disciplinary.employee.apellido}
-                                </div>
-                                <small className="text-muted">Legajo: {disciplinary.employee.legajo || '-'}</small>
-                              </>
-                            ) : 'Empleado no disponible'}
-                          </td>
-                          <td>{formatDate(disciplinary.date)}</td>
-                          <td>{disciplinary.time || '-'}</td>
-                          <td>
-                            <span className={`badge badge-soft badge-soft-${getBadgeColor(disciplinary.type)}`}>
-                              <span className="dot"></span>
-                              {getTypeText(disciplinary.type)}
-                            </span>
-                          </td>
-                          <td>{disciplinary.durationDays ?? '-'}</td>
-                          <td>{disciplinary.returnToWorkDate ? formatDate(disciplinary.returnToWorkDate) : '-'}</td>
-                          <td>{disciplinary.signed ? 'Sí' : 'No'}</td>
-                          <td>{disciplinary.signedDate ? formatDate(disciplinary.signedDate) : '-'}</td>
-                          <td>
-                            {disciplinary.document ? (
-                              <Button 
-                                variant="success" 
-                                size="sm"
-                                className="shadow-sm"
-                              onClick={() => openViewer(disciplinary.document)}
-                              >
-                                <Eye size={16} /> <span>Ver</span>
-                              </Button>
-                            ) : (
-                              'No disponible'
-                            )}
-                          </td>
-                          <td>
-                            <Button 
-                              variant="outline-primary" 
-                              size="sm" 
-                              className="me-2 shadow-sm"
-                              onClick={() => navigate(`/disciplinary/edit/${disciplinary._id}`)}
-                            >
-                              <Pencil size={16} />
-                            </Button>
-                            <Button 
-                              variant="outline-danger" 
-                              size="sm"
-                              className="shadow-sm"
-                              onClick={() => handleDelete(disciplinary._id)}
-                            >
-                              <Trash2 size={16} />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="10" className="text-center">
-                          {error ? 'Error al cargar datos' : 'No hay medidas disciplinarias registradas'}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-                <div className="d-flex justify-content-between align-items-center mt-2">
-                  <div className="text-muted small">
-                    {typeof serverTotal === 'number' ? `Total: ${serverTotal}` : ''}
-                  </div>
-                  <div>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      className="me-2"
-                      disabled={page <= 1}
-                      onClick={() => setPage(Math.max(page - 1, 1))}
-                    >
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      disabled={typeof serverTotalPages === 'number' ? page >= serverTotalPages : false}
-                      onClick={() => setPage(page + 1)}
-                    >
-                      Siguiente
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              </SectionCard>
-            </div>
-          </div>
-          </div>
-
-          {/* Vista móvil */}
-          <div className="d-md-none p-0">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <div className="d-flex align-items-center gap-2">
-                <label className="text-muted small mb-0">Ordenar por:</label>
-                <select
-                  className="form-select form-select-sm w-auto"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="date">Fecha</option>
-                  <option value="employee">Empleado</option>
-                  <option value="type">Tipo</option>
-                  <option value="signed">Firmado</option>
-                  <option value="durationDays">Duración</option>
-                  <option value="returnToWorkDate">Fecha regreso</option>
-                </select>
-              </div>
-              <Button
-                variant="outline-secondary"
-                size="sm"
-                onClick={() => setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
-                title="Cambiar dirección"
-              >
-                {sortDir === 'asc' ? 'Asc ↑' : 'Desc ↓'}
-              </Button>
-            </div>
-            {disciplinaries.length > 0 ? (
-              disciplinaries.map((d) => (
-                <MobileCard
-                  key={d._id}
-                  title={d.employee ? `${d.employee.nombre} ${d.employee.apellido}` : 'Empleado no disponible'}
-                  subtitle={`Legajo: ${d.employee?.legajo || '-'}`}
-                  accentColor="#ef4444"
-                  badges={[{ text: getTypeText(d.type) || 'N/A', variant: getBadgeColor(d.type) }]}
-                  fields={[
-                    { label: 'Fecha', value: formatDate(d.date) },
-                    { label: 'Hora', value: d.time || '-' },
-                    { label: 'Días suspensión', value: d.durationDays ?? '-' },
-                    { label: 'Reincorporación', value: d.returnToWorkDate ? formatDate(d.returnToWorkDate) : '-' },
-                    { label: 'Firmado', value: d.signed ? 'Sí' : 'No' },
-                    { label: 'Fecha firma', value: d.signedDate ? formatDate(d.signedDate) : '-' },
-                    { label: 'Documento', value: d.document ? 'Disponible' : 'No disponible' },
-                  ]}
-                  actions={[
-                    d.document ? {
-                      text: 'Ver Documento',
-                      variant: 'success',
-                      size: 'sm',
-                      onClick: () => openViewer(d.document)
-                    } : null,
-                    {
-                      text: <Pencil size={16} />, 
-                      variant: 'outline-primary',
-                      size: 'sm',
-                      onClick: () => navigate(`/disciplinary/edit/${d._id}`)
-                    },
-                    {
-                      text: <Trash2 size={16} />, 
-                      variant: 'outline-danger',
-                      size: 'sm',
-                      onClick: () => handleDelete(d._id)
-                    }
-                  ].filter(Boolean)}
-                />
-              ))
-            ) : (
-              <div className="alert alert-light">No se encontraron medidas disciplinarias</div>
-            )}
-          </div>
-        </>
-      )}
-
-      <DocumentViewerModal 
+      <DocumentViewerModal
         show={viewerOpen}
-        onHide={closeViewer}
+        onHide={() => { setViewerOpen(false); setViewerUrl(null); }}
         url={viewerUrl}
         title="Documento de medida disciplinaria"
       />
-    </Container>
+    </Box>
   );
 };
 

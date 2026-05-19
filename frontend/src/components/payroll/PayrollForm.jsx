@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaSave, FaArrowLeft } from 'react-icons/fa';
+import {
+  Box, Paper, Typography, Button, TextField, MenuItem, Switch,
+  FormControlLabel, CircularProgress, Grid,
+} from '@mui/material';
+import {
+  Receipt as ReceiptIcon,
+  Save as SaveIcon,
+  ArrowBack as BackIcon,
+} from '@mui/icons-material';
 import Swal from 'sweetalert2';
 import { getEmployees, createPayrollReceipt, updatePayrollReceipt, getPayrollReceiptById } from '../../services/api';
 
@@ -18,11 +25,13 @@ const PayrollForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     employeeId: '',
-    period: new Date().toISOString().slice(0,7), // YYYY-MM
+    period: new Date().toISOString().slice(0, 7),
     paymentDate: new Date().toISOString().split('T')[0],
     signed: false,
     signedDate: '',
@@ -33,18 +42,16 @@ const PayrollForm = () => {
     advanceRequested: false,
     advanceDate: '',
     advanceAmount: 0,
-    netAmount: 0
+    netAmount: 0,
   });
 
   useEffect(() => {
     const loadEmployees = async () => {
       try {
-        const resp = await getEmployees(); // { data, total, page, totalPages }
-        const list = Array.isArray(resp?.data) ? resp.data : [];
+        const resp = await getEmployees();
+        const list = Array.isArray(resp?.data) ? resp.data : (Array.isArray(resp) ? resp : []);
         setEmployees(list);
-      } catch (err) {
-        console.error('Error al cargar empleados:', err);
-      }
+      } catch (_) {}
     };
     loadEmployees();
   }, []);
@@ -70,8 +77,8 @@ const PayrollForm = () => {
           advanceAmount: Number(r.advanceAmount) || 0,
           netAmount: Number(r.netAmount) || 0,
         });
-      } catch (err) {
-        console.error('Error al cargar recibo:', err);
+      } catch (_) {
+        Swal.fire('Error', 'No se pudo cargar el recibo', 'error');
       } finally {
         setLoading(false);
       }
@@ -80,14 +87,23 @@ const PayrollForm = () => {
   }, [isEdit, id]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
-      setFormData({ ...formData, [name]: checked });
-    } else if (name === 'extraHours' || name === 'otherAdditions' || name === 'discounts' || name === 'advanceAmount' || name === 'netAmount') {
-      setFormData({ ...formData, [name]: Number(value) });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    const { name, value } = e.target;
+    const numericFields = ['extraHours', 'otherAdditions', 'discounts', 'advanceAmount', 'netAmount'];
+    setFormData(prev => ({
+      ...prev,
+      [name]: numericFields.includes(name) ? Number(value) : value,
+    }));
+  };
+
+  const handleSwitchChange = (name) => (e) => {
+    setFormData(prev => ({ ...prev, [name]: e.target.checked }));
+  };
+
+  const weeklyAmount = () => {
+    const dim = daysInMonth(formData.period);
+    const baseNet = Number(formData.netAmount) || 0;
+    const advance = formData.advanceRequested ? (Number(formData.advanceAmount) || 0) : 0;
+    return Math.round(((baseNet / dim) * 7) - advance);
   };
 
   const handleSubmit = async (e) => {
@@ -103,147 +119,260 @@ const PayrollForm = () => {
       if (!formData.advanceRequested) payload.advanceDate = '';
       if (isEdit) {
         await updatePayrollReceipt(id, payload);
-        Swal.fire('Actualizado', 'Recibo actualizado correctamente', 'success');
+        Swal.fire({ icon: 'success', title: 'Actualizado', timer: 1500, showConfirmButton: false });
       } else {
         await createPayrollReceipt(payload);
-        Swal.fire('Guardado', 'Recibo creado correctamente', 'success');
+        Swal.fire({ icon: 'success', title: 'Guardado', timer: 1500, showConfirmButton: false });
       }
       navigate('/payroll');
-    } catch (err) {
-      console.error('Error al guardar recibo:', err);
+    } catch (_) {
       Swal.fire('Error', 'No se pudo guardar el recibo', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const weeklyAmount = () => {
-    const dim = daysInMonth(formData.period);
-    const baseNet = Number(formData.netAmount) || 0;
-    const advance = formData.advanceRequested ? (Number(formData.advanceAmount) || 0) : 0;
-    return Math.round(((baseNet / dim) * 7) - advance);
-  };
+  if (loading && isEdit && !formData.employeeId) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
-    <Container className="mt-4 px-2 md:px-4">
-      <Card className="shadow-sm border border-slate-200/70">
-        <Card.Body className="pt-3">
-          <h3 className="text-xl font-semibold tracking-tight">{isEdit ? 'Editar Recibo' : 'Nuevo Recibo'}</h3>
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Empleado</Form.Label>
-                  <Form.Select name="employeeId" value={formData.employeeId} onChange={handleChange} required>
-                    <option value="">Seleccione...</option>
-                    {employees.map(e => (
-                      <option key={e._id} value={e._id}>{e.nombre} {e.apellido} ({e.legajo})</option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Periodo (MM-YYYY)</Form.Label>
-                  <Form.Control type="month" name="period" value={formData.period} onChange={handleChange} required />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Pago</Form.Label>
-                  <Form.Control type="date" name="paymentDate" value={formData.paymentDate} onChange={handleChange} required />
-                </Form.Group>
-              </Col>
-            </Row>
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ReceiptIcon sx={{ fontSize: 22 }} />
+          {isEdit ? 'Editar Recibo de Sueldo' : 'Nuevo Recibo de Sueldo'}
+        </Typography>
+      </Box>
 
-            <Row>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Check type="checkbox" label="Firmado" name="signed" checked={formData.signed} onChange={handleChange} />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Firma</Form.Label>
-                  <Form.Control type="date" name="signedDate" value={formData.signedDate} onChange={handleChange} disabled={!formData.signed} />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Check type="checkbox" label="Presentismo" name="hasPresentismo" checked={formData.hasPresentismo} onChange={handleChange} />
-                </Form.Group>
-              </Col>
-            </Row>
+      <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider' }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+          <Grid container spacing={2.5}>
 
-            <Row>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Horas Extras (Monto)</Form.Label>
-                  <Form.Control type="number" name="extraHours" value={formData.extraHours} onChange={handleChange} />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Otros Adicionales</Form.Label>
-                  <Form.Control type="number" name="otherAdditions" value={formData.otherAdditions} onChange={handleChange} />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Descuentos</Form.Label>
-                  <Form.Control type="number" name="discounts" value={formData.discounts} onChange={handleChange} />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>NETO A COBRAR (Mensual)</Form.Label>
-                  <Form.Control type="number" name="netAmount" value={formData.netAmount} onChange={handleChange} required />
-                </Form.Group>
-              </Col>
-            </Row>
+            {/* Empleado */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                label="Empleado *"
+                name="employeeId"
+                value={formData.employeeId}
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="">Seleccione...</MenuItem>
+                {employees.map(emp => (
+                  <MenuItem key={emp._id} value={emp._id}>
+                    {emp.nombre} {emp.apellido} ({emp.legajo})
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
 
-            <Row>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Check type="checkbox" label="Adelanto solicitado" name="advanceRequested" checked={formData.advanceRequested} onChange={handleChange} />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Adelanto</Form.Label>
-                  <Form.Control type="date" name="advanceDate" value={formData.advanceDate} onChange={handleChange} disabled={!formData.advanceRequested} />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Monto del Adelanto</Form.Label>
-                  <Form.Control type="number" name="advanceAmount" value={formData.advanceAmount} onChange={handleChange} disabled={!formData.advanceRequested} />
-                </Form.Group>
-              </Col>
-            </Row>
+            {/* Período */}
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Período (MM-YYYY) *"
+                type="month"
+                name="period"
+                value={formData.period}
+                onChange={handleChange}
+                required
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
 
-            <Row>
-              <Col md={12}>
-                <Form.Group className="mb-2">
-                  <Form.Label>Monto semanal calculado</Form.Label>
-                  <Form.Control type="text" readOnly value={`$${weeklyAmount().toLocaleString('es-AR')}`} />
-                </Form.Group>
-                <small className="text-muted">Fórmula: (NETO A COBRAR / días del mes × 7) - Adelanto</small>
-              </Col>
-            </Row>
+            {/* Fecha de pago */}
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha de Pago *"
+                type="date"
+                name="paymentDate"
+                value={formData.paymentDate}
+                onChange={handleChange}
+                required
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
 
-            <div className="d-flex justify-content-between mt-4">
-              <Button variant="secondary" onClick={() => navigate('/payroll')}>
-                <FaArrowLeft /> <span>Volver</span>
-              </Button>
-              <Button variant="primary" type="submit" disabled={loading} className="shadow-sm">
-                <FaSave /> <span>{isEdit ? 'Actualizar' : 'Guardar'}</span>
-              </Button>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+            {/* Firmado switch */}
+            <Grid item xs={12} md={4}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.signed}
+                    onChange={handleSwitchChange('signed')}
+                    color="info"
+                  />
+                }
+                label="Firmado"
+              />
+            </Grid>
+
+            {/* Fecha firma */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha de Firma"
+                type="date"
+                name="signedDate"
+                value={formData.signedDate}
+                onChange={handleChange}
+                disabled={!formData.signed}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+
+            {/* Presentismo switch */}
+            <Grid item xs={12} md={4}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.hasPresentismo}
+                    onChange={handleSwitchChange('hasPresentismo')}
+                    color="success"
+                  />
+                }
+                label="Presentismo"
+              />
+            </Grid>
+
+            {/* Montos */}
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Horas Extras (Monto)"
+                type="number"
+                name="extraHours"
+                value={formData.extraHours}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Otros Adicionales"
+                type="number"
+                name="otherAdditions"
+                value={formData.otherAdditions}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Descuentos"
+                type="number"
+                name="discounts"
+                value={formData.discounts}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="NETO A COBRAR (Mensual) *"
+                type="number"
+                name="netAmount"
+                value={formData.netAmount}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+
+            {/* Adelanto switch */}
+            <Grid item xs={12} md={4}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.advanceRequested}
+                    onChange={handleSwitchChange('advanceRequested')}
+                    color="warning"
+                  />
+                }
+                label="Adelanto solicitado"
+              />
+            </Grid>
+
+            {/* Fecha adelanto */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha de Adelanto"
+                type="date"
+                name="advanceDate"
+                value={formData.advanceDate}
+                onChange={handleChange}
+                disabled={!formData.advanceRequested}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+
+            {/* Monto adelanto */}
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Monto del Adelanto"
+                type="number"
+                name="advanceAmount"
+                value={formData.advanceAmount}
+                onChange={handleChange}
+                disabled={!formData.advanceRequested}
+              />
+            </Grid>
+
+            {/* Monto semanal calculado (readonly) */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Monto semanal calculado"
+                value={`$${weeklyAmount().toLocaleString('es-AR')}`}
+                slotProps={{ input: { readOnly: true } }}
+                helperText="Fórmula: (NETO / días del mes × 7) − Adelanto"
+              />
+            </Grid>
+
+            {/* Botones */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<BackIcon />}
+                  onClick={() => navigate('/payroll')}
+                >
+                  Volver
+                </Button>
+                <Button
+                  variant="contained"
+                  type="submit"
+                  startIcon={<SaveIcon />}
+                  disabled={loading}
+                  sx={{ borderRadius: 2.5 }}
+                >
+                  {isEdit ? 'Actualizar' : 'Guardar'}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </Paper>
+    </Box>
   );
 };
 

@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Card, Row, Col, Button } from 'react-bootstrap';
+import {
+  Box, Paper, Typography, Button, Chip, CircularProgress, Grid,
+} from '@mui/material';
+import {
+  Receipt as ReceiptIcon,
+  ArrowBack as BackIcon,
+  PictureAsPdf as PdfIcon,
+  Edit as EditIcon,
+} from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPayrollReceiptById } from '../../services/api';
 
@@ -13,12 +21,48 @@ const daysInMonth = (period) => {
 };
 
 const formatCurrency = (value) => `$${Number(value || 0).toLocaleString('es-AR')}`;
-const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString('es-AR') : '-';
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
 const formatPeriod = (period) => {
-  if (!period || !period.includes('-')) return period || '-';
+  if (!period || !period.includes('-')) return period || '—';
   const [y, m] = period.split('-');
   return `${m}-${y}`;
 };
+
+const chipSx = { borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600 };
+
+const InfoRow = ({ label, value }) => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignSelf: 'flex-start',
+        px: 1,
+        py: 0.25,
+        borderRadius: 1,
+        bgcolor: 'primary.main',
+        opacity: 0.85,
+      }}
+    >
+      <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', color: '#fff', textTransform: 'uppercase', lineHeight: 1.6 }}>
+        {label}
+      </Typography>
+    </Box>
+    <Typography variant="body2" fontWeight={500} color="text.primary" sx={{ pl: 0.25 }}>
+      {value || '—'}
+    </Typography>
+  </Box>
+);
+
+const SectionPaper = ({ title, children }) => (
+  <Paper variant="outlined" sx={{ borderRadius: 3, borderColor: 'divider', overflow: 'hidden' }}>
+    <Box sx={{ px: 2.5, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+      <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary' }}>
+        {title}
+      </Typography>
+    </Box>
+    <Box sx={{ p: 2.5 }}>{children}</Box>
+  </Paper>
+);
 
 const PayrollDetail = () => {
   const { id } = useParams();
@@ -30,9 +74,7 @@ const PayrollDetail = () => {
       try {
         const r = await getPayrollReceiptById(id);
         setReceipt(r);
-      } catch (err) {
-        console.error('Error cargando recibo:', err);
-      }
+      } catch (_) {}
     };
     load();
   }, [id]);
@@ -40,7 +82,7 @@ const PayrollDetail = () => {
   const exportPdf = () => {
     if (!receipt) return;
     const dim = daysInMonth(receipt.period);
-    const netToPay = Number(receipt.netAmount) || 0; // backend ya guarda neto final
+    const netToPay = Number(receipt.netAmount) || 0;
     const advance = receipt.advanceRequested ? (Number(receipt.advanceAmount) || 0) : 0;
     const weekly = Math.round(((netToPay / dim) * 7) - advance);
 
@@ -101,57 +143,189 @@ const PayrollDetail = () => {
     }
   };
 
-  if (!receipt) {
-    return (
-      <Container className="mt-4 px-2 md:px-4">
-        <p>Cargando...</p>
-      </Container>
-    );
-  }
+  if (!receipt) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+      <CircularProgress />
+    </Box>
+  );
 
   const netToPay = Number(receipt.netAmount) || 0;
   const advance = receipt.advanceRequested ? (Number(receipt.advanceAmount) || 0) : 0;
   const weekly = Math.round(((netToPay / daysInMonth(receipt.period)) * 7) - advance);
 
   return (
-    <Container className="mt-4 px-2 md:px-4 space-y-4">
-      <Card className="shadow-sm border border-slate-200/70">
-        <Card.Body className="pt-3">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h3 className="text-xl font-semibold tracking-tight">Detalle de Recibo</h3>
-            <div>
-              <Button variant="secondary" className="me-2 shadow-sm" onClick={() => navigate('/payroll')}>Volver</Button>
-              <Button variant="primary" className="shadow-sm" onClick={exportPdf}>Exportar PDF</Button>
-            </div>
-          </div>
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ReceiptIcon sx={{ fontSize: 22 }} />
+            Detalle de Recibo
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>
+            {receipt.employee
+              ? `${receipt.employee.nombre} ${receipt.employee.apellido} — Legajo ${receipt.employee.legajo}`
+              : '—'
+            }
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Button
+            variant="outlined"
+            startIcon={<BackIcon />}
+            size="small"
+            onClick={() => navigate('/payroll')}
+          >
+            Volver
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<PdfIcon />}
+            size="small"
+            onClick={exportPdf}
+          >
+            Exportar PDF
+          </Button>
+          <Button
+            variant="outlined"
+            color="warning"
+            startIcon={<EditIcon />}
+            size="small"
+            onClick={() => navigate(`/payroll/edit/${id}`)}
+          >
+            Editar
+          </Button>
+        </Box>
+      </Box>
 
-          <Row className="mb-3">
-            <Col md={6}><strong>Empleado:</strong> {receipt.employee ? `${receipt.employee.nombre} ${receipt.employee.apellido} (${receipt.employee.legajo})` : '-'}</Col>
-            <Col md={3}><strong>Periodo:</strong> {formatPeriod(receipt.period)}</Col>
-            <Col md={3}><strong>Fecha de Pago:</strong> {formatDate(receipt.paymentDate)}</Col>
-          </Row>
-          <Row className="mb-3">
-            <Col md={3}><strong>Firmado:</strong> {receipt.signed ? 'Sí' : 'No'}</Col>
-            <Col md={3}><strong>Fecha Firma:</strong> {formatDate(receipt.signedDate)}</Col>
-            <Col md={3}><strong>Presentismo:</strong> {receipt.hasPresentismo ? 'Sí' : 'No'}</Col>
-          </Row>
-          <Row className="mb-3">
-            <Col md={3}><strong>Horas Extras:</strong> {formatCurrency(receipt.extraHours)}</Col>
-            <Col md={3}><strong>Otros Adicionales:</strong> {formatCurrency(receipt.otherAdditions)}</Col>
-            <Col md={3}><strong>Descuentos:</strong> {formatCurrency(receipt.discounts)}</Col>
-          </Row>
-          <Row className="mb-3">
-            <Col md={3}><strong>Adelanto:</strong> {receipt.advanceRequested ? 'Sí' : 'No'}</Col>
-            <Col md={3}><strong>Fecha Adelanto:</strong> {formatDate(receipt.advanceDate)}</Col>
-            <Col md={3}><strong>Monto Adelanto:</strong> {formatCurrency(receipt.advanceAmount)}</Col>
-          </Row>
-          <Row>
-            <Col md={3}><strong>NETO A COBRAR:</strong> {formatCurrency(netToPay)}</Col>
-            <Col md={3}><strong>Monto Semanal:</strong> {formatCurrency(weekly)}</Col>
-          </Row>
-        </Card.Body>
-      </Card>
-    </Container>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+
+        {/* Empleado */}
+        <SectionPaper title="Empleado">
+          <Grid container spacing={2.5}>
+            <Grid item xs={12} sm={6}>
+              <InfoRow
+                label="Nombre"
+                value={receipt.employee ? `${receipt.employee.nombre} ${receipt.employee.apellido}` : null}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <InfoRow label="Legajo" value={receipt.employee?.legajo} />
+            </Grid>
+          </Grid>
+        </SectionPaper>
+
+        {/* Estado */}
+        <SectionPaper title="Estado">
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Chip
+              label={receipt.signed ? 'Firmado' : 'Sin Firmar'}
+              size="small"
+              sx={{
+                ...chipSx,
+                ...(receipt.signed
+                  ? { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' }
+                  : { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }),
+              }}
+            />
+            <Chip
+              label={receipt.hasPresentismo ? 'Con Presentismo' : 'Sin Presentismo'}
+              size="small"
+              sx={{
+                ...chipSx,
+                ...(receipt.hasPresentismo
+                  ? { bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }
+                  : { bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }),
+              }}
+            />
+            {receipt.advanceRequested && (
+              <Chip
+                label="Con Adelanto"
+                size="small"
+                sx={{ ...chipSx, bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }}
+              />
+            )}
+          </Box>
+        </SectionPaper>
+
+        {/* Período y Fecha de Pago */}
+        <SectionPaper title="Período y Fecha de Pago">
+          <Grid container spacing={2.5}>
+            <Grid item xs={12} sm={4}>
+              <InfoRow label="Período" value={formatPeriod(receipt.period)} />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <InfoRow label="Fecha de Pago" value={formatDate(receipt.paymentDate)} />
+            </Grid>
+            {receipt.signed && (
+              <Grid item xs={12} sm={4}>
+                <InfoRow label="Fecha de Firma" value={formatDate(receipt.signedDate)} />
+              </Grid>
+            )}
+            {receipt.advanceRequested && (
+              <Grid item xs={12} sm={4}>
+                <InfoRow label="Fecha de Adelanto" value={formatDate(receipt.advanceDate)} />
+              </Grid>
+            )}
+          </Grid>
+        </SectionPaper>
+
+        {/* Montos */}
+        <SectionPaper title="Montos">
+          <Grid container spacing={2.5}>
+            <Grid item xs={12} sm={6} md={3}>
+              <InfoRow label="Horas Extras" value={formatCurrency(receipt.extraHours)} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <InfoRow label="Otros Adicionales" value={formatCurrency(receipt.otherAdditions)} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <InfoRow label="Descuentos" value={formatCurrency(receipt.discounts)} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <InfoRow label="Adelanto" value={formatCurrency(receipt.advanceAmount)} />
+            </Grid>
+
+            {/* NETO destacado */}
+            <Grid item xs={12}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  borderRadius: 3,
+                  borderColor: 'success.main',
+                  bgcolor: 'rgba(86,202,0,0.06)',
+                  p: 2.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 2,
+                }}
+              >
+                <Box>
+                  <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    NETO A COBRAR
+                  </Typography>
+                  <Typography variant="h4" fontWeight={800} color="success.main" lineHeight={1.1}>
+                    {formatCurrency(netToPay)}
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: 'right' }}>
+                  <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Monto Semanal
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700} color="text.primary" lineHeight={1.2}>
+                    {formatCurrency(weekly)}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+        </SectionPaper>
+
+      </Box>
+    </Box>
   );
 };
 

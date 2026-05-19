@@ -1,94 +1,95 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaSave, FaArrowLeft } from 'react-icons/fa';
+import {
+  Box, Paper, Typography, Button, TextField, MenuItem, Switch,
+  FormControlLabel, CircularProgress, Grid,
+} from '@mui/material';
+import {
+  Gavel as GavelIcon,
+  Save as SaveIcon,
+  ArrowBack as BackIcon,
+  UploadFile as UploadIcon,
+} from '@mui/icons-material';
 import { getEmployees, createDisciplinary, updateDisciplinary, getDisciplinaryById } from '../../services/api';
-import Swal from 'sweetalert2';
 import DocumentViewerModal from '../common/DocumentViewerModal';
+import Swal from 'sweetalert2';
 
 const DisciplinaryForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isEdit = Boolean(id);
+
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentDocUrl, setCurrentDocUrl] = useState('');
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
+
   const [formData, setFormData] = useState({
     employeeId: '',
     date: new Date().toISOString().split('T')[0],
-    time: new Date().toTimeString().slice(0,5),
+    time: new Date().toTimeString().slice(0, 5),
     type: 'verbal',
     description: '',
     document: null,
     signed: false,
     signedDate: '',
     durationDays: '',
-    returnToWorkDate: ''
+    returnToWorkDate: '',
   });
-  const isEdit = Boolean(id);
-  const [currentDocUrl, setCurrentDocUrl] = useState('');
-  const [viewerOpen, setViewerOpen] = useState(false);
 
   useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const data = await getEmployees();
+        const arr = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        setEmployees(arr);
+      } catch (_) {}
+    };
     loadEmployees();
   }, []);
 
   useEffect(() => {
-    if (isEdit) {
-      loadDisciplinary(id);
-    }
+    if (!isEdit) return;
+    const loadDisciplinary = async () => {
+      try {
+        setLoading(true);
+        const d = await getDisciplinaryById(id);
+        setFormData({
+          employeeId: d.employee?._id || '',
+          date: new Date(d.date).toISOString().split('T')[0],
+          time: d.time || '',
+          type: d.type,
+          description: d.description || '',
+          document: null,
+          signed: Boolean(d.signed),
+          signedDate: d.signedDate ? new Date(d.signedDate).toISOString().split('T')[0] : '',
+          durationDays: d.durationDays ?? '',
+          returnToWorkDate: d.returnToWorkDate ? new Date(d.returnToWorkDate).toISOString().split('T')[0] : '',
+        });
+        setCurrentDocUrl(d.document || '');
+      } catch (_) {
+        Swal.fire('Error', 'No se pudo cargar la medida disciplinaria', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadDisciplinary();
   }, [isEdit, id]);
 
-  const loadEmployees = async () => {
-    try {
-      const data = await getEmployees();
-      // getEmployees puede devolver { data, total, page, totalPages } o un array
-      const employeesArray = Array.isArray(data)
-        ? data
-        : (data && Array.isArray(data.data))
-          ? data.data
-          : [];
-      setEmployees(employeesArray);
-    } catch (error) {
-      console.error('Error al cargar empleados:', error);
-    }
-  };
-
-  const loadDisciplinary = async (disciplinaryId) => {
-    try {
-      setLoading(true);
-      const disciplinary = await getDisciplinaryById(disciplinaryId);
-      setFormData({
-        employeeId: disciplinary.employee?._id || '',
-        date: new Date(disciplinary.date).toISOString().split('T')[0],
-        time: disciplinary.time || '',
-        type: disciplinary.type,
-        description: disciplinary.description || '',
-        document: null,
-        signed: Boolean(disciplinary.signed),
-        signedDate: disciplinary.signedDate ? new Date(disciplinary.signedDate).toISOString().split('T')[0] : '',
-        durationDays: disciplinary.durationDays ?? '',
-        returnToWorkDate: disciplinary.returnToWorkDate ? new Date(disciplinary.returnToWorkDate).toISOString().split('T')[0] : ''
-      });
-      setCurrentDocUrl(disciplinary.document || '');
-    } catch (error) {
-      console.error('Error al cargar la medida disciplinaria:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
+    const { name, value, type, files } = e.target;
     if (type === 'file') {
-      setFormData({ ...formData, [name]: files[0] });
-    } else if (type === 'checkbox') {
-      setFormData({ ...formData, [name]: checked });
+      setFormData(prev => ({ ...prev, [name]: files[0] }));
+      setSelectedFileName(files[0]?.name || '');
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const openViewer = () => setViewerOpen(true);
-  const closeViewer = () => setViewerOpen(false);
+  const handleSwitchChange = (name) => (e) => {
+    setFormData(prev => ({ ...prev, [name]: e.target.checked }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,12 +97,10 @@ const DisciplinaryForm = () => {
       Swal.fire('Error', 'Por favor complete los campos obligatorios', 'error');
       return;
     }
-
     if (!String(formData.description || '').trim()) {
       Swal.fire('Error', 'La descripción es obligatoria', 'error');
       return;
     }
-
     try {
       setLoading(true);
       const data = new FormData();
@@ -118,200 +117,251 @@ const DisciplinaryForm = () => {
 
       if (isEdit) {
         await updateDisciplinary(id, data);
-        Swal.fire('Actualizado', 'Medida disciplinaria actualizada correctamente', 'success');
+        Swal.fire({ icon: 'success', title: 'Actualizado', timer: 1500, showConfirmButton: false });
       } else {
         await createDisciplinary(data);
-        Swal.fire('Guardado', 'Medida disciplinaria registrada correctamente', 'success');
+        Swal.fire({ icon: 'success', title: 'Guardado', timer: 1500, showConfirmButton: false });
       }
       navigate('/disciplinary');
-    } catch (error) {
-      const backendMsg = error?.response?.data?.message || error?.response?.data?.msg;
-      const displayMsg = backendMsg || 'No se pudo guardar la medida disciplinaria';
-      console.error('Error al guardar:', error.response?.data || error.message);
-      Swal.fire('Error', displayMsg, 'error');
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.response?.data?.msg || 'No se pudo guardar la medida disciplinaria';
+      Swal.fire('Error', msg, 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading && isEdit && !formData.employeeId) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+      <CircularProgress />
+    </Box>
+  );
+
   return (
-    <Container className="mt-4 px-2 md:px-4">
-      <Card className="shadow-sm border border-slate-200/70">
-        <Card.Header as="h5" className="font-semibold">
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <GavelIcon sx={{ fontSize: 22 }} />
           {isEdit ? 'Editar Medida Disciplinaria' : 'Registrar Nueva Medida Disciplinaria'}
-        </Card.Header>
-        <Card.Body className="pt-3">
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Empleado *</Form.Label>
-                  <Form.Select
-                    name="employeeId"
-                    value={formData.employeeId}
-                    onChange={handleChange}
-                    required
-                    disabled={isEdit}
-                  >
-                    <option value="">Seleccione un empleado</option>
-                    {(Array.isArray(employees) ? employees : []).map((employee) => (
-                      <option key={employee._id} value={employee._id}>
-                        {employee.nombre} {employee.apellido} - Legajo: {employee.legajo}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha *</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+        </Typography>
+      </Box>
 
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Hora *</Form.Label>
-                  <Form.Control
-                    type="time"
-                    name="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+      <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider' }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+          <Grid container spacing={2.5}>
 
-            <Row>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Días de suspensión</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    name="durationDays"
-                    value={formData.durationDays}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de reincorporación</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="returnToWorkDate"
-                    value={formData.returnToWorkDate}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+            {/* Empleado */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                label="Empleado *"
+                name="employeeId"
+                value={formData.employeeId}
+                onChange={handleChange}
+                required
+                disabled={isEdit}
+              >
+                <MenuItem value="">Seleccione un empleado</MenuItem>
+                {employees.map(emp => (
+                  <MenuItem key={emp._id} value={emp._id}>
+                    {emp.nombre} {emp.apellido} — Legajo: {emp.legajo}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
 
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tipo de Medida *</Form.Label>
-                  <Form.Select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="verbal">Verbal</option>
-                    <option value="formal">Formal</option>
-                    <option value="grave">Grave</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Documento (PDF, JPG, PNG)</Form.Label>
-                  <Form.Control
-                    type="file"
-                    name="document"
-                    onChange={handleChange}
-                    accept=".pdf,.jpg,.jpeg,.png"
-                  />
-                  <Form.Text className="text-muted">Tamaño máximo: 5MB</Form.Text>
-                  {isEdit && currentDocUrl && (
-                    <div className="mt-2">
-                      <Button variant="outline-secondary" size="sm" className="shadow-sm" onClick={openViewer}>
-                        Ver documento actual
-                      </Button>
-                    </div>
-                  )}
-                </Form.Group>
-              </Col>
-            </Row>
+            {/* Fecha */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha *"
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Descripción</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
+            {/* Hora */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Hora"
+                type="time"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+
+            {/* Tipo */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                label="Tipo de Medida *"
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="verbal">Verbal</MenuItem>
+                <MenuItem value="formal">Formal</MenuItem>
+                <MenuItem value="grave">Grave</MenuItem>
+              </TextField>
+            </Grid>
+
+            {/* Días suspensión */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Días de suspensión"
+                type="number"
+                name="durationDays"
+                value={formData.durationDays}
+                onChange={handleChange}
+                slotProps={{ input: { inputProps: { min: 0 } } }}
+              />
+            </Grid>
+
+            {/* Fecha reincorporación */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha de reincorporación"
+                type="date"
+                name="returnToWorkDate"
+                value={formData.returnToWorkDate}
+                onChange={handleChange}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+
+            {/* Descripción */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Descripción *"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Detalles de la medida disciplinaria"
+                multiline
+                rows={3}
                 required
+                placeholder="Detalles de la medida disciplinaria"
               />
-            </Form.Group>
+            </Grid>
 
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Check
-                    type="checkbox"
-                    label="Firmado por el empleado"
-                    name="signed"
+            {/* Documento */}
+            <Grid item xs={12} md={6}>
+              <Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                  Documento (PDF, JPG, PNG — máx. 5 MB)
+                </Typography>
+                <Button
+                  component="label"
+                  variant="outlined"
+                  size="small"
+                  startIcon={<UploadIcon />}
+                  sx={{ borderRadius: 2 }}
+                >
+                  {selectedFileName || 'Seleccionar archivo'}
+                  <input
+                    type="file"
+                    name="document"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    hidden
+                    onChange={handleChange}
+                  />
+                </Button>
+                {isEdit && currentDocUrl && (
+                  <Button
+                    size="small"
+                    variant="text"
+                    sx={{ ml: 1 }}
+                    onClick={() => setViewerOpen(true)}
+                  >
+                    Ver actual
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+
+            {/* Firmado */}
+            <Grid item xs={12} md={6}>
+              <FormControlLabel
+                control={
+                  <Switch
                     checked={formData.signed}
-                    onChange={handleChange}
+                    onChange={handleSwitchChange('signed')}
+                    color="info"
                   />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Firma</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="signedDate"
-                    value={formData.signedDate}
-                    onChange={handleChange}
-                    disabled={!formData.signed}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+                }
+                label="Firmado por el empleado"
+              />
+            </Grid>
 
-            <div className="d-flex justify-content-between mt-4">
-              <Button variant="secondary" className="shadow-sm" onClick={() => navigate('/disciplinary')}>
-                <FaArrowLeft /> <span>Volver</span>
-              </Button>
-              <Button variant="primary" type="submit" disabled={loading} className="shadow-sm">
-                <FaSave /> <span>{isEdit ? 'Actualizar' : 'Guardar'}</span>
-              </Button>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
+            {/* Fecha firma */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Fecha de Firma"
+                type="date"
+                name="signedDate"
+                value={formData.signedDate}
+                onChange={handleChange}
+                disabled={!formData.signed}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+
+            {/* Botones */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<BackIcon />}
+                  onClick={() => navigate('/disciplinary')}
+                >
+                  Volver
+                </Button>
+                <Button
+                  variant="contained"
+                  type="submit"
+                  startIcon={<SaveIcon />}
+                  disabled={loading}
+                  sx={{ borderRadius: 2.5 }}
+                >
+                  {isEdit ? 'Actualizar' : 'Guardar'}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </Paper>
+
       {isEdit && currentDocUrl && (
         <DocumentViewerModal
           show={viewerOpen}
-          onHide={closeViewer}
+          onHide={() => setViewerOpen(false)}
           url={currentDocUrl}
           title="Documento actual de la medida"
         />
       )}
-    </Container>
+    </Box>
   );
 };
 

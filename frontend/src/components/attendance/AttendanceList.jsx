@@ -1,589 +1,402 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Table, Button, Card, Badge, Row, Col, Form } from 'react-bootstrap';
-import DocumentViewerModal from '../common/DocumentViewerModal';
-import MobileCard from '../common/MobileCard';
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, Chip, IconButton, Tooltip, Typography, Button,
+  CircularProgress, Alert, TextField, MenuItem, InputAdornment,
+} from '@mui/material';
+import {
+  AccessTime as ClockIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ArrowUpward as AscIcon,
+  ArrowDownward as DescIcon,
+  Description as DocIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { getAttendances, getEmployees, deleteAttendance } from '../../services/api';
-import PageHeader from '../common/PageHeader';
-import SectionCard from '../common/SectionCard';
-import { Clock, Plus } from 'lucide-react';
-// Eliminado react-window para evitar problemas de interop en build
+import DocumentViewerModal from '../common/DocumentViewerModal';
+import Swal from 'sweetalert2';
+
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
+
+const typeChipSx = (type) => {
+  switch ((type || '').toLowerCase()) {
+    case 'inasistencia':   return { bgcolor: 'rgba(255,76,81,0.12)',  color: '#FF4C51' };
+    case 'tardanza':       return { bgcolor: 'rgba(255,180,0,0.12)',  color: '#E6A200' };
+    case 'licencia medica':return { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' };
+    case 'vacaciones':     return { bgcolor: 'rgba(140,87,255,0.12)', color: '#8C57FF' };
+    default:               return { bgcolor: 'rgba(138,141,147,0.12)',color: '#8A8D93' };
+  }
+};
+
+const typeLabel = (type) => {
+  switch ((type || '').toLowerCase()) {
+    case 'inasistencia':    return 'Inasistencia';
+    case 'tardanza':        return 'Tardanza';
+    case 'licencia medica': return 'Lic. Médica';
+    case 'vacaciones':      return 'Vacaciones';
+    default:                return type || '—';
+  }
+};
+
+const chipSx = { borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600 };
 
 const AttendanceList = () => {
+  const navigate = useNavigate();
   const [attendances, setAttendances] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState({
-    employeeId: '',
-    type: '',
-    justified: ''
-  });
+  const [filter, setFilter] = useState({ employeeId: '', type: '', justified: '' });
   const [viewerUrl, setViewerUrl] = useState(null);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [sortBy, setSortBy] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
-  const containerRef = useRef(null);
-  const [listWidth, setListWidth] = useState(0);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage] = useState(50);
+  const [serverTotal, setServerTotal] = useState(0);
 
-  useEffect(() => {
-    const measure = () => {
-      const w = containerRef.current?.clientWidth || 360;
-      setListWidth(w);
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
-
-  // Cargar empleados una vez
   useEffect(() => {
     const loadEmployees = async () => {
       try {
-        const employeesData = await getEmployees();
-        const employeesArray = Array.isArray(employeesData)
-          ? employeesData
-          : (employeesData && Array.isArray(employeesData.data))
-            ? employeesData.data
-            : [];
-        setEmployees(employeesArray);
-      } catch (err) {
-        // No bloquear por error de empleados; se mostrará mensaje general si falla todo
-      }
+        const data = await getEmployees();
+        const arr = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        setEmployees(arr);
+      } catch (_) {}
     };
     loadEmployees();
   }, []);
 
-  // Cargar asistencias con paginación del servidor y filtros
   useEffect(() => {
     const loadAttendances = async () => {
       try {
         setLoading(true);
         const params = {
-          page,
-          limit: pageSize,
+          page: page + 1,
+          limit: rowsPerPage,
           employeeId: filter.employeeId || undefined,
           type: filter.type || undefined,
           justified: filter.justified || undefined,
           sortBy,
           sortDir,
         };
-        const attendancesResp = await getAttendances(params);
-        if (Array.isArray(attendancesResp)) {
-          setAttendances(attendancesResp);
-          setServerTotal(undefined);
-          setLoading(false);
-          return;
+        const resp = await getAttendances(params);
+        if (Array.isArray(resp)) {
+          setAttendances(resp);
+          setServerTotal(resp.length);
+        } else {
+          setAttendances(Array.isArray(resp.data) ? resp.data : []);
+          setServerTotal(resp.total || 0);
         }
-        const arr = Array.isArray(attendancesResp.data) ? attendancesResp.data : [];
-        setAttendances(arr);
-        setServerTotal(attendancesResp.total);
-        setServerTotalPages(attendancesResp.totalPages);
-        setLoading(false);
-      } catch (err) {
+      } catch (_) {
         setError('Error al cargar los datos');
+      } finally {
         setLoading(false);
       }
     };
     loadAttendances();
-  }, [page, pageSize, filter.employeeId, filter.type, filter.justified, sortBy, sortDir]);
-
-  const [serverTotal, setServerTotal] = useState();
-  const [serverTotalPages, setServerTotalPages] = useState();
+  }, [page, rowsPerPage, filter.employeeId, filter.type, filter.justified, sortBy, sortDir]);
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilter({
-      ...filter,
-      [name]: value
-    });
-    setPage(1);
+    setFilter(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setPage(0);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Está seguro de eliminar este registro?')) {
-      try {
-        await deleteAttendance(id);
-        setAttendances(attendances.filter(attendance => attendance._id !== id));
-      } catch (err) {
-        setError('Error al eliminar el registro');
-      }
-    }
-  };
-
-  const filteredAttendances = attendances.filter(attendance => {
-    return (
-      (filter.employeeId === '' || (attendance.employee?._id ?? '') === filter.employeeId) &&
-      (filter.type === '' || attendance.type === filter.type) &&
-      (filter.justified === '' || 
-        (filter.justified === 'true' && attendance.justified) || 
-        (filter.justified === 'false' && !attendance.justified))
-    );
-  });
-
-  const getEmployeeName = (employeeId) => {
-    const list = Array.isArray(employees) ? employees : [];
-    const employee = list.find(emp => emp._id === employeeId);
-    return employee ? `${employee.nombre} ${employee.apellido}` : 'Desconocido';
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR');
-  };
-
-  const typePriority = (type) => {
-    // Define an order: inasistencia > tardanza > licencia medica > vacaciones > otros
-    const order = {
-      'inasistencia': 4,
-      'tardanza': 3,
-      'licencia medica': 2,
-      'vacaciones': 1
-    };
-    return order[type] ?? 0;
-  };
-
-  const statusScore = (a) => {
-    // Higher score means more "favorable" status
-    // Justificado (2) + Presentismo conservado (1)
-    const justifiedScore = a.justified ? 2 : 0;
-    const presentismoScore = a.lostPresentismo ? 0 : 1;
-    return justifiedScore + presentismoScore;
-  };
-
-  const typeAbbrev = (type) => {
-    switch ((type || '').toLowerCase()) {
-      case 'inasistencia': return 'INAS';
-      case 'tardanza': return 'TARD';
-      case 'licencia medica': return 'LIC MED';
-      case 'vacaciones': return 'VAC';
-      default: return (type || '').toUpperCase();
-    }
-  };
-
-  const handleSort = (e, key) => {
-    if (e && e.altKey) {
-      setSortBy('date');
-      setSortDir('desc');
-      setPage(1);
-      return;
-    }
+  const handleSort = (key) => {
     if (sortBy === key) {
-      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(key);
       setSortDir('asc');
     }
-    setPage(1);
+    setPage(0);
   };
 
-  const renderSort = (key) => {
-    if (sortBy !== key) return null;
-    return sortDir === 'asc' ? <ChevronUp size={16} className="ms-1" /> : <ChevronDown size={16} className="ms-1" />;
+  const SortIcon = ({ field }) => {
+    if (sortBy !== field) return null;
+    return sortDir === 'asc'
+      ? <AscIcon sx={{ fontSize: 14, ml: 0.5, verticalAlign: 'middle' }} />
+      : <DescIcon sx={{ fontSize: 14, ml: 0.5, verticalAlign: 'middle' }} />;
   };
 
-  const getName = (att) => att.employee ? `${att.employee.nombre} ${att.employee.apellido}` : 'Desconocido';
-
-  const sortedAttendances = [...filteredAttendances].sort((a, b) => {
-    let va = 0, vb = 0;
-    switch (sortBy) {
-      case 'employee':
-        va = getName(a).toLowerCase();
-        vb = getName(b).toLowerCase();
-        break;
-      case 'date':
-        va = new Date(a.date).getTime();
-        vb = new Date(b.date).getTime();
-        break;
-      case 'type':
-        va = typePriority(a.type);
-        vb = typePriority(b.type);
-        break;
-      case 'justified':
-        va = a.justified ? 1 : 0;
-        vb = b.justified ? 1 : 0;
-        break;
-      case 'presentismo':
-        // 1 si conserva presentismo, 0 si lo pierde
-        va = a.lostPresentismo ? 0 : 1;
-        vb = b.lostPresentismo ? 0 : 1;
-        break;
-      case 'status':
-        va = statusScore(a);
-        vb = statusScore(b);
-        break;
-      case 'late':
-        va = a.lateMinutes ?? 0;
-        vb = b.lateMinutes ?? 0;
-        break;
-      default:
-        va = new Date(a.date).getTime();
-        vb = new Date(b.date).getTime();
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: '¿Eliminar registro?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF4C51',
+      cancelButtonColor: '#8A8D93',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await deleteAttendance(id);
+      setAttendances(prev => prev.filter(a => a._id !== id));
+      setServerTotal(prev => Math.max(prev - 1, 0));
+      Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1500, showConfirmButton: false });
+    } catch (_) {
+      Swal.fire({ icon: 'error', title: 'Error al eliminar' });
     }
-    if (va < vb) return sortDir === 'asc' ? -1 : 1;
-    if (va > vb) return sortDir === 'asc' ? 1 : -1;
-    return 0;
-  });
-
-  // Paginación: si el servidor ya paginó, usar todo el arreglo y los metadatos
-  const usingServerPagination = typeof serverTotal === 'number' && typeof serverTotalPages === 'number';
-  const totalCount = usingServerPagination ? serverTotal : sortedAttendances.length;
-  const totalPages = usingServerPagination ? serverTotalPages : Math.max(Math.ceil(totalCount / pageSize), 1);
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  const pagedAttendances = usingServerPagination ? sortedAttendances : sortedAttendances.slice(start, end);
-  const canPrev = page > 1;
-  const canNext = page < totalPages;
-  const goPrev = () => { if (canPrev) setPage(page - 1); };
-  const goNext = () => { if (canNext) setPage(page + 1); };
-
-  const openViewer = (url) => {
-    setViewerUrl(url);
-    setViewerOpen(true);
   };
 
-  const closeViewer = () => {
-    setViewerOpen(false);
-    setViewerUrl(null);
-  };
+  const getName = (att) => att.employee
+    ? `${att.employee.nombre} ${att.employee.apellido}`
+    : 'Desconocido';
 
-  const isPdfUrl = (url) => {
-    if (!url) return false;
-    return /\.pdf($|\?)/i.test(url);
-  };
-
-  const isImageUrl = (url) => {
-    if (!url) return false;
-    return /\.(jpg|jpeg|png)($|\?)/i.test(url);
-  };
-
-  if (loading) return <div>Cargando...</div>;
+  const headCell = (label, field) => (
+    <TableCell
+      onClick={() => handleSort(field)}
+      sx={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+    >
+      {label}<SortIcon field={field} />
+    </TableCell>
+  );
 
   return (
-    <div className="container-fluid px-2 md:px-4 space-y-4">
-      <PageHeader
-        icon={<Clock size={20} />}
-        title="Inasistencias y Tardanzas"
-        subtitle="Filtre, ordene y gestione los registros de asistencia"
-        accentColor="#f59e0b"
-        actions={(
-          <Link to="/attendance/new">
-            <Button variant="primary" className="shadow-sm">
-              <Plus size={16} /> <span>Registrar Nueva</span>
-            </Button>
-          </Link>
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ClockIcon sx={{ fontSize: 22 }} />
+            Inasistencias y Tardanzas
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>
+            Filtre, ordene y gestione los registros de asistencia
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          sx={{ borderRadius: 2.5 }}
+          onClick={() => navigate('/attendance/new')}
+        >
+          Registrar Nueva
+        </Button>
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
+
+      {/* Filtros */}
+      <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider', mb: 2.5 }}>
+        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="subtitle2" fontWeight={700}>Filtros</Typography>
+        </Box>
+        <Box sx={{ px: 2.5, py: 2, display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end' }}>
+          <TextField
+            select
+            size="small"
+            label="Empleado"
+            name="employeeId"
+            value={filter.employeeId}
+            onChange={handleFilterChange}
+            sx={{ minWidth: 220 }}
+          >
+            <MenuItem value="">Todos los empleados</MenuItem>
+            {employees.map(emp => (
+              <MenuItem key={emp._id} value={emp._id}>
+                {emp.nombre} {emp.apellido}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            select
+            size="small"
+            label="Tipo"
+            name="type"
+            value={filter.type}
+            onChange={handleFilterChange}
+            sx={{ minWidth: 160 }}
+          >
+            <MenuItem value="">Todos</MenuItem>
+            <MenuItem value="inasistencia">Inasistencia</MenuItem>
+            <MenuItem value="tardanza">Tardanza</MenuItem>
+            <MenuItem value="licencia medica">Licencia Médica</MenuItem>
+            <MenuItem value="vacaciones">Vacaciones</MenuItem>
+            <MenuItem value="sancion recibida">Sanción Recibida</MenuItem>
+          </TextField>
+
+          <TextField
+            select
+            size="small"
+            label="Justificado"
+            name="justified"
+            value={filter.justified}
+            onChange={handleFilterChange}
+            sx={{ minWidth: 140 }}
+          >
+            <MenuItem value="">Todos</MenuItem>
+            <MenuItem value="true">Sí</MenuItem>
+            <MenuItem value="false">No</MenuItem>
+          </TextField>
+
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => { setSortBy('date'); setSortDir('desc'); }}
+          >
+            Reset orden
+          </Button>
+        </Box>
+      </Paper>
+
+      {/* Tabla */}
+      <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden', borderColor: 'divider' }}>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                  {headCell('Empleado', 'employee')}
+                  {headCell('Fecha', 'date')}
+                  {headCell('Estado', 'status')}
+                  {headCell('Horario / Tardanza', 'late')}
+                  <TableCell>Vence cert.</TableCell>
+                  <TableCell>Inicio vac.</TableCell>
+                  <TableCell>Fin vac.</TableCell>
+                  <TableCell>Reincorporación</TableCell>
+                  <TableCell>Certificado</TableCell>
+                  <TableCell align="right">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {attendances.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                      No hay registros que coincidan con los filtros
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  attendances.map((att) => {
+                    const estab = att.scheduledEntry || '—';
+                    const reg = att.actualEntry || '—';
+                    const late = att.lateMinutes ?? 0;
+                    const hasHorario = att.scheduledEntry || att.actualEntry || late > 0;
+
+                    return (
+                      <TableRow key={att._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={600}>{getName(att)}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Legajo: {att.employee?.legajo || '—'}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2">{formatDate(att.date)}</Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            <Chip
+                              label={typeLabel(att.type)}
+                              size="small"
+                              sx={{ ...chipSx, ...typeChipSx(att.type) }}
+                            />
+                            <Chip
+                              label={att.justified ? 'Justificado' : 'No justificado'}
+                              size="small"
+                              sx={{
+                                ...chipSx,
+                                ...(att.justified
+                                  ? { bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }
+                                  : { bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }),
+                              }}
+                            />
+                            <Chip
+                              label={att.lostPresentismo ? 'Sin presentismo' : 'Con presentismo'}
+                              size="small"
+                              sx={{
+                                ...chipSx,
+                                ...(att.lostPresentismo
+                                  ? { bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }
+                                  : { bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }),
+                              }}
+                            />
+                          </Box>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2">
+                            {hasHorario ? `${estab} → ${reg} (${late} min)` : '—'}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>{formatDate(att.certificateExpiry)}</TableCell>
+                        <TableCell>{formatDate(att.vacationsStart)}</TableCell>
+                        <TableCell>{formatDate(att.vacationsEnd)}</TableCell>
+                        <TableCell>{formatDate(att.returnToWorkDate)}</TableCell>
+
+                        <TableCell>
+                          {att.justificationDocument ? (
+                            <Tooltip title="Ver certificado">
+                              <IconButton
+                                size="small"
+                                onClick={() => { setViewerUrl(att.justificationDocument); setViewerOpen(true); }}
+                                sx={{ color: 'info.main' }}
+                              >
+                                <DocIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          ) : '—'}
+                        </TableCell>
+
+                        <TableCell align="right">
+                          <Tooltip title="Editar">
+                            <IconButton
+                              size="small"
+                              sx={{ color: 'warning.main' }}
+                              onClick={() => navigate(`/attendance/edit/${att._id}`)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Eliminar">
+                            <IconButton
+                              size="small"
+                              sx={{ color: 'error.main' }}
+                              onClick={() => handleDelete(att._id)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
-      />
-      <div>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <div className="section-box mb-4">
-        <div className="section-band" />
-        <div className="p-3 p-md-4">
-<SectionCard title="Filtros" icon={<Clock size={20} />} accentColor="#f59e0b"> 
-        <Row className="mb-3 align-items-end">
-          <Col md={4}>
-            <Form.Group>
-              <Form.Label>Filtrar por Empleado</Form.Label>
-              <Form.Select
-                name="employeeId"
-                value={filter.employeeId}
-                onChange={handleFilterChange}
-              >
-                <option value="">Todos los empleados</option>
-                {(Array.isArray(employees) ? employees : []).map(employee => (
-                  <option key={employee._id} value={employee._id}>
-                    {employee.nombre} {employee.apellido}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col md={4}>
-            <Form.Group>
-              <Form.Label>Tipo</Form.Label>
-              <Form.Select
-                name="type"
-                value={filter.type}
-                onChange={handleFilterChange}
-              >
-                <option value="">Todos</option>
-                <option value="inasistencia">Inasistencia</option>
-                <option value="tardanza">Tardanza</option>
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>Justificado</Form.Label>
-              <Form.Select
-                name="justified"
-                value={filter.justified}
-                onChange={handleFilterChange}
-              >
-                <option value="">Todos</option>
-                <option value="true">Sí</option>
-                <option value="false">No</option>
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col md={1} className="d-flex justify-content-end">
-            <Button
-              variant="outline-secondary"
-              className="mt-2 shadow-sm"
-              onClick={() => { setSortBy('date'); setSortDir('desc'); }}
-            >
-              Reset orden
-            </Button>
-          </Col>
-        </Row>
-        </SectionCard>
-        </div>
-        </div>
-        
-        {/* Vista de escritorio - Tabla con columna de Estado (tipo/justificado/presentismo) */}
-        <div className="desktop-view">
-          <div className="section-box">
-          <div className="section-band" />
-          <div className="p-3 p-md-4">
-<SectionCard title="Listado" icon={<Clock size={20} />} accentColor="#f59e0b"> 
-          <div className="table-responsive">
-          <Table hover responsive className="attendance-table mb-0 align-middle text-sm">
-            <thead>
-              <tr>
-                <th role="button" onClick={(e) => handleSort(e, 'employee')}>
-                  Empleado {renderSort('employee')}
-                </th>
-                <th role="button" onClick={(e) => handleSort(e, 'date')}>
-                  Fecha {renderSort('date')}
-                </th>
-                <th role="button" onClick={(e) => handleSort(e, 'status')}>
-                  Estado {renderSort('status')}
-                </th>
-                <th role="button" onClick={(e) => handleSort(e, 'late')}>
-                  Horario y tardanza {renderSort('late')}
-                </th>
-                <th>Vence cert.</th>
-                <th>Inicio vacaciones</th>
-                <th>Fin vacaciones</th>
-                <th>Reincorporación</th>
-                <th>Certificado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pagedAttendances.length > 0 ? (
-                pagedAttendances.map(attendance => (
-                  <tr key={attendance._id}>
-                    <td>
-                      <div className="fw-semibold text-truncate" title={getName(attendance)}>
-                        {getName(attendance)}
-                      </div>
-                      <small className="text-muted">Legajo: {attendance.employee?.legajo || '-'}</small>
-                    </td>
-                    <td>{formatDate(attendance.date)}</td>
-                    <td>
-                      <div
-                        className="d-flex flex-wrap align-items-center"
-                        title={`${attendance.type}: ${attendance.justified ? 'Justificado' : 'No justificado'} / ${attendance.lostPresentismo ? 'Sin presentismo' : 'Con presentismo'}`}
-                      >
-                        <span
-                          className={`badge badge-soft ${attendance.type === 'inasistencia' ? 'badge-soft-danger' : attendance.type === 'tardanza' ? 'badge-soft-warning' : attendance.type === 'licencia medica' ? 'badge-soft-info' : 'badge-soft-primary'} me-1 mb-1`}
-                        >
-                          <span className="dot"></span>
-                          {typeAbbrev(attendance.type)}
-                        </span>
-                        <span
-                          className={`badge badge-soft ${attendance.justified ? 'badge-soft-success' : 'badge-soft-danger'} me-1 mb-1`}
-                        >
-                          <span className="dot"></span>
-                          {attendance.justified ? 'JUST' : 'NO JUST'}
-                        </span>
-                        <span
-                          className={`badge badge-soft ${attendance.lostPresentismo ? 'badge-soft-danger' : 'badge-soft-success'} mb-1`}
-                        >
-                          <span className="dot"></span>
-                          {attendance.lostPresentismo ? 'SIN PRES' : 'CON PRES'}
-                        </span>
-                      </div>
-                    </td>
-                    <td title={`Hora establecida: ${attendance.scheduledEntry || '-'} / Hora registrada: ${attendance.actualEntry || '-'} / Tardanza: ${attendance.lateMinutes ?? 0} min`}>
-                      {(() => {
-                        const estab = attendance.scheduledEntry || '-';
-                        const reg = attendance.actualEntry || '-';
-                        const late = attendance.lateMinutes ?? 0;
-                        const hasData = attendance.scheduledEntry || attendance.actualEntry || (late > 0);
-                        return hasData ? `${estab} → ${reg} (${late} min)` : '-';
-                      })()}
-                    </td>
-                    <td>{attendance.certificateExpiry ? formatDate(attendance.certificateExpiry) : '-'}</td>
-                    <td>{attendance.vacationsStart ? formatDate(attendance.vacationsStart) : '-'}</td>
-                    <td>{attendance.vacationsEnd ? formatDate(attendance.vacationsEnd) : '-'}</td>
-                    <td>{attendance.returnToWorkDate ? formatDate(attendance.returnToWorkDate) : '-'}</td>
-                    <td>
-                      {attendance.justificationDocument ? (
-                        <Button 
-                          variant="outline-secondary" 
-                          size="sm" 
-                          className="me-2 shadow-sm"
-                          onClick={() => openViewer(attendance.justificationDocument)}
-                        >
-                          Ver certificado
-                        </Button>
-                      ) : '-'}
-                    </td>
-                    <td>
-                      <Link to={`/attendance/edit/${attendance._id}`} className="btn btn-sm btn-primary me-2 shadow-sm btn-compact">
-                        Editar
-                      </Link>
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        className="shadow-sm"
-                        onClick={() => handleDelete(attendance._id)}
-                      >
-                        Eliminar
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="10" className="text-center">No hay registros que coincidan con los filtros</td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-          </div>
-          <div className="d-flex justify-content-between align-items-center mt-3">
-            <small className="text-muted">Total: {totalCount} — Página {page} de {totalPages}</small>
-            <div>
-              <Button variant="outline-secondary" size="sm" className="me-2" disabled={!canPrev} onClick={goPrev}>Anterior</Button>
-              <Button variant="outline-secondary" size="sm" disabled={!canNext} onClick={goNext}>Siguiente</Button>
-            </div>
-          </div>
-          </SectionCard>
-          </div>
-          </div>
-        </div>
 
-        {/* Vista móvil - Tarjetas */}
-        <div className="mobile-view" ref={containerRef}>
-          {pagedAttendances.length > 0 ? (
-            pagedAttendances.map((attendance) => {
-              // Preparar campos dinámicos según el tipo
-              const fields = [
-                { label: 'Fecha', value: formatDate(attendance.date) }
-              ];
+        <TablePagination
+          component="div"
+          count={serverTotal}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[]}
+          labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+          sx={{ borderTop: '1px solid', borderColor: 'divider' }}
+        />
+      </Paper>
 
-              // Agregar campos específicos según el tipo
-              if (attendance.type === 'tardanza') {
-                const estab = attendance.scheduledEntry || '-';
-                const reg = attendance.actualEntry || '-';
-                const late = attendance.lateMinutes ?? 0;
-                const hasData = attendance.scheduledEntry || attendance.actualEntry || (late > 0);
-                if (hasData) {
-                  fields.push({
-                    label: 'Horario y tardanza',
-                    value: `${estab} → ${reg} (${late} min)`
-                  });
-                }
-              }
-
-              if (attendance.type === 'licencia medica' && attendance.certificateExpiry) {
-                fields.push({ label: 'Vence certificado', value: formatDate(attendance.certificateExpiry) });
-              }
-
-              if (attendance.type === 'vacaciones') {
-                if (attendance.vacationsStart) fields.push({ label: 'Inicio vacaciones', value: formatDate(attendance.vacationsStart) });
-                if (attendance.vacationsEnd) fields.push({ label: 'Fin vacaciones', value: formatDate(attendance.vacationsEnd) });
-              }
-
-              if (attendance.returnToWorkDate) {
-                fields.push({ label: 'Reincorporación', value: formatDate(attendance.returnToWorkDate) });
-              }
-
-              // Preparar badges
-              const badges = [
-                {
-                  text: attendance.type,
-                  soft: true,
-                  variant: attendance.type === 'inasistencia' ? 'danger' :
-                          attendance.type === 'tardanza' ? 'warning' :
-                          attendance.type === 'licencia medica' ? 'info' :
-                          attendance.type === 'vacaciones' ? 'primary' : 'primary'
-                },
-                {
-                  text: attendance.justified ? 'Justificado' : 'No justificado',
-                  soft: true,
-                  variant: attendance.justified ? 'success' : 'danger'
-                },
-                {
-                  text: attendance.lostPresentismo ? 'Sin presentismo' : 'Con presentismo',
-                  soft: true,
-                  variant: attendance.lostPresentismo ? 'danger' : 'success'
-                }
-              ];
-
-              // Preparar acciones
-              const actions = [
-                {
-                  text: 'Editar',
-                  variant: 'primary',
-                  onClick: () => window.location.href = `/attendance/edit/${attendance._id}`
-                },
-                {
-                  text: 'Eliminar',
-                  variant: 'danger',
-                  onClick: () => handleDelete(attendance._id)
-                }
-              ];
-
-              // Agregar acción de ver certificado si existe
-              if (attendance.justificationDocument) {
-                actions.unshift({
-                  text: 'Ver certificado',
-                  variant: 'outline-secondary',
-                  onClick: () => openViewer(attendance.justificationDocument)
-                });
-              }
-
-              return (
-                <div key={attendance._id} className="mb-3">
-                  <MobileCard
-                    title={attendance.employee ? `${attendance.employee.nombre} ${attendance.employee.apellido}` : 'Empleado desconocido'}
-                    subtitle={`Legajo: ${attendance.employee?.legajo || '-'}`}
-                    accentColor="#f59e0b"
-                    fields={fields}
-                    badges={badges}
-                    actions={actions}
-                  />
-                </div>
-              );
-            })
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-muted">No hay registros que coincidan con los filtros</p>
-            </div>
-          )}
-          <div className="d-flex justify-content-between align-items-center mt-3">
-            <small className="text-muted">Total: {totalCount} — Página {page} de {totalPages}</small>
-            <div>
-              <Button variant="outline-secondary" size="sm" className="me-2" disabled={!canPrev} onClick={goPrev}>Anterior</Button>
-              <Button variant="outline-secondary" size="sm" disabled={!canNext} onClick={goNext}>Siguiente</Button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <DocumentViewerModal 
+      <DocumentViewerModal
         show={viewerOpen}
-        onHide={closeViewer}
+        onHide={() => { setViewerOpen(false); setViewerUrl(null); }}
         url={viewerUrl}
         title="Documento de asistencia"
       />
-    </div>
+    </Box>
   );
 };
 
