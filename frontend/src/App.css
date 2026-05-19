@@ -1,5 +1,5 @@
 /* Import tipografía Inter para mayor legibilidad */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
 /* Variables CSS para tema consistente (paleta clara y amigable) */
 :root {
@@ -38,10 +38,10 @@ button { cursor: pointer; }
   /* Fondo más limpio y menos grisáceo */
   background: linear-gradient(135deg, #ffffff 0%, var(--light-bg) 100%);
   /* Variables tipográficas */
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-hero: 'Inter', 'Montserrat', sans-serif;
-  --font-alt: 'Inter', 'Exo 2', sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-hero: 'Plus Jakarta Sans', sans-serif;
+  --font-alt: 'Plus Jakarta Sans', sans-serif;
 
   font-family: var(--font-body);
   color: var(--text-primary);
@@ -1106,14 +1106,14 @@ input[type="month"] {
 /* Contenedor de sección con banda superior morada como en el screenshot */
 .section-box {
   background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: 18px;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(229,231,235,0.80);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 6px 20px rgba(15,23,42,0.06);
   overflow: hidden;
 }
 .section-box .section-band {
-  height: 10px;
-  background: linear-gradient(90deg, var(--primary-dark), var(--accent-color));
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color, #4f46e5), var(--accent-color, #10b981));
 }
 .section-box .section-body {
   padding: 1rem;
@@ -1196,7 +1196,7 @@ input[type="month"] {
 }
 
 .quick-actions-card .card-header {
-  background: linear-gradient(135deg, rgba(124,58,237,0.95) 0%, rgba(96,165,250,0.95) 100%);
+  background: linear-gradient(135deg, #6d28d9 0%, #3b82f6 100%);
   border-bottom: none;
 }
 
@@ -2123,37 +2123,31 @@ input[type="month"] {
 
 /* Alternative KPI metric card */
 .kpi-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow .2s ease, transform .15s ease;
+  background: #ffffff;
+  border: 1px solid rgba(229,231,235,0.80);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 4px 14px rgba(15,23,42,0.06);
+  transition: box-shadow .2s ease, transform .2s ease;
   position: relative;
   overflow: hidden;
 }
 .kpi-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-dark), var(--accent-color));
+  display: none;
 }
 .kpi-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 20px rgba(15,23,42,0.10);
   transform: translateY(-2px);
 }
 .kpi-icon {
-  width: clamp(34px, 3.4vw, 44px);
-  height: clamp(34px, 3.4vw, 44px);
-  border-radius: 12px;
+  width: clamp(36px, 3.4vw, 44px);
+  height: clamp(36px, 3.4vw, 44px);
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-  border: 1px solid var(--color-gray-200, rgba(0,0,0,0.06));
-  box-shadow: inset 0 2px 6px rgba(15,23,42,0.06);
+  background: color-mix(in srgb, var(--kpi-accent, var(--primary-color, #4f46e5)) 12%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--kpi-accent, var(--primary-color, #4f46e5)) 18%, #ffffff);
+  flex-shrink: 0;
 }
 .kpi-title {
   font-size: clamp(0.72rem, 1.4vw, 0.88rem);
@@ -2167,23 +2161,24 @@ input[type="month"] {
 .kpi-delta {
   display: inline-flex;
   align-items: center;
-  gap: clamp(4px, 1.2vw, 6px);
-  padding: 4px 10px;
+  gap: 3px;
+  padding: 3px 8px;
   border-radius: 999px;
   font-weight: 600;
-  font-size: clamp(0.75rem, 1.8vw, 0.9rem);
-  border: none;
-  background: transparent;
-  opacity: .85;
+  font-size: clamp(0.68rem, 1.3vw, 0.76rem);
 }
 .kpi-delta.up {
-  color: var(--color-green-700, #166534);
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 .kpi-delta.down {
-  color: var(--color-red-700, #991b1b);
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 .kpi-delta-symbol {
-  font-size: .9rem;
+  font-size: .75rem;
   line-height: 1;
 }
 
@@ -2481,35 +2476,34 @@ input[type="month"] {
    ============================================= */
 .kpi-card.leaflet {
   background: #fff;
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+  border: 1px solid rgba(229,231,235,0.80);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 6px 20px rgba(15,23,42,0.07);
 }
 .kpi-card.leaflet::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
-  width: 6px;
-  height: 100%;
-  background: linear-gradient(180deg, var(--kpi-accent, var(--primary-dark)), color-mix(in srgb, var(--kpi-accent, var(--accent-color)) 70%, transparent));
-  opacity: 0.9;
+  width: 100%;
+  height: 3px;
+  background: var(--kpi-accent, var(--primary-color, #4f46e5));
+  border-radius: 1rem 1rem 0 0;
+  opacity: 1;
 }
 .kpi-card.leaflet::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-top: 16px solid rgba(241,245,249,0.95);
-  border-left: 16px solid transparent;
-  filter: drop-shadow(0 1px 1px rgba(15,23,42,0.06));
+  display: none;
 }
 .kpi-card.leaflet .card-body {
-  padding: clamp(0.8rem, 2.2vw, 1.2rem);
+  padding: clamp(0.9rem, 2.2vw, 1.25rem);
 }
 .kpi-card.leaflet .kpi-icon {
-  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  background: color-mix(in srgb, var(--kpi-accent, var(--primary-color, #4f46e5)) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--kpi-accent, var(--primary-color, #4f46e5)) 18%, #ffffff);
+}
+.kpi-card.leaflet:hover {
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--kpi-accent, var(--primary-dark)) 16%, transparent),
+              0 2px 6px rgba(15,23,42,0.06);
+  transform: translateY(-3px);
 }
 @media (max-width: 576px) {
   /* Aplicar aspecto cuadrado solo en móviles XS */

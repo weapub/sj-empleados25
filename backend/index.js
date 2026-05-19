@@ -113,9 +113,9 @@ if (process.env.NODE_ENV !== 'production') {
           middleware.handle.stack.forEach((handler) => {
             const methods = Object.keys(handler.route.methods || {}).join(',');
             routes.push(`[router] ${methods} ${handler.route.path}`);
-          }
-        });
-      }
+          });
+        }
+      });
       res.json({ routes });
     } catch (e) {
       res.status(500).json({ error: e.message });

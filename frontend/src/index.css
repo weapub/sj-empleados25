@@ -2,7 +2,7 @@
 
 /* Tokens de tema en CSS estándar para evitar avisos del linter */
 :root {
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -14,9 +14,7 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Mejoras globales para móviles */
@@ -34,46 +32,34 @@ code {
 /* Componentes hoja (equivalentes a @apply) en CSS estándar */
 .leaflet-panel {
   background-color: #ffffff;
-  border-radius: 0.75rem; /* rounded-xl */
-  /* shadow-md */
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-  border: 1px solid rgba(229, 231, 235, 0.70); /* border-slate-200/70 */
-  position: relative; /* relative */
-  overflow: hidden; /* overflow-hidden */
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 6px 20px rgba(15,23,42,0.06);
+  border: 1px solid rgba(229, 231, 235, 0.80);
+  position: relative;
+  overflow: hidden;
 }
 .leaflet-header {
-  background-color: #ffffff; /* bg-white */
-  border-top-left-radius: 0.75rem; /* rounded-t-xl */
-  border-top-right-radius: 0.75rem; /* rounded-t-xl */
-  padding-left: 1rem; /* px-4 */
-  padding-right: 1rem; /* px-4 */
-  padding-top: 0.75rem; /* py-3 */
-  padding-bottom: 0.75rem; /* py-3 */
-  border-bottom: 1px solid rgba(229, 231, 235, 0.60); /* border-b border-slate-200/60 */
+  background-color: #ffffff;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.60);
 }
 .leaflet-body {
-  padding: 1rem; /* p-4 */
+  padding: 1.25rem;
 }
 
-/* Acento lateral y esquina doblada del panel leaflet */
+/* Franja de acento superior */
 .leaflet-panel::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
-  width: 6px;
-  height: 100%;
-  background: linear-gradient(180deg, var(--leaflet-accent, var(--primary-dark)), color-mix(in srgb, var(--leaflet-accent, var(--accent-color)) 70%, transparent));
-  opacity: 0.9;
+  width: 100%;
+  height: 3px;
+  background: var(--leaflet-accent, var(--primary-color, #4f46e5));
+  border-radius: 1rem 1rem 0 0;
 }
 .leaflet-panel::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-top: 16px solid rgba(241,245,249,0.95);
-  border-left: 16px solid transparent;
-  filter: drop-shadow(0 1px 1px rgba(15,23,42,0.06));
+  display: none;
 }
