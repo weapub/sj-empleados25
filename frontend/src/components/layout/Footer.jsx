@@ -5,7 +5,7 @@ const Footer = () => (
   <Box
     component="footer"
     sx={{
-      py: 1.5,
+      py: 2,
       px: 3,
       textAlign: 'center',
       bgcolor: 'background.paper',
@@ -14,7 +14,7 @@ const Footer = () => (
       mt: 'auto',
     }}
   >
-    <Typography variant="caption" color="text.secondary">
+    <Typography variant="body2" color="text.secondary">
       Desarrollado por{' '}
       <MuiLink
         href="https://wa.me/5493704602028"
@@ -23,6 +23,7 @@ const Footer = () => (
         underline="hover"
         color="primary"
         title="Contactar a Iván García por WhatsApp"
+        fontWeight={600}
       >
         Iván García
       </MuiLink>

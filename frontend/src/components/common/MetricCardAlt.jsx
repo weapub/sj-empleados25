@@ -1,5 +1,6 @@
 import React from 'react';
 import { Grid, Card, CardContent, Box, Typography, Chip, Skeleton } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 
 const MetricCardAlt = ({
@@ -13,7 +14,12 @@ const MetricCardAlt = ({
   to = null,
   onClick,
 }) => {
+  const theme = useTheme();
   const isDown = typeof delta === 'string' && delta.trim().startsWith('-');
+
+  const chipBg     = isDown ? alpha(theme.palette.error.main, 0.15)   : alpha(theme.palette.success.main, 0.15);
+  const chipColor  = isDown ? theme.palette.error.main                 : theme.palette.success.main;
+  const chipBorder = isDown ? alpha(theme.palette.error.main, 0.35)   : alpha(theme.palette.success.main, 0.35);
 
   const inner = (
     <Card
@@ -25,7 +31,7 @@ const MetricCardAlt = ({
         borderTop: `4px solid ${color}`,
         transition: 'box-shadow 0.22s ease, transform 0.22s ease',
         '&:hover': (to || onClick) ? {
-          boxShadow: `0 6px 24px ${color}28, 0 2px 8px rgba(15,23,42,0.07)`,
+          boxShadow: `0 6px 24px ${color}28, 0 2px 8px ${alpha(theme.palette.text.primary, 0.07)}`,
           transform: 'translateY(-3px)',
         } : {},
       }}
@@ -41,7 +47,7 @@ const MetricCardAlt = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              bgcolor: `${color}18`,
+              bgcolor: alpha(color, 0.12),
               color,
               flexShrink: 0,
             }}
@@ -57,9 +63,9 @@ const MetricCardAlt = ({
                 height: 22,
                 fontSize: '0.7rem',
                 fontWeight: 700,
-                bgcolor: isDown ? '#FEE2E2' : '#DCFCE7',
-                color:   isDown ? '#B91C1C'  : '#15803D',
-                border:  `1px solid ${isDown ? '#FECACA' : '#BBF7D0'}`,
+                bgcolor: chipBg,
+                color: chipColor,
+                border: `1px solid ${chipBorder}`,
               }}
             />
           )}

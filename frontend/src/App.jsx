@@ -4,6 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
 import buildTheme, { SIDEBAR_WIDTH } from './theme';
+import { getCurrentUser } from './services/api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -39,8 +40,14 @@ function App() {
   const [colorMode, setColorMode]             = useState(
     () => localStorage.getItem('colorMode') || 'light'
   );
+  const [currentUser, setCurrentUser]         = useState(null);
 
   const theme = useMemo(() => buildTheme(colorMode), [colorMode]);
+
+  useEffect(() => {
+    if (!isAuthenticated) { setCurrentUser(null); return; }
+    getCurrentUser().then(setCurrentUser).catch(() => {});
+  }, [isAuthenticated]);
 
   const toggleColorMode = () => {
     setColorMode(prev => {
@@ -97,6 +104,7 @@ function App() {
               onMobileMenuToggle={() => setMobileOpen(prev => !prev)}
               colorMode={colorMode}
               onToggleColorMode={toggleColorMode}
+              currentUser={currentUser}
             />
 
             <Box

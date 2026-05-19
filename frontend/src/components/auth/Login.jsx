@@ -3,6 +3,7 @@ import {
   Box, Card, CardContent, TextField, Button, Typography,
   Alert, CircularProgress, InputAdornment, IconButton,
 } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import {
   Email as EmailIcon,
   Lock as LockIcon,
@@ -13,6 +14,7 @@ import { login } from '../../services/api';
 import { BRAND_NAME, BRAND_LOGO_PATH } from '../../config/branding';
 
 const Login = ({ login: loginUser }) => {
+  const theme = useTheme();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
@@ -48,7 +50,7 @@ const Login = ({ login: loginUser }) => {
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: 'background.default',
-        backgroundImage: 'radial-gradient(ellipse at 60% 0%, rgba(59,130,246,0.10) 0%, transparent 65%)',
+        backgroundImage: `radial-gradient(ellipse at 60% 0%, ${alpha(theme.palette.primary.main, 0.12)} 0%, transparent 65%)`,
         p: 2,
       }}
     >

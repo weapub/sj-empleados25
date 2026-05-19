@@ -141,7 +141,7 @@ const Dashboard = () => {
       {/* Page header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <LayoutIcon sx={{ fontSize: 28 }} />
+          <LayoutIcon sx={{ fontSize: 22 }} />
           Dashboard de Gestión
         </Typography>
         <Typography variant="body2" color="text.secondary" mt={0.5}>
@@ -173,7 +173,7 @@ const Dashboard = () => {
       <SectionBlock title="Acciones Rápidas" icon={<UsersIcon />}>
         <Grid container spacing={1.5}>
           {quickActions.map(({ label, to, icon, color }) => (
-            <Grid item xs={12} sm={6} md={3} key={to}>
+            <Grid item xs={12} sm={6} md={4} key={to}>
               <Button
                 component={Link}
                 to={to}
@@ -189,21 +189,21 @@ const Dashboard = () => {
           ))}
 
           {/* WhatsApp presentismo */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4}>
             <Button
               variant="outlined"
               fullWidth
               startIcon={sendingReport ? <CircularProgress size={16} /> : <WhatsAppIcon />}
               disabled={sendingReport}
               onClick={handleSendPresentismoReport}
-              sx={{ py: 1.5, borderRadius: 2.5, color: '#16A34A', borderColor: '#16A34A', '&:hover': { borderColor: '#15803D', bgcolor: '#F0FDF4' } }}
+              sx={{ py: 1.5, borderRadius: 2.5, color: '#16A34A', borderColor: '#16A34A', '&:hover': { borderColor: '#15803D', bgcolor: 'rgba(22,163,74,0.06)' } }}
             >
               {sendingReport ? 'Preparando...' : 'Informe Presentismo'}
             </Button>
           </Grid>
 
           {/* Configurar destinatarios */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={4}>
             <Button
               component={Link}
               to="/admin/presentismo/recipients"
@@ -337,12 +337,12 @@ const SectionBlock = ({ title, icon, children, mb = 0 }) => (
       boxShadow: '0 1px 3px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.05)',
     }}
   >
-    <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 1.75, display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
       <Box sx={{ color: 'primary.main', display: 'flex' }}>{icon}</Box>
-      <Typography variant="h6" fontWeight={600} fontSize="1rem">{title}</Typography>
+      <Typography variant="h6" fontWeight={600} fontSize="0.9375rem">{title}</Typography>
     </Box>
     <Divider />
-    <Box sx={{ p: { xs: 2, sm: 2.5 } }}>{children}</Box>
+    <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 2 }}>{children}</Box>
   </Paper>
 );
 

@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 
-export const SIDEBAR_WIDTH = 260;
+export const SIDEBAR_WIDTH = 240;
 
 const PALETTE_SHARED = {
   primary:   { light: '#A379FF', main: '#8C57FF', dark: '#7E4EE6', contrastText: '#FFFFFF' },

@@ -57,7 +57,7 @@ const NavItem = ({ to, label, icon, end, onNavigate }) => (
           position: 'relative',
         },
         '&:hover': {
-          background: 'rgba(58,53,65,0.04)',
+          bgcolor: 'action.hover',
           color: 'text.primary',
           '& .MuiListItemIcon-root': { color: 'text.primary' },
         },
@@ -202,7 +202,8 @@ const Sidebar = ({ isAuthenticated, logout, mobileOpen, onMobileClose }) => {
     '& .MuiDrawer-paper': {
       width: SIDEBAR_WIDTH,
       boxSizing: 'border-box',
-      borderRight: '1px solid rgba(58,53,65,0.12)',
+      borderRight: '1px solid',
+      borderColor: 'divider',
       bgcolor: 'background.paper',
       backgroundImage: 'none',
     },

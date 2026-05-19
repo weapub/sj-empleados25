@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AppBar, Toolbar, IconButton, Box, Button, Avatar, Typography, Tooltip,
+  AppBar, Toolbar, IconButton, Box, Button, Avatar, Typography, Tooltip, Chip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -13,18 +13,23 @@ import { NavLink } from 'react-router-dom';
 import { SIDEBAR_WIDTH } from '../../theme';
 import { BRAND_NAME, BRAND_LOGO_PATH } from '../../config/branding';
 
-const Navbar = ({ isAuthenticated, logout, onMobileMenuToggle, colorMode, onToggleColorMode }) => {
+const Navbar = ({ isAuthenticated, logout, onMobileMenuToggle, colorMode, onToggleColorMode, currentUser }) => {
   const [logoOk, setLogoOk] = React.useState(true);
 
   const ModeToggle = () => (
     <Tooltip title={colorMode === 'dark' ? 'Modo claro' : 'Modo oscuro'}>
-      <IconButton onClick={onToggleColorMode} size="small" sx={{ ml: 0.5 }}>
+      <IconButton onClick={onToggleColorMode} size="small">
         {colorMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
       </IconButton>
     </Tooltip>
   );
 
   if (isAuthenticated) {
+    const initials = currentUser?.nombre
+      ? currentUser.nombre.charAt(0).toUpperCase()
+      : 'U';
+    const roleLabel = currentUser?.role === 'admin' ? 'Admin' : currentUser?.role || '';
+
     return (
       <AppBar
         position="sticky"
@@ -42,6 +47,31 @@ const Navbar = ({ isAuthenticated, logout, onMobileMenuToggle, colorMode, onTogg
           >
             <MenuIcon />
           </IconButton>
+
+          {/* User greeting — desktop only */}
+          {currentUser && (
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1.5 }}>
+              <Avatar
+                sx={{
+                  width: 32, height: 32, fontSize: 13, fontWeight: 700,
+                  background: 'linear-gradient(135deg, #8C57FF 0%, #16B1FF 100%)',
+                }}
+              >
+                {initials}
+              </Avatar>
+              <Box>
+                <Typography variant="body2" fontWeight={600} lineHeight={1.2}>
+                  {currentUser.nombre || currentUser.email}
+                </Typography>
+                {roleLabel && (
+                  <Typography variant="caption" color="text.secondary" lineHeight={1}>
+                    {roleLabel}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          )}
+
           <Box sx={{ flex: 1 }} />
           <ModeToggle />
         </Toolbar>
