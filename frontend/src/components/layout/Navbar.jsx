@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AppBar, Toolbar, IconButton, Box, Button, Avatar, Typography, Tooltip, Chip,
+  AppBar, Toolbar, IconButton, Box, Button, Avatar, Typography, Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,

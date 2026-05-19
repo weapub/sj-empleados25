@@ -1,86 +1,83 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Alert } from 'react-bootstrap';
+import {
+  Box, Paper, Grid, Typography, TextField, Button, Switch,
+  FormControlLabel, Divider, CircularProgress, Alert, MenuItem,
+} from '@mui/material';
+import {
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  PersonAdd as PersonAddIcon,
+  Edit as EditIcon,
+  Person as PersonIcon,
+  Work as WorkIcon,
+} from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createEmployee, getEmployeeById, updateEmployee } from '../../services/api';
 
-const EmployeeForm = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const isEditing = !!id;
+const SectionBlock = ({ title, icon, children }) => (
+  <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider', overflow: 'hidden' }}>
+    <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+      <Box sx={{ color: 'primary.main', display: 'flex' }}>{icon}</Box>
+      <Typography variant="subtitle1" fontWeight={700} fontSize="0.9375rem">{title}</Typography>
+    </Box>
+    <Box sx={{ p: 2.5 }}>
+      <Grid container spacing={2.5}>{children}</Grid>
+    </Box>
+  </Paper>
+);
 
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    dni: '',
-    email: '',
-    telefono: '',
-    puesto: '',
-    departamento: '',
-    salario: '',
-    fechaContratacion: '',
-    activo: true,
-    cuit: '',
-    fechaIngreso: '',
-    fechaRegistroARCA: '',
-    fechaNacimiento: '',
-    lugarNacimiento: '',
-    domicilio: '',
-    sucursal: ''
-  });
-  
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+const Field = ({ children, xs = 12, sm = 6 }) => (
+  <Grid item xs={xs} sm={sm}>{children}</Grid>
+);
+
+const EMPTY_FORM = {
+  nombre: '', apellido: '', dni: '', email: '', telefono: '',
+  puesto: '', departamento: '', salario: '', fechaContratacion: '',
+  activo: true, cuit: '', fechaIngreso: '', fechaRegistroARCA: '',
+  fechaNacimiento: '', lugarNacimiento: '', domicilio: '', sucursal: '',
+};
+
+const fmtDate = (d) => d ? new Date(d).toISOString().split('T')[0] : '';
+
+const EmployeeForm = () => {
+  const { id }      = useParams();
+  const navigate    = useNavigate();
+  const isEditing   = !!id;
+
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [fetching, setFetching] = useState(isEditing);
 
   useEffect(() => {
-    if (isEditing) {
-      const fetchEmployee = async () => {
-        try {
-          const data = await getEmployeeById(id);
-          // Formatear la fecha para el input date
-          const fmt = (d) => (d ? new Date(d).toISOString().split('T')[0] : '');
-          const fechaFormateada = fmt(data.fechaContratacion);
-          const fechaIngreso = fmt(data.fechaIngreso);
-          const fechaRegistroARCA = fmt(data.fechaRegistroARCA);
-          const fechaNacimiento = fmt(data.fechaNacimiento);
-          
-          setFormData({
-            ...data,
-            fechaContratacion: fechaFormateada,
-            fechaIngreso,
-            fechaRegistroARCA,
-            fechaNacimiento
-          });
-        } catch (err) {
-          setError('Error al cargar los datos del empleado');
-          console.error(err);
-        }
-      };
-      
-      fetchEmployee();
-    }
+    if (!isEditing) return;
+    getEmployeeById(id)
+      .then(data => setFormData({
+        ...data,
+        fechaContratacion:  fmtDate(data.fechaContratacion),
+        fechaIngreso:       fmtDate(data.fechaIngreso),
+        fechaRegistroARCA:  fmtDate(data.fechaRegistroARCA),
+        fechaNacimiento:    fmtDate(data.fechaNacimiento),
+      }))
+      .catch(() => setError('Error al cargar los datos del empleado'))
+      .finally(() => setFetching(false));
   }, [id, isEditing]);
 
-  const onChange = e => {
+  const onChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData({ ...formData, [e.target.name]: value });
+    setFormData(prev => ({ ...prev, [e.target.name]: value }));
   };
 
-  const onSubmit = async e => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
     try {
-      // Sanitizar fechas vacías a null para evitar casts inválidos
       const payload = { ...formData };
-      ['fechaContratacion','fechaIngreso','fechaRegistroARCA','fechaNacimiento'].forEach((k) => {
-        if (payload[k] === '') payload[k] = null;
-      });
-      if (isEditing) {
-        await updateEmployee(id, payload);
-      } else {
-        await createEmployee(payload);
-      }
+      ['fechaContratacion','fechaIngreso','fechaRegistroARCA','fechaNacimiento']
+        .forEach(k => { if (payload[k] === '') payload[k] = null; });
+      if (isEditing) await updateEmployee(id, payload);
+      else           await createEmployee(payload);
       navigate('/employees');
     } catch (err) {
       setError(err.response?.data?.message || 'Error al guardar el empleado');
@@ -89,262 +86,101 @@ const EmployeeForm = () => {
     }
   };
 
+  if (fetching) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}><CircularProgress /></Box>
+  );
+
+  const legajoPreview = formData.dni ? `SJ-${String(formData.dni).replace(/\D/g, '')}` : '';
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{isEditing ? 'Editar Empleado' : 'Nuevo Empleado'}</h1>
-      <Card className="shadow-sm border border-slate-200/70">
-        <Card.Body className="pt-3">
-          {error && <Alert variant="danger">{error}</Alert>}
-          <Form onSubmit={onSubmit}>
-            <div className="row">
-              <div className="col-12 col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Nombre</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={onChange}
-                    required
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-12 col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Apellido</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="apellido"
-                    value={formData.apellido}
-                    onChange={onChange}
-                    required
-                  />
-                </Form.Group>
-              </div>
-            </div>
+    <Box component="form" onSubmit={onSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-            <div className="row">
-              <div className="col-12 col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>DNI</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="dni"
-                    value={formData.dni}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-12 col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Legajo (se genera automáticamente)</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={formData.dni ? `SJ-${String(formData.dni).replace(/\D/g,'')}` : ''}
-                    disabled
-                  />
-                </Form.Group>
-              </div>
-            </div>
+      {/* ── Header ── */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {isEditing ? <EditIcon sx={{ fontSize: 22 }} /> : <PersonAddIcon sx={{ fontSize: 22 }} />}
+            {isEditing ? 'Editar Empleado' : 'Nuevo Empleado'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>
+            {isEditing ? 'Modificá los datos del empleado' : 'Completá los datos para registrar un nuevo empleado'}
+          </Typography>
+        </Box>
+        <Button variant="outlined" startIcon={<BackIcon />} onClick={() => navigate('/employees')}>
+          Cancelar
+        </Button>
+      </Box>
 
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={onChange}
-                    required
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Teléfono</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-            </div>
+      {error && <Alert severity="error" onClose={() => setError('')}>{error}</Alert>}
 
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Puesto</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="puesto"
-                    value={formData.puesto}
-                    onChange={onChange}
-                    required
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Departamento</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="departamento"
-                    value={formData.departamento}
-                    onChange={onChange}
-                    required
-                  />
-                </Form.Group>
-              </div>
-            </div>
+      {/* ── Datos personales ── */}
+      <SectionBlock title="Datos Personales" icon={<PersonIcon fontSize="small" />}>
+        <Field><TextField label="Nombre" name="nombre" value={formData.nombre} onChange={onChange} required fullWidth size="small" /></Field>
+        <Field><TextField label="Apellido" name="apellido" value={formData.apellido} onChange={onChange} required fullWidth size="small" /></Field>
+        <Field><TextField label="DNI" name="dni" value={formData.dni} onChange={onChange} fullWidth size="small" /></Field>
+        <Field>
+          <TextField
+            label="Legajo (generado automáticamente)"
+            value={legajoPreview}
+            disabled
+            fullWidth
+            size="small"
+          />
+        </Field>
+        <Field><TextField label="CUIT" name="cuit" value={formData.cuit} onChange={onChange} fullWidth size="small" /></Field>
+        <Field><TextField label="Email" name="email" type="email" value={formData.email} onChange={onChange} required fullWidth size="small" /></Field>
+        <Field><TextField label="Teléfono" name="telefono" value={formData.telefono} onChange={onChange} fullWidth size="small" /></Field>
+        <Field>
+          <TextField label="Fecha de Nacimiento" name="fechaNacimiento" type="date" value={formData.fechaNacimiento} onChange={onChange} fullWidth size="small"
+            slotProps={{ inputLabel: { shrink: true } }} />
+        </Field>
+        <Field><TextField label="Lugar de Nacimiento" name="lugarNacimiento" value={formData.lugarNacimiento} onChange={onChange} fullWidth size="small" /></Field>
+        <Field xs={12} sm={12}><TextField label="Domicilio" name="domicilio" value={formData.domicilio} onChange={onChange} fullWidth size="small" /></Field>
+      </SectionBlock>
 
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Salario</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="salario"
-                    value={formData.salario}
-                    onChange={onChange}
-                    required
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Contratación</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="fechaContratacion"
-                    value={formData.fechaContratacion}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-            </div>
+      {/* ── Datos laborales ── */}
+      <SectionBlock title="Datos Laborales" icon={<WorkIcon fontSize="small" />}>
+        <Field><TextField label="Puesto" name="puesto" value={formData.puesto} onChange={onChange} required fullWidth size="small" /></Field>
+        <Field><TextField label="Departamento" name="departamento" value={formData.departamento} onChange={onChange} required fullWidth size="small" /></Field>
+        <Field><TextField label="Sucursal" name="sucursal" value={formData.sucursal} onChange={onChange} fullWidth size="small" /></Field>
+        <Field>
+          <TextField label="Salario" name="salario" type="number" value={formData.salario} onChange={onChange} required fullWidth size="small"
+            slotProps={{ input: { inputProps: { min: 0 } } }} />
+        </Field>
+        <Field>
+          <TextField label="Fecha de Contratación" name="fechaContratacion" type="date" value={formData.fechaContratacion} onChange={onChange} fullWidth size="small"
+            slotProps={{ inputLabel: { shrink: true } }} />
+        </Field>
+        <Field>
+          <TextField label="Fecha de Ingreso" name="fechaIngreso" type="date" value={formData.fechaIngreso} onChange={onChange} fullWidth size="small"
+            slotProps={{ inputLabel: { shrink: true } }} />
+        </Field>
+        <Field>
+          <TextField label="Fecha de Registro en ARCA" name="fechaRegistroARCA" type="date" value={formData.fechaRegistroARCA} onChange={onChange} fullWidth size="small"
+            slotProps={{ inputLabel: { shrink: true } }} />
+        </Field>
+        <Field xs={12} sm={12}>
+          <FormControlLabel
+            control={<Switch name="activo" checked={!!formData.activo} onChange={onChange} color="success" />}
+            label={<Typography variant="body2" fontWeight={500}>Empleado activo</Typography>}
+          />
+        </Field>
+      </SectionBlock>
 
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>CUIT</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="cuit"
-                    value={formData.cuit}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Ingreso</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="fechaIngreso"
-                    value={formData.fechaIngreso}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-            </div>
+      {/* ── Footer ── */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+        <Button variant="outlined" onClick={() => navigate('/employees')}>Cancelar</Button>
+        <Button
+          type="submit"
+          variant="contained"
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+          disabled={loading}
+        >
+          {loading ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Crear empleado'}
+        </Button>
+      </Box>
 
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Registro en ARCA</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="fechaRegistroARCA"
-                    value={formData.fechaRegistroARCA}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Nacimiento</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="fechaNacimiento"
-                    value={formData.fechaNacimiento}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Lugar de Nacimiento</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="lugarNacimiento"
-                    value={formData.lugarNacimiento}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Domicilio</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="domicilio"
-                    value={formData.domicilio}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Sucursal</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="sucursal"
-                    value={formData.sucursal}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Check
-                    type="checkbox"
-                    label="Activo"
-                    name="activo"
-                    checked={formData.activo}
-                    onChange={onChange}
-                  />
-                </Form.Group>
-              </div>
-            </div>
-
-            <div className="d-flex justify-content-between mt-2">
-              <Button 
-                variant="secondary" 
-                onClick={() => navigate('/employees')}
-              >
-                Cancelar
-              </Button>
-              <Button 
-                variant="primary" 
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Guardando...' : 'Guardar'}
-              </Button>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </div>
+    </Box>
   );
 };
 

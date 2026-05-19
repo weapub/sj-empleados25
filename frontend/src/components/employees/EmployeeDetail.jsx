@@ -1,108 +1,112 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Alert, Spinner, ListGroup, Form, Row, Col } from 'react-bootstrap';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import {
+  Box, Paper, Grid, Typography, Avatar, Button, Chip, IconButton, Tooltip,
+  Divider, TextField, MenuItem, List, ListItem, ListItemText, CircularProgress,
+  Alert,
+} from '@mui/material';
+import {
+  ArrowBack as BackIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  WhatsApp as WhatsAppIcon,
+  Person as PersonIcon,
+  Work as WorkIcon,
+  EventNote as EventIcon,
+  Send as SendIcon,
+} from '@mui/icons-material';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getEmployeeById, deleteEmployee, getEmployeeEvents, createEmployeeEvent } from '../../services/api';
+import Swal from 'sweetalert2';
+
+const avatarColor = (name = '') => {
+  const colors = ['#8C57FF','#16B1FF','#56CA00','#FFB400','#FF4C51','#A379FF'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+};
+
+const fmt = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
+
+const InfoRow = ({ label, value }) => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+    <Typography variant="caption" color="text.disabled" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      {label}
+    </Typography>
+    <Typography variant="body2" fontWeight={500} color="text.primary">
+      {value || '—'}
+    </Typography>
+  </Box>
+);
+
+const SectionPaper = ({ title, icon, children }) => (
+  <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider', overflow: 'hidden' }}>
+    <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ color: 'primary.main', display: 'flex' }}>{icon}</Box>
+      <Typography variant="subtitle1" fontWeight={700} fontSize="0.9375rem">{title}</Typography>
+    </Box>
+    <Box sx={{ p: 2.5 }}>{children}</Box>
+  </Paper>
+);
+
+const EVENT_TYPES = [
+  { value: 'general',           label: 'General' },
+  { value: 'recibo',            label: 'Recibo' },
+  { value: 'disciplinario',     label: 'Disciplinario' },
+  { value: 'certificado_medico',label: 'Certificado Médico' },
+  { value: 'vacaciones',        label: 'Vacaciones' },
+  { value: 'presentacion',      label: 'Presentación' },
+  { value: 'suspension',        label: 'Suspensión' },
+];
 
 const EmployeeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [employee, setEmployee] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [events, setEvents] = useState([]);
+  const [employee, setEmployee]         = useState(null);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState('');
+  const [events, setEvents]             = useState([]);
   const [newEventType, setNewEventType] = useState('general');
-  const [newEventMessage, setNewEventMessage] = useState('');
+  const [newEventMsg, setNewEventMsg]   = useState('');
+  const [savingEvent, setSavingEvent]   = useState(false);
 
   useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        const data = await getEmployeeById(id);
-        setEmployee(data);
-      } catch (err) {
-        setError('Error al cargar los datos del empleado');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEmployee();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const evs = await getEmployeeEvents(id);
-        setEvents(evs);
-      } catch (err) {
-        console.error('Error al cargar eventos del empleado', err);
-      }
-    };
-    fetchEvents();
+    getEmployeeById(id)
+      .then(setEmployee)
+      .catch(() => setError('Error al cargar los datos del empleado'))
+      .finally(() => setLoading(false));
+    getEmployeeEvents(id).then(setEvents).catch(() => {});
   }, [id]);
 
   const normalizeWaNumber = (raw) => {
     if (!raw) return null;
     const digits = String(raw).replace(/\D/g, '');
     if (!digits) return null;
-    // Asegurar código de país (AR: 54). wa.me requiere formato internacional sin '+'
     const withCountry = digits.startsWith('54') ? digits : `54${digits}`;
-    // Quitar ceros iniciales tras el código de país (e.g., 54011 -> 5411)
     const cleaned = `54${withCountry.slice(2).replace(/^0+/, '')}`;
-    // Si tras limpieza queda muy corto, consideramos inválido
-    if (cleaned.length < 10) return null;
-    return cleaned;
+    return cleaned.length < 10 ? null : cleaned;
   };
 
   const openWhatsApp = (text) => {
-    if (!employee || !employee.telefono) {
-      alert('No hay teléfono cargado para el empleado.');
-      return;
-    }
-    const waNumber = normalizeWaNumber(employee.telefono);
-    if (!waNumber) {
-      alert('Número de WhatsApp inválido. Verifique que incluya código de área.');
-      return;
-    }
-    const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(text || '')}`;
-    const win = window.open(url, '_blank', 'noopener');
-    if (win) {
-      win.focus();
-    } else {
-      // Fallback si el navegador bloquea popups
-      window.location.href = url;
-    }
-  };
-
-  const createEvent = async () => {
-    if (!newEventMessage.trim()) return;
-    try {
-      await createEmployeeEvent({ employeeId: id, type: newEventType, message: newEventMessage });
-      const evs = await getEmployeeEvents(id);
-      setEvents(evs);
-      setNewEventMessage('');
-    } catch (err) {
-      console.error('Error al crear evento', err);
-    }
+    if (!employee?.telefono) { Swal.fire({ icon: 'warning', title: 'Sin teléfono', text: 'No hay teléfono cargado.' }); return; }
+    const num = normalizeWaNumber(employee.telefono);
+    if (!num) { Swal.fire({ icon: 'warning', title: 'Número inválido', text: 'Verificá que incluya código de área.' }); return; }
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(text || '')}`, '_blank', 'noopener');
   };
 
   const templateMessage = (kind) => {
     const nombre = employee ? `${employee.nombre} ${employee.apellido}` : 'Empleado';
     const hoy = new Date().toLocaleDateString('es-AR');
     switch (kind) {
-      case 'recibo_disponible':
-        return `Hola ${nombre}, tu recibo de sueldo ya está disponible. Fecha ${hoy}.`;
-      case 'recibo_firmado':
-        return `Hola ${nombre}, confirmamos que tu recibo está firmado.`;
-      case 'apercibimiento':
-        return `Hola ${nombre}, se emitió un apercibimiento en tu legajo. Por favor revisa el detalle.`;
+      case 'recibo_disponible':      return `Hola ${nombre}, tu recibo de sueldo ya está disponible. Fecha ${hoy}.`;
+      case 'recibo_firmado':         return `Hola ${nombre}, confirmamos que tu recibo está firmado.`;
+      case 'apercibimiento':         return `Hola ${nombre}, se emitió un apercibimiento en tu legajo. Por favor revisá el detalle.`;
       case 'suspension': {
-        const dias = prompt('¿Cuántos días dura la suspensión?');
-        const retorno = prompt('¿Fecha de reincorporación (YYYY-MM-DD)?');
-        return `Hola ${nombre}, se te ha aplicado una suspensión de ${dias} días. Debes presentarte a trabajar el ${retorno}.`;
+        const dias   = prompt('¿Cuántos días dura la suspensión?');
+        const retorno = prompt('¿Fecha de reincorporación (DD/MM/AAAA)?');
+        return `Hola ${nombre}, se te ha aplicado una suspensión de ${dias} días. Debés presentarte el ${retorno}.`;
       }
       case 'certificado_medico_vencido': {
-        const fecha = prompt('¿Fecha de vencimiento (YYYY-MM-DD)?');
+        const fecha = prompt('¿Fecha de vencimiento?');
         return `Hola ${nombre}, venció el plazo para presentar tu certificado médico el ${fecha}.`;
       }
       case 'presentarse_trabajar': {
@@ -110,226 +114,267 @@ const EmployeeDetail = () => {
         return `Hola ${nombre}, debés presentarte a trabajar el ${fecha}.`;
       }
       case 'vacaciones': {
-        const dias = prompt('¿Cuántos días de vacaciones?');
-        const inicio = prompt('¿Fecha de inicio (YYYY-MM-DD)?');
-        const fin = prompt('¿Fecha de fin (YYYY-MM-DD)?');
+        const dias  = prompt('¿Cuántos días de vacaciones?');
+        const inicio = prompt('¿Fecha de inicio?');
+        const fin    = prompt('¿Fecha de fin?');
         return `Hola ${nombre}, tus vacaciones son de ${dias} días, desde ${inicio} hasta ${fin}.`;
       }
-      default:
-        return '';
+      default: return '';
     }
+  };
+
+  const handleCreateEvent = async () => {
+    if (!newEventMsg.trim()) return;
+    setSavingEvent(true);
+    try {
+      await createEmployeeEvent({ employeeId: id, type: newEventType, message: newEventMsg });
+      const evs = await getEmployeeEvents(id);
+      setEvents(evs);
+      setNewEventMsg('');
+    } catch { Swal.fire({ icon: 'error', title: 'Error al registrar evento' }); }
+    finally { setSavingEvent(false); }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este empleado?')) {
-      try {
-        await deleteEmployee(id);
-        navigate('/employees');
-      } catch (err) {
-        setError('Error al eliminar el empleado');
-        console.error(err);
-      }
-    }
+    const result = await Swal.fire({
+      title: '¿Eliminar empleado?',
+      text: `Esto eliminará a ${employee?.nombre} ${employee?.apellido} permanentemente.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF4C51',
+      cancelButtonColor: '#8A8D93',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await deleteEmployee(id);
+      navigate('/employees');
+    } catch { Swal.fire({ icon: 'error', title: 'Error al eliminar' }); }
   };
 
-  if (loading) {
-    return (
-      <div className="text-center my-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </Spinner>
-      </div>
-    );
-  }
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}><CircularProgress /></Box>
+  );
+  if (error) return <Alert severity="error">{error}</Alert>;
+  if (!employee) return <Alert severity="warning">No se encontró el empleado</Alert>;
 
-  if (error) {
-    return <Alert variant="danger">{error}</Alert>;
-  }
-
-  if (!employee) {
-    return <Alert variant="warning">No se encontró el empleado</Alert>;
-  }
+  const color    = avatarColor(`${employee.nombre}${employee.apellido}`);
+  const initials = `${employee.nombre?.charAt(0) || ''}${employee.apellido?.charAt(0) || ''}`.toUpperCase();
+  const legajo   = employee.legajo || (employee.dni ? `SJ-${String(employee.dni).replace(/\D/g, '')}` : '—');
 
   return (
-    <div className="space-y-4 px-4 md:px-6">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Detalles del Empleado</h1>
-        <div>
-          <Link to="/employees" className="btn btn-secondary me-2 shadow-sm">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+      {/* ── Header ── */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar sx={{ width: 56, height: 56, bgcolor: color, fontSize: 20, fontWeight: 700 }}>
+            {initials}
+          </Avatar>
+          <Box>
+            <Typography variant="h5" fontWeight={800} letterSpacing="-0.02em" lineHeight={1.2}>
+              {employee.nombre} {employee.apellido}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, mt: 0.75, flexWrap: 'wrap' }}>
+              {employee.puesto && <Chip label={employee.puesto} size="small" sx={{ borderRadius: 1.5, fontSize: '0.72rem', bgcolor: 'action.selected' }} />}
+              <Chip
+                label={employee.activo !== false ? 'Activo' : 'Inactivo'}
+                size="small"
+                sx={{
+                  borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600,
+                  bgcolor: employee.activo !== false ? 'rgba(86,202,0,0.12)' : 'rgba(255,76,81,0.12)',
+                  color:   employee.activo !== false ? '#4DB600' : '#FF4C51',
+                }}
+              />
+            </Box>
+          </Box>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Button variant="outlined" startIcon={<BackIcon />} size="small" onClick={() => navigate('/employees')}>
             Volver
-          </Link>
-          <Link to={`/employees/edit/${id}`} className="btn btn-warning me-2 shadow-sm">
+          </Button>
+          <Button variant="outlined" color="warning" startIcon={<EditIcon />} size="small" onClick={() => navigate(`/employees/edit/${id}`)}>
             Editar
-          </Link>
-          <Button variant="danger" onClick={handleDelete} className="shadow-sm">
+          </Button>
+          <Button variant="outlined" color="error" startIcon={<DeleteIcon />} size="small" onClick={handleDelete}>
             Eliminar
           </Button>
-          {events.length > 0 && (
+          {employee.telefono && (
             <Button
-              className="ms-2 shadow-sm"
-              variant="success"
-              disabled={!employee?.telefono}
-              onClick={() => openWhatsApp(`Aviso: tu legajo fue actualizado. ${events[0]?.message}`)}
+              variant="outlined"
+              size="small"
+              startIcon={<WhatsAppIcon />}
+              sx={{ color: '#16A34A', borderColor: '#16A34A', '&:hover': { bgcolor: 'rgba(22,163,74,0.06)', borderColor: '#15803D' } }}
+              onClick={() => events.length > 0
+                ? openWhatsApp(`Aviso: ${events[0]?.message}`)
+                : Swal.fire({ icon: 'info', title: 'Sin eventos', text: 'Registrá un evento primero.' })
+              }
             >
-              WhatsApp último evento
+              WhatsApp
             </Button>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      <Card className="shadow-sm border border-slate-200/70 rounded-xl">
-        <Card.Header as="h5" className="font-semibold rounded-t-xl">{employee.nombre} {employee.apellido}</Card.Header>
-        <Card.Body>
-          <ListGroup variant="flush">
-            <ListGroup.Item>
-              <strong>Legajo:</strong> {employee.legajo || (employee.dni ? `SJ-${String(employee.dni).replace(/\D/g,'')}` : 'No especificado')}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>DNI:</strong> {employee.dni || 'No especificado'}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Email:</strong> {employee.email}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Teléfono:</strong> {employee.telefono || 'No especificado'}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Puesto:</strong> {employee.puesto}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Departamento:</strong> {employee.departamento}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Salario:</strong> ${employee.salario.toLocaleString()}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Fecha de Contratación:</strong> {
-                employee.fechaContratacion 
-                  ? new Date(employee.fechaContratacion).toLocaleDateString() 
-                  : 'No especificada'
-              }
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Estado:</strong> {employee.activo ? 'Activo' : 'Inactivo'}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>CUIT:</strong> {employee.cuit || 'No especificado'}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Fecha de Ingreso:</strong> {
-                employee.fechaIngreso 
-                  ? new Date(employee.fechaIngreso).toLocaleDateString() 
-                  : 'No especificada'
-              }
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Fecha de Registro en ARCA:</strong> {
-                employee.fechaRegistroARCA 
-                  ? new Date(employee.fechaRegistroARCA).toLocaleDateString() 
-                  : 'No especificada'
-              }
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Fecha de Nacimiento:</strong> {
-                employee.fechaNacimiento 
-                  ? new Date(employee.fechaNacimiento).toLocaleDateString() 
-                  : 'No especificada'
-              }
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Lugar de Nacimiento:</strong> {employee.lugarNacimiento || 'No especificado'}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Domicilio:</strong> {employee.domicilio || 'No especificado'}
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <strong>Sucursal:</strong> {employee.sucursal || 'No especificada'}
-            </ListGroup.Item>
-          </ListGroup>
-      </Card.Body>
-      </Card>
+      {/* ── Datos ── */}
+      <Grid container spacing={2.5}>
+        {/* Personal */}
+        <Grid item xs={12} md={6}>
+          <SectionPaper title="Información Personal" icon={<PersonIcon fontSize="small" />}>
+            <Grid container spacing={2.5}>
+              <Grid item xs={6}><InfoRow label="Legajo"   value={legajo} /></Grid>
+              <Grid item xs={6}><InfoRow label="DNI"      value={employee.dni} /></Grid>
+              <Grid item xs={6}><InfoRow label="CUIT"     value={employee.cuit} /></Grid>
+              <Grid item xs={6}><InfoRow label="Teléfono" value={employee.telefono} /></Grid>
+              <Grid item xs={12}><InfoRow label="Email"   value={employee.email} /></Grid>
+              <Grid item xs={6}><InfoRow label="Fecha de Nacimiento" value={fmt(employee.fechaNacimiento)} /></Grid>
+              <Grid item xs={6}><InfoRow label="Lugar de Nacimiento" value={employee.lugarNacimiento} /></Grid>
+              <Grid item xs={12}><InfoRow label="Domicilio" value={employee.domicilio} /></Grid>
+            </Grid>
+          </SectionPaper>
+        </Grid>
 
-      <Card className="mt-4 shadow-sm border border-slate-200/70 rounded-xl">
-        <Card.Header as="h5" className="font-semibold rounded-t-xl">Eventos del Legajo</Card.Header>
-        <Card.Body>
-          <Row className="mb-3">
-            <Col md={8}>
-              <Form.Group>
-                <Form.Label>Mensaje de evento</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={2}
-                  value={newEventMessage}
-                  onChange={(e) => setNewEventMessage(e.target.value)}
-                  placeholder="Escribe un mensaje para registrar y enviar por WhatsApp"
-                />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group className="mb-2">
-                <Form.Label>Tipo</Form.Label>
-                <Form.Select value={newEventType} onChange={(e) => setNewEventType(e.target.value)}>
-                  <option value="general">General</option>
-                  <option value="recibo">Recibo</option>
-                  <option value="disciplinario">Disciplinario</option>
-                  <option value="certificado_medico">Certificado Médico</option>
-                  <option value="vacaciones">Vacaciones</option>
-                  <option value="presentacion">Presentación</option>
-                  <option value="suspension">Suspensión</option>
-                </Form.Select>
-              </Form.Group>
-              <div className="d-flex gap-2">
-                <Button variant="primary" onClick={createEvent}>Registrar evento</Button>
-                <Button
-                  variant="success"
-                  disabled={!employee?.telefono || !newEventMessage.trim()}
-                  onClick={() => openWhatsApp(newEventMessage)}
+        {/* Laboral */}
+        <Grid item xs={12} md={6}>
+          <SectionPaper title="Información Laboral" icon={<WorkIcon fontSize="small" />}>
+            <Grid container spacing={2.5}>
+              <Grid item xs={6}><InfoRow label="Puesto"       value={employee.puesto} /></Grid>
+              <Grid item xs={6}><InfoRow label="Departamento" value={employee.departamento} /></Grid>
+              <Grid item xs={6}><InfoRow label="Sucursal"     value={employee.sucursal} /></Grid>
+              <Grid item xs={6}>
+                <InfoRow label="Salario" value={employee.salario ? `$${Number(employee.salario).toLocaleString('es-AR')}` : '—'} />
+              </Grid>
+              <Grid item xs={6}><InfoRow label="Fecha de Contratación"  value={fmt(employee.fechaContratacion)} /></Grid>
+              <Grid item xs={6}><InfoRow label="Fecha de Ingreso"        value={fmt(employee.fechaIngreso)} /></Grid>
+              <Grid item xs={6}><InfoRow label="Registro ARCA"           value={fmt(employee.fechaRegistroARCA)} /></Grid>
+            </Grid>
+          </SectionPaper>
+        </Grid>
+      </Grid>
+
+      {/* ── Eventos del legajo ── */}
+      <SectionPaper title="Eventos del Legajo" icon={<EventIcon fontSize="small" />}>
+        {/* Nuevo evento */}
+        <Grid container spacing={2} alignItems="flex-end" sx={{ mb: 2.5 }}>
+          <Grid item xs={12} sm>
+            <TextField
+              label="Mensaje del evento"
+              multiline
+              rows={2}
+              fullWidth
+              size="small"
+              value={newEventMsg}
+              onChange={e => setNewEventMsg(e.target.value)}
+              placeholder="Escribí un mensaje para registrar y/o enviar por WhatsApp…"
+            />
+          </Grid>
+          <Grid item xs={12} sm="auto">
+            <TextField
+              label="Tipo"
+              select
+              size="small"
+              value={newEventType}
+              onChange={e => setNewEventType(e.target.value)}
+              sx={{ minWidth: 180 }}
+            >
+              {EVENT_TYPES.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm="auto">
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button variant="contained" onClick={handleCreateEvent} disabled={savingEvent || !newEventMsg.trim()}>
+                Registrar
+              </Button>
+              <Tooltip title={employee.telefono ? 'Enviar por WhatsApp' : 'Sin teléfono'}>
+                <span>
+                  <Button
+                    variant="outlined"
+                    startIcon={<WhatsAppIcon />}
+                    disabled={!employee.telefono || !newEventMsg.trim()}
+                    onClick={() => openWhatsApp(newEventMsg)}
+                    sx={{ color: '#16A34A', borderColor: '#16A34A', '&:hover': { bgcolor: 'rgba(22,163,74,0.06)', borderColor: '#15803D' } }}
+                  >
+                    Enviar
+                  </Button>
+                </span>
+              </Tooltip>
+            </Box>
+          </Grid>
+        </Grid>
+
+        {/* Plantillas rápidas */}
+        <Box sx={{ mb: 2.5 }}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Plantillas rápidas
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+            {[
+              ['recibo_disponible',       'Recibo disponible'],
+              ['recibo_firmado',          'Recibo firmado'],
+              ['apercibimiento',          'Apercibimiento'],
+              ['suspension',              'Suspensión'],
+              ['certificado_medico_vencido','Cert. médico vencido'],
+              ['presentarse_trabajar',    'Presentarse a trabajar'],
+              ['vacaciones',              'Vacaciones'],
+            ].map(([key, label]) => (
+              <Chip
+                key={key}
+                label={label}
+                size="small"
+                variant="outlined"
+                clickable
+                onClick={() => setNewEventMsg(templateMessage(key))}
+                sx={{ borderRadius: 1.5, fontSize: '0.75rem' }}
+              />
+            ))}
+          </Box>
+        </Box>
+
+        <Divider sx={{ mb: 2 }} />
+
+        {/* Lista de eventos */}
+        {events.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <EventIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+            <Typography color="text.secondary" variant="body2">No hay eventos registrados</Typography>
+          </Box>
+        ) : (
+          <List disablePadding>
+            {events.map((ev, i) => (
+              <React.Fragment key={ev._id}>
+                {i > 0 && <Divider />}
+                <ListItem
+                  sx={{ px: 0, py: 1.5, alignItems: 'flex-start' }}
+                  secondaryAction={
+                    <Tooltip title={employee.telefono ? 'Enviar por WhatsApp' : 'Sin teléfono'}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={!employee.telefono}
+                          onClick={() => openWhatsApp(`Aviso de San Jorge Fiambres y Quesos: ${ev.message}`)}
+                          sx={{ color: '#16A34A' }}
+                        >
+                          <SendIcon fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  }
                 >
-                  Enviar WhatsApp
-                </Button>
-              </div>
-            </Col>
-          </Row>
-
-          <div className="mb-3">
-            <strong>Plantillas rápidas:</strong>
-            <div className="d-flex flex-wrap gap-2 mt-2">
-              <Button size="sm" variant="outline-secondary" onClick={() => setNewEventMessage(templateMessage('recibo_disponible'))}>Recibo disponible</Button>
-              <Button size="sm" variant="outline-secondary" onClick={() => setNewEventMessage(templateMessage('recibo_firmado'))}>Recibo firmado</Button>
-              <Button size="sm" variant="outline-secondary" onClick={() => setNewEventMessage(templateMessage('apercibimiento'))}>Apercibimiento</Button>
-              <Button size="sm" variant="outline-secondary" onClick={() => setNewEventMessage(templateMessage('suspension'))}>Suspensión</Button>
-              <Button size="sm" variant="outline-secondary" onClick={() => setNewEventMessage(templateMessage('certificado_medico_vencido'))}>Certificado médico vencido</Button>
-              <Button size="sm" variant="outline-secondary" onClick={() => setNewEventMessage(templateMessage('presentarse_trabajar'))}>Presentarse a trabajar</Button>
-              <Button size="sm" variant="outline-secondary" onClick={() => setNewEventMessage(templateMessage('vacaciones'))}>Vacaciones</Button>
-            </div>
-          </div>
-
-          {events.length === 0 ? (
-            <Alert variant="info">No hay eventos registrados para este empleado.</Alert>
-          ) : (
-            <ListGroup>
-              {events.map((ev) => (
-                <ListGroup.Item key={ev._id} className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <div><strong>{new Date(ev.createdAt).toLocaleString('es-AR')}</strong></div>
-                    <div>{ev.message}</div>
-                  </div>
-                  <div>
-                    <Button
-                      variant="success"
-                      disabled={!employee?.telefono}
-                      onClick={() => openWhatsApp(`Aviso de San Jorge Fiambres y Quesos: ${ev.message}`)}
-                    >
-                      Enviar por WhatsApp
-                    </Button>
-                  </div>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          )}
-        </Card.Body>
-      </Card>
-    </div>
+                  <ListItemText
+                    primary={ev.message}
+                    secondary={new Date(ev.createdAt).toLocaleString('es-AR')}
+                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
+                    secondaryTypographyProps={{ variant: 'caption' }}
+                  />
+                </ListItem>
+              </React.Fragment>
+            ))}
+          </List>
+        )}
+      </SectionPaper>
+    </Box>
   );
 };
 

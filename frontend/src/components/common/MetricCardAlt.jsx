@@ -28,6 +28,7 @@ const MetricCardAlt = ({
       sx={{
         height: '100%',
         cursor: (to || onClick) ? 'pointer' : 'default',
+        borderRadius: 4,
         borderTop: `4px solid ${color}`,
         transition: 'box-shadow 0.22s ease, transform 0.22s ease',
         '&:hover': (to || onClick) ? {

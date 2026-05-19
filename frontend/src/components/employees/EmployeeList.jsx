@@ -1,204 +1,249 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Alert, Spinner } from 'react-bootstrap';
+import {
+  Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, Avatar, Chip, IconButton, Tooltip, Typography, Button,
+  CircularProgress, Alert, TextField, InputAdornment,
+} from '@mui/material';
+import {
+  People as PeopleIcon,
+  PersonAdd as PersonAddIcon,
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import { getEmployees, deleteEmployee } from '../../services/api';
-import MobileCard from '../common/MobileCard';
-import PageHeader from '../common/PageHeader';
-import SectionCard from '../common/SectionCard';
-import { Users, Plus } from 'lucide-react';
+import Swal from 'sweetalert2';
+
+const avatarColor = (name = '') => {
+  const colors = ['#8C57FF','#16B1FF','#56CA00','#FFB400','#FF4C51','#A379FF'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+};
+
+const initials = (nombre = '', apellido = '') =>
+  `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
 
 const EmployeeList = () => {
   const navigate = useNavigate();
-  const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [page, setPage] = useState(1);
+  const [employees, setEmployees]   = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState('');
+  const [page, setPage]             = useState(0);
+  const [rowsPerPage]               = useState(25);
+  const [total, setTotal]           = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [search, setSearch]         = useState('');
 
-  const fetchEmployees = async (targetPage = page) => {
+  const fetchEmployees = async (targetPage = 0) => {
     try {
       setLoading(true);
-      const resp = await getEmployees({ page: targetPage, limit: 25 });
+      const resp = await getEmployees({ page: targetPage + 1, limit: rowsPerPage });
       setEmployees(resp.data || []);
       setTotal(resp.total || 0);
       setTotalPages(resp.totalPages || 1);
-      setPage(resp.page || targetPage);
       setError('');
-    } catch (err) {
+    } catch {
       setError('Error al cargar los empleados');
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchEmployees(1);
-  }, []);
+  useEffect(() => { fetchEmployees(0); }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este empleado?')) {
-      try {
-        await deleteEmployee(id);
-        // Refrescar la página actual tras eliminar
-        fetchEmployees(page);
-      } catch (err) {
-        setError('Error al eliminar el empleado');
-        console.error(err);
-      }
+  const handlePageChange = (_, newPage) => {
+    setPage(newPage);
+    fetchEmployees(newPage);
+  };
+
+  const handleDelete = async (id, nombre) => {
+    const result = await Swal.fire({
+      title: '¿Eliminar empleado?',
+      text: `Esta acción eliminará a ${nombre} de forma permanente.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF4C51',
+      cancelButtonColor: '#8A8D93',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await deleteEmployee(id);
+      fetchEmployees(page);
+      Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1500, showConfirmButton: false });
+    } catch {
+      Swal.fire({ icon: 'error', title: 'Error al eliminar' });
     }
   };
 
-  const canPrev = page > 1;
-  const canNext = page < totalPages;
-  const goPrev = () => { if (canPrev) fetchEmployees(page - 1); };
-  const goNext = () => { if (canNext) fetchEmployees(page + 1); };
-
-  if (loading) {
-    return (
-      <div className="text-center my-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </Spinner>
-      </div>
-    );
-  }
+  const filtered = employees.filter(e =>
+    `${e.nombre} ${e.apellido} ${e.puesto} ${e.departamento} ${e.email}`
+      .toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="container-fluid px-0 md:px-4 space-y-4">
-      <PageHeader
-        icon={<Users size={20} />}
-        title="Empleados"
-        subtitle="Gestione el registro y edición de empleados"
-        accentColor="#3b82f6"
-        actions={(
-          <Link to="/employees/new" className="d-none d-md-inline-flex">
-            <Button variant="primary" className="shadow-sm">
-              <Plus size={16} /> <span>Nuevo Empleado</span>
-            </Button>
-          </Link>
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PeopleIcon sx={{ fontSize: 22 }} />
+            Empleados
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>
+            Gestión del registro de empleados
+          </Typography>
+        </Box>
+        <Button
+          component={Link}
+          to="/employees/new"
+          variant="contained"
+          startIcon={<PersonAddIcon />}
+          sx={{ borderRadius: 2.5 }}
+        >
+          Nuevo Empleado
+        </Button>
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
+
+      <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden', borderColor: 'divider' }}>
+        {/* Search bar */}
+        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <TextField
+            placeholder="Buscar por nombre, puesto, departamento…"
+            size="small"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ width: { xs: '100%', sm: 340 } }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" sx={{ color: 'text.disabled' }} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        </Box>
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : filtered.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <PeopleIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+            <Typography color="text.secondary">
+              {search ? 'Sin resultados para la búsqueda' : 'No hay empleados registrados'}
+            </Typography>
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                  <TableCell>Empleado</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Puesto</TableCell>
+                  <TableCell>Departamento</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell align="right">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.map((emp) => {
+                  const color = avatarColor(`${emp.nombre}${emp.apellido}`);
+                  return (
+                    <TableRow
+                      key={emp._id}
+                      hover
+                      sx={{ '&:last-child td': { border: 0 }, cursor: 'pointer' }}
+                      onClick={() => navigate(`/employees/${emp._id}`)}
+                    >
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Avatar sx={{ width: 36, height: 36, bgcolor: color, fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                            {initials(emp.nombre, emp.apellido)}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="body2" fontWeight={600} lineHeight={1.3}>
+                              {emp.nombre} {emp.apellido}
+                            </Typography>
+                            {emp.legajo && (
+                              <Typography variant="caption" color="text.secondary">
+                                Leg. {emp.legajo}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">{emp.email || '—'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{emp.puesto || '—'}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        {emp.departamento ? (
+                          <Chip label={emp.departamento} size="small" variant="outlined" sx={{ borderRadius: 1.5, fontSize: '0.72rem' }} />
+                        ) : '—'}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={emp.activo !== false ? 'Activo' : 'Inactivo'}
+                          size="small"
+                          sx={{
+                            borderRadius: 1.5,
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            bgcolor: emp.activo !== false ? 'rgba(86,202,0,0.12)' : 'rgba(255,76,81,0.12)',
+                            color:   emp.activo !== false ? '#4DB600' : '#FF4C51',
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="right" onClick={e => e.stopPropagation()}>
+                        <Tooltip title="Ver detalle">
+                          <IconButton size="small" onClick={() => navigate(`/employees/${emp._id}`)} sx={{ color: 'info.main' }}>
+                            <ViewIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Editar">
+                          <IconButton size="small" onClick={() => navigate(`/employees/edit/${emp._id}`)} sx={{ color: 'warning.main' }}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Eliminar">
+                          <IconButton size="small" onClick={() => handleDelete(emp._id, `${emp.nombre} ${emp.apellido}`)} sx={{ color: 'error.main' }}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
-      />
 
-      {error && <Alert variant="danger">{error}</Alert>}
-
-      {total === 0 ? (
-        <Alert variant="light" className="shadow-sm">No hay empleados registrados</Alert>
-      ) : (
-        <>
-          {/* Vista de escritorio - Tabla */}
-          <div className="desktop-view">
-          <div className="section-box">
-            <div className="section-band" />
-            <div className="p-3 p-md-4">
-  <SectionCard title="Listado" icon={<Users size={20} />} accentColor="#3b82f6">
-              <div className="table-responsive">
-                <Table hover responsive className="employee-table mb-0 align-middle text-sm">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Email</th>
-                      <th>Puesto</th>
-                      <th>Departamento</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {employees.map(employee => (
-                      <tr key={employee._id}>
-                        <td>
-                          <div className="fw-semibold text-truncate" title={`${employee.nombre} ${employee.apellido}`}>
-                            {employee.nombre} {employee.apellido}
-                          </div>
-                          <small className="text-muted">Legajo: {employee.legajo || '-'}</small>
-                        </td>
-                        <td>{employee.email}</td>
-                        <td>{employee.puesto}</td>
-                        <td>{employee.departamento}</td>
-                        <td>
-                          <Link to={`/employees/${employee._id}`}>
-                            <Button variant="success" size="sm" className="me-2 shadow-sm">Ver</Button>
-                          </Link>
-                          <Link to={`/employees/edit/${employee._id}`}>
-                            <Button variant="warning" size="sm" className="me-2 shadow-sm">Editar</Button>
-                          </Link>
-                          <Button 
-                            variant="danger" 
-                            size="sm"
-                            className="shadow-sm"
-                            onClick={() => handleDelete(employee._id)}
-                          >
-                            Eliminar
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-              <div className="d-flex justify-content-between align-items-center mt-3">
-                <small className="text-muted">Total: {total} — Página {page} de {totalPages}</small>
-                <div>
-                  <Button variant="outline-secondary" size="sm" className="me-2" disabled={!canPrev} onClick={goPrev}>Anterior</Button>
-                  <Button variant="outline-secondary" size="sm" disabled={!canNext} onClick={goNext}>Siguiente</Button>
-                </div>
-              </div>
-            </SectionCard>
-            </div>
-          </div>
-          </div>
-
-          {/* Vista móvil - Tarjetas */}
-          <div className="mobile-view">
-            {/* Acción principal en mobile: Nuevo Empleado */}
-            <div className="d-md-none mb-3">
-              <Link to="/employees/new">
-                <Button variant="primary" size="sm" className="w-100 shadow-sm">
-                  <Plus size={16} /> <span>Nuevo Empleado</span>
-                </Button>
-              </Link>
-            </div>
-            {employees.map(employee => (
-              <MobileCard
-                key={employee._id}
-                title={`${employee.nombre} ${employee.apellido}`}
-                subtitle={`Legajo: ${employee.legajo || '-'}`}
-                accentColor="#3b82f6"
-                fields={[
-                  { label: 'Puesto', value: employee.puesto || 'No especificado' },
-                  { label: 'Departamento', value: employee.departamento || 'No especificado' }
-                ]}
-                actions={[
-                  {
-                    text: 'Ver',
-                    variant: 'info',
-                    onClick: () => navigate(`/employees/${employee._id}`)
-                  },
-                  {
-                    text: 'Editar',
-                    variant: 'warning',
-                    onClick: () => navigate(`/employees/edit/${employee._id}`)
-                  },
-                  {
-                    text: 'Eliminar',
-                    variant: 'danger',
-                    onClick: () => handleDelete(employee._id)
-                  }
-                ]}
-              />
-            ))}
-            <div className="d-flex justify-content-between align-items-center mt-3">
-              <small className="text-muted">Total: {total} — Página {page} de {totalPages}</small>
-              <div>
-                <Button variant="outline-secondary" size="sm" className="me-2" disabled={!canPrev} onClick={goPrev}>Anterior</Button>
-                <Button variant="outline-secondary" size="sm" disabled={!canNext} onClick={goNext}>Siguiente</Button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+        <TablePagination
+          component="div"
+          count={total}
+          page={page}
+          onPageChange={handlePageChange}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[]}
+          labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+          sx={{ borderTop: '1px solid', borderColor: 'divider' }}
+        />
+      </Paper>
+    </Box>
   );
 };
 
