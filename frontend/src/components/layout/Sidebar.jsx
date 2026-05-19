@@ -1,179 +1,235 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
+  Typography, Avatar, Divider, Tooltip,
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  People as PeopleIcon,
+  WarningAmber as WarningIcon,
+  AccessTime as ClockIcon,
+  ReceiptLong as ReceiptIcon,
+  AccountBalanceWallet as WalletIcon,
+  Logout as LogoutIcon,
+} from '@mui/icons-material';
 import { NavLink } from 'react-router-dom';
-import { FaChartLine, FaUsers, FaExclamationTriangle, FaClock, FaFileInvoiceDollar, FaWallet, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { BRAND_NAME, BRAND_LOGO_PATH, BRAND_SUBTITLE } from '../../config/branding';
+import { SIDEBAR_WIDTH } from '../../theme';
 import { getCurrentUser } from '../../services/api';
 
-const Sidebar = ({ isAuthenticated, logout }) => {
-  const [logoOk, setLogoOk] = useState(true);
+const NAV_ITEMS = [
+  { to: '/',                label: 'Dashboard',         icon: <DashboardIcon />, end: true },
+  { to: '/employees',       label: 'Empleados',         icon: <PeopleIcon />    },
+  { to: '/disciplinary',    label: 'Disciplinario',     icon: <WarningIcon />   },
+  { to: '/attendance',      label: 'Asistencias',       icon: <ClockIcon />     },
+  { to: '/payroll',         label: 'Recibos',           icon: <ReceiptIcon />   },
+  { to: '/employee-account',label: 'Cuenta Corriente',  icon: <WalletIcon />    },
+];
+
+const NavItem = ({ to, label, icon, end, onNavigate }) => (
+  <ListItem disablePadding sx={{ mb: 0.5 }}>
+    <ListItemButton
+      component={NavLink}
+      to={to}
+      end={end}
+      onClick={onNavigate}
+      sx={{
+        borderRadius: 2,
+        py: 0.875,
+        px: 2,
+        color: 'text.secondary',
+        '& .MuiListItemIcon-root': { color: 'text.secondary', minWidth: 36 },
+        '&.active': {
+          background: 'linear-gradient(270deg, rgba(140,87,255,0.16) 0%, rgba(140,87,255,0.28) 100%)',
+          color: 'primary.main',
+          fontWeight: 600,
+          '& .MuiListItemIcon-root': { color: 'primary.main' },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            right: 0,
+            top: '12%',
+            height: '76%',
+            width: 3,
+            borderRadius: '3px 0 0 3px',
+            backgroundColor: '#8C57FF',
+          },
+          position: 'relative',
+        },
+        '&:hover': {
+          background: 'rgba(58,53,65,0.04)',
+          color: 'text.primary',
+          '& .MuiListItemIcon-root': { color: 'text.primary' },
+        },
+        transition: 'all 0.15s ease',
+      }}
+    >
+      <ListItemIcon>{icon}</ListItemIcon>
+      <ListItemText
+        primary={label}
+        primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 'inherit' }}
+      />
+    </ListItemButton>
+  </ListItem>
+);
+
+const SidebarContent = ({ logout, onNavigate }) => {
+  const [logoOk, setLogoOk]       = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
 
-  React.useEffect(() => {
-    let mounted = true;
-    if (isAuthenticated) {
-      getCurrentUser().then((data) => {
-        if (mounted) setCurrentUser(data);
-      }).catch(() => {
-        // Ignorar errores; se mostrará información genérica
-      });
-    }
-    return () => { mounted = false; };
-  }, [isAuthenticated]);
+  useEffect(() => {
+    let active = true;
+    getCurrentUser()
+      .then(data => { if (active) setCurrentUser(data); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
-  if (!isAuthenticated) return null;
+  const initials = currentUser?.nombre
+    ? currentUser.nombre.charAt(0).toUpperCase()
+    : (currentUser?.email?.charAt(0).toUpperCase() || 'U');
 
   return (
-    <aside className="app-sidebar bg-white border-r border-slate-200/70 shadow-sm min-h-[calc(100vh-56px)] w-64 flex flex-col">
-      <div className="sidebar-brand flex items-center gap-3 px-4 py-4 text-slate-700 border-b border-slate-100/80">
-        <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-md">
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Brand */}
+      <Box sx={{ px: 3, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box
+          sx={{
+            width: 34, height: 34, borderRadius: 2,
+            background: 'linear-gradient(135deg, #8C57FF 0%, #A379FF 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 10px rgba(140,87,255,0.4)',
+            flexShrink: 0,
+          }}
+        >
           {logoOk ? (
-            <img
+            <Box
+              component="img"
               src={BRAND_LOGO_PATH}
               alt={BRAND_NAME}
-              className="w-5 h-5 object-contain"
               onError={() => setLogoOk(false)}
+              sx={{ width: 22, height: 22, objectFit: 'contain' }}
             />
           ) : (
-            <span className="text-white/90 text-lg font-semibold">SJ</span>
+            <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: 14 }}>
+              {BRAND_NAME[0]}
+            </Typography>
           )}
-        </div>
-        <div className="flex flex-col">
-          <span className="brand-name font-semibold tracking-tight text-slate-900">{BRAND_NAME}</span>
+        </Box>
+        <Box>
+          <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+            {BRAND_NAME}
+          </Typography>
           {BRAND_SUBTITLE && (
-            <span className="text-xs text-slate-500">{BRAND_SUBTITLE}</span>
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
+              {BRAND_SUBTITLE}
+            </Typography>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      <nav className="sidebar-nav grid gap-2 px-3 py-3 flex-1">
-        <NavLink
-          to="/"
-          end
-          className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
-          }
-          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
+      <Divider />
+
+      {/* Nav section label */}
+      <Typography
+        variant="overline"
+        sx={{ px: 3, pt: 2.5, pb: 0.5, color: 'text.disabled', fontSize: '0.7rem', letterSpacing: '0.1em' }}
+      >
+        Menú
+      </Typography>
+
+      {/* Navigation */}
+      <List sx={{ px: 1.5, flex: 1, overflowY: 'auto' }}>
+        {NAV_ITEMS.map(item => (
+          <NavItem key={item.to} {...item} onNavigate={onNavigate} />
+        ))}
+      </List>
+
+      <Divider />
+
+      {/* User card */}
+      <Box sx={{ p: 2 }}>
+        <Box
+          sx={{
+            display: 'flex', alignItems: 'center', gap: 1.5,
+            p: 1.5, borderRadius: 2,
+            bgcolor: 'rgba(140,87,255,0.06)',
+            border: '1px solid rgba(140,87,255,0.14)',
+          }}
         >
-          {({ isActive }) => (
-            <>
-              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
-                <FaChartLine size={isActive ? 18 : 16} />
-              </span>
-              <span style={isActive ? { color: '#ffffff' } : undefined}>Dashboard</span>
-              <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
-            </>
-          )}
-        </NavLink>
+          <Avatar
+            sx={{
+              width: 38, height: 38,
+              background: 'linear-gradient(135deg, #8C57FF 0%, #16B1FF 100%)',
+              fontSize: 15, fontWeight: 700, flexShrink: 0,
+            }}
+          >
+            {initials}
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="body2" fontWeight={600} noWrap>
+              {currentUser?.nombre || currentUser?.email || 'Usuario'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ textTransform: 'capitalize' }}>
+              {currentUser?.role || 'Administrador'}
+            </Typography>
+          </Box>
+          <Tooltip title="Cerrar sesión">
+            <Box
+              onClick={logout}
+              sx={{
+                cursor: 'pointer', color: 'text.secondary', display: 'flex',
+                p: 0.5, borderRadius: 1,
+                '&:hover': { color: 'error.main', bgcolor: 'rgba(255,76,81,0.08)' },
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <LogoutIcon fontSize="small" />
+            </Box>
+          </Tooltip>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 
-        <NavLink
-          to="/employees"
-          className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
-          }
-          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
-        >
-          {({ isActive }) => (
-            <>
-              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
-                <FaUsers size={isActive ? 18 : 16} />
-              </span>
-              <span style={isActive ? { color: '#ffffff' } : undefined}>Empleados</span>
-              <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
-            </>
-          )}
-        </NavLink>
+const Sidebar = ({ isAuthenticated, logout, mobileOpen, onMobileClose }) => {
+  if (!isAuthenticated) return null;
 
-        <NavLink
-          to="/disciplinary"
-          className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
-          }
-          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
-        >
-          {({ isActive }) => (
-            <>
-              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
-                <FaExclamationTriangle size={isActive ? 18 : 16} />
-              </span>
-              <span style={isActive ? { color: '#ffffff' } : undefined}>Disciplinarias</span>
-              <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
-            </>
-          )}
-        </NavLink>
+  const drawerSx = {
+    width: SIDEBAR_WIDTH,
+    flexShrink: 0,
+    '& .MuiDrawer-paper': {
+      width: SIDEBAR_WIDTH,
+      boxSizing: 'border-box',
+      borderRight: '1px solid rgba(58,53,65,0.12)',
+      bgcolor: 'background.paper',
+      backgroundImage: 'none',
+    },
+  };
 
-        <NavLink
-          to="/attendance"
-          className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50 hover:text-white'}`
-          }
-          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
-        >
-          {({ isActive }) => (
-            <>
-              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
-                <FaClock size={isActive ? 18 : 16} />
-              </span>
-              <span style={isActive ? { color: '#ffffff' } : undefined}>Asistencias</span>
-              <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
-            </>
-          )}
-        </NavLink>
+  return (
+    <Box component="nav" sx={{ width: { md: SIDEBAR_WIDTH }, flexShrink: { md: 0 } }}>
+      {/* Mobile drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onMobileClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{ display: { xs: 'block', md: 'none' }, ...drawerSx }}
+      >
+        <SidebarContent logout={logout} onNavigate={onMobileClose} />
+      </Drawer>
 
-        <NavLink
-          to="/payroll"
-          className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-50 hover:text-white'}`
-          }
-          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
-        >
-          {({ isActive }) => (
-            <>
-              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
-                <FaFileInvoiceDollar size={isActive ? 18 : 16} />
-              </span>
-              <span style={isActive ? { color: '#ffffff' } : undefined}>Recibos</span>
-              <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
-            </>
-          )}
-        </NavLink>
-
-        <NavLink
-          to="/employee-account"
-          className={({ isActive }) =>
-            `inline-flex items-center gap-4 px-4 py-2 text-sm rounded-full transition-colors ${isActive ? 'text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`
-          }
-          style={({ isActive }) => (isActive ? { backgroundColor: 'var(--leaflet-accent)' } : undefined)}
-        >
-          {({ isActive }) => (
-            <>
-              <span className="mr-2" style={isActive ? { color: 'rgba(255,255,255,0.92)' } : undefined}>
-                <FaWallet size={isActive ? 18 : 16} />
-              </span>
-              <span style={isActive ? { color: '#ffffff' } : undefined}>Cuenta Corriente</span>
-              <span className={`ml-auto w-2 h-2 rounded-full ${isActive ? 'bg-white/70' : 'opacity-0'}`} />
-            </>
-          )}
-        </NavLink>
-      </nav>
-
-      <div className="sidebar-footer mt-auto px-3 py-4 border-t border-slate-100/80">
-        <div className="rounded-xl bg-slate-50 shadow-sm p-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm">
-              <FaUser />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-slate-900">{currentUser?.nombre || currentUser?.email || 'Usuario'}</span>
-              <span className="text-xs text-slate-500">{currentUser?.role || 'Administrador'}</span>
-            </div>
-          </div>
-          <button onClick={logout} className="text-sm text-slate-600 hover:text-slate-900 inline-flex items-center gap-2">
-            <FaSignOutAlt />
-            <span>Salir</span>
-          </button>
-        </div>
-      </div>
-    </aside>
+      {/* Desktop permanent drawer */}
+      <Drawer
+        variant="permanent"
+        open
+        sx={{ display: { xs: 'none', md: 'flex' }, ...drawerSx }}
+      >
+        <SidebarContent logout={logout} onNavigate={() => {}} />
+      </Drawer>
+    </Box>
   );
 };
 

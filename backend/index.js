@@ -79,7 +79,7 @@ app.use(helmet());
 // Rate limiting para endpoints de autenticación
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // 5 intentos por ventana
+  max: 20, // 20 intentos por ventana
   message: 'Demasiados intentos de inicio de sesión, intente más tarde',
   standardHeaders: true,
   legacyHeaders: false,

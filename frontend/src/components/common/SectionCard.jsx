@@ -1,28 +1,52 @@
 import React from 'react';
-import { Card } from 'react-bootstrap';
+import { Paper, Box, Typography, Divider } from '@mui/material';
 
-// Tarjeta de sección unificada con título, icono y acciones en el header
-const SectionCard = ({ title, icon = null, headerRight = null, children, className = '', accentColor }) => {
-  return (
-    <Card className={`section-card leaflet-panel ${className}`} style={accentColor ? { ['--leaflet-accent']: accentColor } : undefined}>
-      {(title || icon || headerRight) && (
-        <Card.Header className="section-card-header leaflet-header">
-          <div className="d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center gap-2">
-              {icon && <span className="text-slate-700">{icon}</span>}
-              {title && <h5 className="mb-0 fw-semibold text-slate-700">{title}</h5>}
-            </div>
-            {headerRight && (
-              <div className="d-flex align-items-center gap-2">
-                {headerRight}
-              </div>
+const SectionCard = ({ title, icon = null, headerRight = null, children, accentColor, sx = {} }) => (
+  <Paper
+    variant="outlined"
+    sx={{
+      borderRadius: 3.5,
+      overflow: 'hidden',
+      borderColor: 'divider',
+      boxShadow: '0 1px 3px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.05)',
+      ...sx,
+    }}
+  >
+    {(title || icon || headerRight) && (
+      <>
+        <Box
+          sx={{
+            px: { xs: 2, sm: 2.5 },
+            py: 1.75,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            ...(accentColor ? { borderTop: `3px solid ${accentColor}` } : {}),
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {icon && (
+              <Box sx={{ color: accentColor || 'primary.main', display: 'flex', alignItems: 'center' }}>
+                {icon}
+              </Box>
             )}
-          </div>
-        </Card.Header>
-      )}
-      <Card.Body className="leaflet-body">{children}</Card.Body>
-    </Card>
-  );
-};
+            {title && (
+              <Typography variant="h6" fontWeight={600} fontSize="1rem">
+                {title}
+              </Typography>
+            )}
+          </Box>
+          {headerRight && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {headerRight}
+            </Box>
+          )}
+        </Box>
+        <Divider />
+      </>
+    )}
+    <Box sx={{ p: { xs: 2, sm: 2.5 } }}>{children}</Box>
+  </Paper>
+);
 
 export default SectionCard;
