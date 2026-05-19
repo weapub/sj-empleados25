@@ -230,6 +230,29 @@ const EmployeeDetail = () => {
         </Box>
       </Box>
 
+      {/* ── Banner de baja ── */}
+      {employee.activo === false && (
+        <Paper variant="outlined" sx={{ borderRadius: 3, borderColor: 'error.main', bgcolor: 'rgba(255,76,81,0.06)', p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <DeleteIcon sx={{ color: 'error.main', mt: 0.25 }} />
+          <Box>
+            <Typography variant="subtitle2" color="error.main" fontWeight={700}>Empleado dado de baja</Typography>
+            {employee.fechaBaja && (
+              <Typography variant="body2" color="text.secondary">
+                Fecha de baja: <strong>{new Date(employee.fechaBaja).toLocaleDateString('es-AR')}</strong>
+              </Typography>
+            )}
+            {employee.motivoBaja && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Motivo: <strong>{employee.motivoBaja}</strong>
+              </Typography>
+            )}
+            {!employee.motivoBaja && !employee.fechaBaja && (
+              <Typography variant="body2" color="text.secondary">Sin motivo registrado.</Typography>
+            )}
+          </Box>
+        </Paper>
+      )}
+
       {/* ── Datos ── */}
       <Grid container spacing={2.5}>
         {/* Personal */}
@@ -260,7 +283,13 @@ const EmployeeDetail = () => {
               </Grid>
               <Grid item xs={6}><InfoRow label="Fecha de Contratación"  value={fmt(employee.fechaContratacion)} /></Grid>
               <Grid item xs={6}><InfoRow label="Fecha de Ingreso"        value={fmt(employee.fechaIngreso)} /></Grid>
-              <Grid item xs={6}><InfoRow label="Registro ARCA"           value={fmt(employee.fechaRegistroARCA)} /></Grid>
+              <Grid item xs={6}><InfoRow label="Registro ARCA" value={fmt(employee.fechaRegistroARCA)} /></Grid>
+              {employee.activo === false && (
+                <>
+                  <Grid item xs={6}><InfoRow label="Fecha de Baja" value={fmt(employee.fechaBaja)} /></Grid>
+                  <Grid item xs={6}><InfoRow label="Motivo de Baja" value={employee.motivoBaja} /></Grid>
+                </>
+              )}
             </Grid>
           </SectionPaper>
         </Grid>

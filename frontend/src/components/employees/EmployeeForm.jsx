@@ -35,6 +35,7 @@ const EMPTY_FORM = {
   puesto: '', departamento: '', salario: '', fechaContratacion: '',
   activo: true, cuit: '', fechaIngreso: '', fechaRegistroARCA: '',
   fechaNacimiento: '', lugarNacimiento: '', domicilio: '', sucursal: '',
+  fechaBaja: '', motivoBaja: '',
 };
 
 const fmtDate = (d) => d ? new Date(d).toISOString().split('T')[0] : '';
@@ -58,6 +59,8 @@ const EmployeeForm = () => {
         fechaIngreso:       fmtDate(data.fechaIngreso),
         fechaRegistroARCA:  fmtDate(data.fechaRegistroARCA),
         fechaNacimiento:    fmtDate(data.fechaNacimiento),
+        fechaBaja:          fmtDate(data.fechaBaja),
+        motivoBaja:         data.motivoBaja || '',
       }))
       .catch(() => setError('Error al cargar los datos del empleado'))
       .finally(() => setFetching(false));
@@ -74,8 +77,9 @@ const EmployeeForm = () => {
     setError('');
     try {
       const payload = { ...formData };
-      ['fechaContratacion','fechaIngreso','fechaRegistroARCA','fechaNacimiento']
+      ['fechaContratacion','fechaIngreso','fechaRegistroARCA','fechaNacimiento','fechaBaja']
         .forEach(k => { if (payload[k] === '') payload[k] = null; });
+      if (payload.activo) { payload.fechaBaja = null; payload.motivoBaja = ''; }
       if (isEditing) await updateEmployee(id, payload);
       else           await createEmployee(payload);
       navigate('/employees');
@@ -165,6 +169,37 @@ const EmployeeForm = () => {
             label={<Typography variant="body2" fontWeight={500}>Empleado activo</Typography>}
           />
         </Field>
+
+        {/* Campos de baja — solo cuando está inactivo */}
+        {!formData.activo && (
+          <>
+            <Field>
+              <TextField
+                label="Fecha de baja"
+                name="fechaBaja"
+                type="date"
+                value={formData.fechaBaja}
+                onChange={onChange}
+                fullWidth
+                size="small"
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Field>
+            <Field xs={12} sm={12}>
+              <TextField
+                label="Motivo de baja"
+                name="motivoBaja"
+                value={formData.motivoBaja}
+                onChange={onChange}
+                fullWidth
+                size="small"
+                multiline
+                rows={2}
+                placeholder="Ej: Renuncia voluntaria, despido, vencimiento contrato…"
+              />
+            </Field>
+          </>
+        )}
       </SectionBlock>
 
       {/* ── Footer ── */}

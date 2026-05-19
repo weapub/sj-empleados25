@@ -163,16 +163,26 @@ const EmployeeList = () => {
                     <TableRow
                       key={emp._id}
                       hover
-                      sx={{ '&:last-child td': { border: 0 }, cursor: 'pointer' }}
+                      sx={{
+                        '&:last-child td': { border: 0 },
+                        cursor: 'pointer',
+                        opacity: emp.activo === false ? 0.65 : 1,
+                        bgcolor: emp.activo === false ? 'rgba(255,76,81,0.04)' : 'inherit',
+                        borderLeft: emp.activo === false ? '3px solid #FF4C51' : '3px solid transparent',
+                      }}
                       onClick={() => navigate(`/employees/${emp._id}`)}
                     >
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Avatar sx={{ width: 36, height: 36, bgcolor: color, fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                          <Avatar sx={{
+                            width: 36, height: 36, fontSize: 13, fontWeight: 700, flexShrink: 0,
+                            bgcolor: emp.activo === false ? '#8A8D93' : color,
+                          }}>
                             {initials(emp.nombre, emp.apellido)}
                           </Avatar>
                           <Box>
-                            <Typography variant="body2" fontWeight={600} lineHeight={1.3}>
+                            <Typography variant="body2" fontWeight={600} lineHeight={1.3}
+                              sx={{ textDecoration: emp.activo === false ? 'line-through' : 'none', color: emp.activo === false ? 'text.secondary' : 'text.primary' }}>
                               {emp.nombre} {emp.apellido}
                             </Typography>
                             {emp.legajo && (
@@ -187,7 +197,7 @@ const EmployeeList = () => {
                         <Typography variant="body2" color="text.secondary">{emp.email || '—'}</Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">{emp.puesto || '—'}</Typography>
+                        <Typography variant="body2" color={emp.activo === false ? 'text.secondary' : 'text.primary'}>{emp.puesto || '—'}</Typography>
                       </TableCell>
                       <TableCell>
                         {emp.departamento ? (
@@ -195,17 +205,20 @@ const EmployeeList = () => {
                         ) : '—'}
                       </TableCell>
                       <TableCell>
-                        <Chip
-                          label={emp.activo !== false ? 'Activo' : 'Inactivo'}
-                          size="small"
-                          sx={{
-                            borderRadius: 1.5,
-                            fontSize: '0.72rem',
-                            fontWeight: 600,
-                            bgcolor: emp.activo !== false ? 'rgba(86,202,0,0.12)' : 'rgba(255,76,81,0.12)',
-                            color:   emp.activo !== false ? '#4DB600' : '#FF4C51',
-                          }}
-                        />
+                        {emp.activo !== false ? (
+                          <Chip label="Activo" size="small" sx={{ borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600, bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }} />
+                        ) : (
+                          <Tooltip title={emp.motivoBaja || 'Sin motivo registrado'} arrow>
+                            <Box sx={{ display: 'inline-flex', flexDirection: 'column', gap: 0.25 }}>
+                              <Chip label="Baja" size="small" sx={{ borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600, bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }} />
+                              {emp.motivoBaja && (
+                                <Typography variant="caption" color="error" sx={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                                  {emp.motivoBaja}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Tooltip>
+                        )}
                       </TableCell>
                       <TableCell align="right" onClick={e => e.stopPropagation()}>
                         <Tooltip title="Ver detalle">

@@ -76,6 +76,13 @@ const employeeSchema = new mongoose.Schema({
   sucursal: {
     type: String,
     trim: true
+  },
+  fechaBaja: {
+    type: Date
+  },
+  motivoBaja: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true
