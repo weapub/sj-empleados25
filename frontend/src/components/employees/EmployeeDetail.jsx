@@ -28,11 +28,23 @@ const avatarColor = (name = '') => {
 const fmt = (d) => d ? new Date(d).toLocaleDateString('es-AR') : '—';
 
 const InfoRow = ({ label, value }) => (
-  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-    <Typography variant="caption" color="text.disabled" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-      {label}
-    </Typography>
-    <Typography variant="body2" fontWeight={500} color="text.primary">
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignSelf: 'flex-start',
+        px: 1,
+        py: 0.25,
+        borderRadius: 1,
+        bgcolor: 'primary.main',
+        opacity: 0.85,
+      }}
+    >
+      <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', color: '#fff', textTransform: 'uppercase', lineHeight: 1.6 }}>
+        {label}
+      </Typography>
+    </Box>
+    <Typography variant="body2" fontWeight={500} color="text.primary" sx={{ pl: 0.25 }}>
       {value || '—'}
     </Typography>
   </Box>
