@@ -15,9 +15,15 @@ async function main() {
   const email = args.find((a) => !a.startsWith('--'));
   const nameArg = getArgValue(args, '--name');
   const passwordArg = getArgValue(args, '--password');
+  const roleArg = getArgValue(args, '--role') || 'admin';
+  const validRoles = ['superadmin', 'admin', 'user'];
 
   if (!email) {
-    console.error('Uso: node backend/scripts/promoteAdmin.js <email> [--name "Nombre"] [--password "123456"]');
+    console.error('Uso: node backend/scripts/promoteAdmin.js <email> [--name "Nombre"] [--password "123456"] [--role superadmin|admin|user]');
+    process.exit(1);
+  }
+  if (!validRoles.includes(roleArg)) {
+    console.error(`Rol inválido: ${roleArg}. Opciones: ${validRoles.join(', ')}`);
     process.exit(1);
   }
   if (!isValidEmail(email)) {
@@ -39,23 +45,24 @@ async function main() {
       const rawPassword = passwordArg || process.env.ADMIN_SEED_PASSWORD || '123456';
       const salt = await bcrypt.genSalt(10);
       const hashed = await bcrypt.hash(rawPassword, salt);
-      user = new User({ nombre, email, password: hashed, role: 'admin' });
+      user = new User({ nombre, email, password: hashed, role: roleArg });
       await user.save();
-      console.log(`[OK] Usuario creado y promovido a admin: ${email}`);
+      console.log(`[OK] Usuario creado con rol "${roleArg}": ${email}`);
       console.log(`[INFO] Credenciales -> email: ${email} / password: ${rawPassword}`);
     } else {
-      if (user.role !== 'admin') {
-        user.role = 'admin';
+      if (user.role !== roleArg) {
+        const prevRole = user.role;
+        user.role = roleArg;
         await user.save();
-        console.log(`[OK] Usuario existente promovido a admin: ${email}`);
+        console.log(`[OK] Rol actualizado: ${email} — ${prevRole} → ${roleArg}`);
       } else {
-        console.log(`[INFO] El usuario ya es admin: ${email}`);
+        console.log(`[INFO] El usuario ya tiene rol "${roleArg}": ${email}`);
       }
       if (passwordArg) {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(passwordArg, salt);
         await user.save();
-        console.log('[OK] Password actualizado para el usuario admin.');
+        console.log('[OK] Password actualizado.');
       }
     }
   } catch (err) {

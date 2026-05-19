@@ -26,8 +26,8 @@ const SectionBlock = ({ title, icon, children }) => (
   </Paper>
 );
 
-const Field = ({ children, xs = 12, sm = 6 }) => (
-  <Grid xs={xs} sm={sm}>{children}</Grid>
+const Field = ({ children, xs = 12, md = 6 }) => (
+  <Grid xs={xs} md={md}>{children}</Grid>
 );
 
 const EMPTY_FORM = {
@@ -139,7 +139,7 @@ const EmployeeForm = () => {
             slotProps={{ inputLabel: { shrink: true } }} />
         </Field>
         <Field><TextField label="Lugar de Nacimiento" name="lugarNacimiento" value={formData.lugarNacimiento} onChange={onChange} fullWidth size="small" /></Field>
-        <Field xs={12} sm={12}><TextField label="Domicilio" name="domicilio" value={formData.domicilio} onChange={onChange} fullWidth size="small" /></Field>
+        <Field xs={12} md={12}><TextField label="Domicilio" name="domicilio" value={formData.domicilio} onChange={onChange} fullWidth size="small" /></Field>
       </SectionBlock>
 
       {/* ── Datos laborales ── */}
@@ -163,7 +163,7 @@ const EmployeeForm = () => {
           <TextField label="Fecha de Registro en ARCA" name="fechaRegistroARCA" type="date" value={formData.fechaRegistroARCA} onChange={onChange} fullWidth size="small"
             slotProps={{ inputLabel: { shrink: true } }} />
         </Field>
-        <Field xs={12} sm={12}>
+        <Field xs={12} md={12}>
           <FormControlLabel
             control={<Switch name="activo" checked={!!formData.activo} onChange={onChange} color="success" />}
             label={<Typography variant="body2" fontWeight={500}>Empleado activo</Typography>}
@@ -185,7 +185,7 @@ const EmployeeForm = () => {
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Field>
-            <Field xs={12} sm={12}>
+            <Field xs={12} md={12}>
               <TextField
                 label="Motivo de baja"
                 name="motivoBaja"

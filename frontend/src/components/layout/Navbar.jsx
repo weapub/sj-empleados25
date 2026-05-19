@@ -10,7 +10,6 @@ import {
   LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { NavLink } from 'react-router-dom';
-import { SIDEBAR_WIDTH } from '../../theme';
 import { BRAND_NAME, BRAND_LOGO_PATH } from '../../config/branding';
 
 const Navbar = ({ isAuthenticated, logout, onMobileMenuToggle, colorMode, onToggleColorMode, currentUser }) => {
@@ -33,11 +32,7 @@ const Navbar = ({ isAuthenticated, logout, onMobileMenuToggle, colorMode, onTogg
     return (
       <AppBar
         position="sticky"
-        sx={{
-          ml: { md: `${SIDEBAR_WIDTH}px` },
-          width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
-          zIndex: (t) => t.zIndex.drawer - 1,
-        }}
+        sx={{ zIndex: (t) => t.zIndex.drawer - 1 }}
       >
         <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 }, px: { xs: 2, sm: 3 } }}>
           <IconButton
