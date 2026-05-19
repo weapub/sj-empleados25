@@ -246,14 +246,14 @@ const PayrollList = () => {
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell>Período</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Pago</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Pago</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Estado</TableCell>
                   <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Horas Extras</TableCell>
                   <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Otros</TableCell>
                   <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Descuentos</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Adelanto</TableCell>
                   <TableCell>Neto</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Semanal</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Semanal</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -289,7 +289,7 @@ const PayrollList = () => {
                           <Typography variant="caption" color="text.secondary">Días: {dim}</Typography>
                         </TableCell>
 
-                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{formatDate(r.paymentDate)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDate(r.paymentDate)}</TableCell>
 
                         <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -342,7 +342,7 @@ const PayrollList = () => {
                           </Typography>
                         </TableCell>
 
-                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           <Typography variant="body2">{formatCurrency(weekly)}</Typography>
                         </TableCell>
 

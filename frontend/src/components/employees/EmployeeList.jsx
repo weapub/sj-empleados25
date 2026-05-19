@@ -150,7 +150,7 @@ const EmployeeList = () => {
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Email</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Puesto</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Puesto</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Departamento</TableCell>
                   <TableCell>Estado</TableCell>
                   <TableCell align="right">Acciones</TableCell>
@@ -197,7 +197,7 @@ const EmployeeList = () => {
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                         <Typography variant="body2" color="text.secondary">{emp.email || '—'}</Typography>
                       </TableCell>
-                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                         <Typography variant="body2" color={emp.activo === false ? 'text.secondary' : 'text.primary'}>{emp.puesto || '—'}</Typography>
                       </TableCell>
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>

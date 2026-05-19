@@ -263,7 +263,7 @@ const AttendanceList = () => {
                   <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Inicio vac.</TableCell>
                   <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Fin vac.</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Reincorporación</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Certificado</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Certificado</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -326,18 +326,18 @@ const AttendanceList = () => {
                           </Box>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           <Typography variant="body2">
                             {hasHorario ? `${estab} → ${reg} (${late} min)` : '—'}
                           </Typography>
                         </TableCell>
 
-                        <TableCell>{formatDate(att.certificateExpiry)}</TableCell>
-                        <TableCell>{formatDate(att.vacationsStart)}</TableCell>
-                        <TableCell>{formatDate(att.vacationsEnd)}</TableCell>
-                        <TableCell>{formatDate(att.returnToWorkDate)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(att.certificateExpiry)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(att.vacationsStart)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(att.vacationsEnd)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDate(att.returnToWorkDate)}</TableCell>
 
-                        <TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           {att.justificationDocument ? (
                             <Tooltip title="Ver certificado">
                               <IconButton
