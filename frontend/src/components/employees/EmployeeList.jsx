@@ -149,9 +149,9 @@ const EmployeeList = () => {
               <TableHead>
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
                   <TableCell>Empleado</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Puesto</TableCell>
-                  <TableCell>Departamento</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Email</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Puesto</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Departamento</TableCell>
                   <TableCell>Estado</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
@@ -172,34 +172,35 @@ const EmployeeList = () => {
                       }}
                       onClick={() => navigate(`/employees/${emp._id}`)}
                     >
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <TableCell sx={{ maxWidth: { xs: 120, sm: 200, md: 'none' } }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
                           <Avatar sx={{
+                            display: { xs: 'none', sm: 'flex' },
                             width: 36, height: 36, fontSize: 13, fontWeight: 700, flexShrink: 0,
                             bgcolor: emp.activo === false ? '#8A8D93' : color,
                           }}>
                             {initials(emp.nombre, emp.apellido)}
                           </Avatar>
-                          <Box>
-                            <Typography variant="body2" fontWeight={600} lineHeight={1.3}
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={600} lineHeight={1.3} noWrap
                               sx={{ textDecoration: emp.activo === false ? 'line-through' : 'none', color: emp.activo === false ? 'text.secondary' : 'text.primary' }}>
                               {emp.nombre} {emp.apellido}
                             </Typography>
                             {emp.legajo && (
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
                                 Leg. {emp.legajo}
                               </Typography>
                             )}
                           </Box>
                         </Box>
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                         <Typography variant="body2" color="text.secondary">{emp.email || '—'}</Typography>
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <Typography variant="body2" color={emp.activo === false ? 'text.secondary' : 'text.primary'}>{emp.puesto || '—'}</Typography>
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                         {emp.departamento ? (
                           <Chip label={emp.departamento} size="small" variant="outlined" sx={{ borderRadius: 1.5, fontSize: '0.72rem' }} />
                         ) : '—'}
@@ -220,7 +221,7 @@ const EmployeeList = () => {
                           </Tooltip>
                         )}
                       </TableCell>
-                      <TableCell align="right" onClick={e => e.stopPropagation()}>
+                      <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: { xs: 88, md: 'auto' } }} onClick={e => e.stopPropagation()}>
                         <Tooltip title="Ver detalle">
                           <IconButton size="small" onClick={() => navigate(`/employees/${emp._id}`)} sx={{ color: 'info.main' }}>
                             <ViewIcon fontSize="small" />

@@ -184,7 +184,7 @@ const AttendanceForm = () => {
           <Grid container spacing={2.5}>
 
             {/* Empleado */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 select
                 fullWidth
@@ -205,7 +205,7 @@ const AttendanceForm = () => {
             </Grid>
 
             {/* Fecha */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -220,7 +220,7 @@ const AttendanceForm = () => {
             </Grid>
 
             {/* Tipo */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 select
                 fullWidth
@@ -240,7 +240,7 @@ const AttendanceForm = () => {
             </Grid>
 
             {/* Certificado */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Box>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Certificado médico (JPG, PNG, PDF — máx. 5 MB)
@@ -277,7 +277,7 @@ const AttendanceForm = () => {
             {/* Campos condicionales: Tardanza */}
             {formData.type === 'tardanza' && (
               <>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -290,7 +290,7 @@ const AttendanceForm = () => {
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -309,7 +309,7 @@ const AttendanceForm = () => {
             {/* Campos condicionales: Licencia Médica */}
             {formData.type === 'licencia medica' && (
               <>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -321,7 +321,7 @@ const AttendanceForm = () => {
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -339,7 +339,7 @@ const AttendanceForm = () => {
             {/* Campos condicionales: Vacaciones */}
             {formData.type === 'vacaciones' && (
               <>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -351,7 +351,7 @@ const AttendanceForm = () => {
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -369,7 +369,7 @@ const AttendanceForm = () => {
             {/* Campos condicionales: Sanción */}
             {formData.type === 'sancion recibida' && (
               <>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -381,7 +381,7 @@ const AttendanceForm = () => {
                     slotProps={{ input: { inputProps: { min: 0 } } }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -397,7 +397,7 @@ const AttendanceForm = () => {
             )}
 
             {/* Switches */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <FormControlLabel
                 control={
                   <Switch
@@ -409,7 +409,7 @@ const AttendanceForm = () => {
                 label="Justificado"
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <FormControlLabel
                 control={
                   <Switch
@@ -423,7 +423,7 @@ const AttendanceForm = () => {
             </Grid>
 
             {/* Comentarios */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 size="small"
@@ -437,7 +437,7 @@ const AttendanceForm = () => {
             </Grid>
 
             {/* Botones */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
                 <Button
                   variant="outlined"

@@ -176,13 +176,13 @@ const DisciplinaryList = () => {
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell>Fecha</TableCell>
-                  <TableCell>Hora</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Hora</TableCell>
                   <TableCell>Tipo</TableCell>
-                  <TableCell>Días susp.</TableCell>
-                  <TableCell>Reincorporación</TableCell>
-                  <TableCell>Firmado</TableCell>
-                  <TableCell>Fecha firma</TableCell>
-                  <TableCell>Documento</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Días susp.</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Reincorporación</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Firmado</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Fecha firma</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Documento</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -196,23 +196,23 @@ const DisciplinaryList = () => {
                 ) : (
                   disciplinaries.map((d) => (
                     <TableRow key={d._id} hover sx={{ '&:last-child td': { border: 0 } }}>
-                      <TableCell>
+                      <TableCell sx={{ maxWidth: { xs: 120, sm: 200, md: 'none' } }}>
                         {d.employee ? (
-                          <>
-                            <Typography variant="body2" fontWeight={600}>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={600} noWrap>
                               {d.employee.nombre} {d.employee.apellido}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              Legajo: {d.employee.legajo || '—'}
+                            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                              Leg. {d.employee.legajo || '—'}
                             </Typography>
-                          </>
+                          </Box>
                         ) : (
-                          <Typography variant="body2" color="text.secondary">Empleado no disponible</Typography>
+                          <Typography variant="body2" color="text.secondary" noWrap>Desconocido</Typography>
                         )}
                       </TableCell>
 
                       <TableCell>{formatDate(d.date)}</TableCell>
-                      <TableCell>{d.time || '—'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{d.time || '—'}</TableCell>
 
                       <TableCell>
                         <Chip
@@ -222,10 +222,10 @@ const DisciplinaryList = () => {
                         />
                       </TableCell>
 
-                      <TableCell>{d.durationDays ?? '—'}</TableCell>
-                      <TableCell>{formatDate(d.returnToWorkDate)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{d.durationDays ?? '—'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDate(d.returnToWorkDate)}</TableCell>
 
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <Chip
                           label={d.signed ? 'Firmado' : 'Sin firmar'}
                           size="small"
@@ -238,9 +238,9 @@ const DisciplinaryList = () => {
                         />
                       </TableCell>
 
-                      <TableCell>{formatDate(d.signedDate)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(d.signedDate)}</TableCell>
 
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         {d.document ? (
                           <Tooltip title="Ver documento">
                             <IconButton
@@ -256,7 +256,7 @@ const DisciplinaryList = () => {
                         )}
                       </TableCell>
 
-                      <TableCell align="right">
+                      <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: { xs: 88, md: 'auto' } }}>
                         <Tooltip title="Editar">
                           <IconButton
                             size="small"

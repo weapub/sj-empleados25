@@ -1,50 +1,73 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Button, Row, Col, Table, Alert, Spinner, Card, Container } from 'react-bootstrap';
-import { FaUser, FaWallet, FaShoppingCart, FaMoneyBillWave, FaHistory, FaCog } from 'react-icons/fa';
-import { getEmployees } from '../../services/api';
-import { getEmployeeAccount, updateWeeklyDeduction, addAccountPurchase, addAccountPayment } from '../../services/api';
-import MobileCard from '../common/MobileCard';
-import PageHeader from '../common/PageHeader';
-import SectionCard from '../common/SectionCard';
+import {
+  Box, Paper, Grid, Typography, TextField, Button, MenuItem,
+  CircularProgress, Alert, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Chip, Divider,
+} from '@mui/material';
+import {
+  AccountBalanceWallet as WalletIcon,
+  Person as PersonIcon,
+  ShoppingCart as ShoppingCartIcon,
+  Payments as PaymentsIcon,
+  History as HistoryIcon,
+  Settings as SettingsIcon,
+  Save as SaveIcon,
+} from '@mui/icons-material';
+import { alpha, useTheme } from '@mui/material/styles';
+import { getEmployees, getEmployeeAccount, updateWeeklyDeduction, addAccountPurchase, addAccountPayment } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 
+const SectionBlock = ({ title, icon, children }) => (
+  <Paper variant="outlined" sx={{ borderRadius: 4, borderColor: 'divider', overflow: 'hidden' }}>
+    <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+      <Box sx={{ color: 'primary.main', display: 'flex' }}>{icon}</Box>
+      <Typography variant="subtitle1" fontWeight={700} fontSize="0.9375rem">{title}</Typography>
+    </Box>
+    <Box sx={{ p: 2.5 }}>{children}</Box>
+  </Paper>
+);
+
+const txChip = (type) => {
+  if (type === 'purchase') return { label: 'Compra',           bgcolor: 'rgba(255,76,81,0.12)',  color: '#FF4C51' };
+  if (type === 'payment')  return { label: 'Pago',             bgcolor: 'rgba(86,202,0,0.12)',   color: '#4DB600' };
+  return                          { label: 'Deducción Nómina', bgcolor: 'rgba(22,177,255,0.12)', color: '#0E9FE5' };
+};
+
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
 const EmployeeAccountPage = () => {
-  const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState('');
-  const [account, setAccount] = useState(null);
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const theme = useTheme();
+
+  const [employees, setEmployees]                 = useState([]);
+  const [selectedEmployee, setSelectedEmployee]   = useState('');
+  const [account, setAccount]                     = useState(null);
+  const [transactions, setTransactions]           = useState([]);
+  const [loading, setLoading]                     = useState(false);
+  const [error, setError]                         = useState('');
+  const [success, setSuccess]                     = useState('');
+
   const [weeklyDeductionAmount, setWeeklyDeductionAmount] = useState('');
-  const [purchaseAmount, setPurchaseAmount] = useState('');
-  const [purchaseDesc, setPurchaseDesc] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState(() => new Date().toISOString().slice(0,10));
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentDesc, setPaymentDesc] = useState('');
-  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0,10));
+  const [purchaseAmount, setPurchaseAmount]               = useState('');
+  const [purchaseDesc, setPurchaseDesc]                   = useState('');
+  const [purchaseDate, setPurchaseDate]                   = useState(todayISO);
+  const [paymentAmount, setPaymentAmount]                 = useState('');
+  const [paymentDesc, setPaymentDesc]                     = useState('');
+  const [paymentDate, setPaymentDate]                     = useState(todayISO);
 
   useEffect(() => {
     const loadEmployees = async () => {
       try {
         setLoading(true);
-        const resp = await getEmployees(); // { data, total, page, totalPages }
+        const resp = await getEmployees();
         const list = Array.isArray(resp?.data) ? resp.data : [];
         setEmployees(list);
-        // Autoseleccionar el primer empleado para cargar la cuenta automáticamente
-        if (list.length > 0 && !selectedEmployee) {
+        if (list.length > 0) {
           const firstId = list[0]._id;
           setSelectedEmployee(firstId);
-          // Cargar la cuenta del primer empleado
-          try {
-            await loadAccount(firstId);
-          } catch (e) {
-            // Mantener el error ya gestionado en loadAccount
-          }
+          try { await loadAccount(firstId); } catch {}
         }
-      } catch (err) {
+      } catch {
         setError('Error al cargar empleados');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -60,9 +83,8 @@ const EmployeeAccountPage = () => {
       setTransactions(transactions);
       setWeeklyDeductionAmount(account?.weeklyDeductionAmount ?? '');
       setError('');
-    } catch (err) {
+    } catch {
       setError('Error al cargar la cuenta del empleado');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -74,19 +96,19 @@ const EmployeeAccountPage = () => {
     if (id) await loadAccount(id);
   };
 
+  const flash = (msg) => { setSuccess(msg); setTimeout(() => setSuccess(''), 2500); };
+
   const handleUpdateWeeklyDeduction = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
       await updateWeeklyDeduction(selectedEmployee, Number(weeklyDeductionAmount) || 0);
       await loadAccount(selectedEmployee);
-      setSuccess('Deducción semanal actualizada');
-    } catch (err) {
+      flash('Deducción semanal actualizada');
+    } catch {
       setError('Error al actualizar la deducción semanal');
-      console.error(err);
     } finally {
       setLoading(false);
-      setTimeout(() => setSuccess(''), 2000);
     }
   };
 
@@ -96,16 +118,12 @@ const EmployeeAccountPage = () => {
       setLoading(true);
       await addAccountPurchase({ employeeId: selectedEmployee, amount: Number(purchaseAmount) || 0, description: purchaseDesc, date: purchaseDate });
       await loadAccount(selectedEmployee);
-      setPurchaseAmount('');
-      setPurchaseDesc('');
-      setPurchaseDate(new Date().toISOString().slice(0,10));
-      setSuccess('Compra registrada');
-    } catch (err) {
+      setPurchaseAmount(''); setPurchaseDesc(''); setPurchaseDate(todayISO());
+      flash('Compra registrada');
+    } catch {
       setError('Error al registrar compra');
-      console.error(err);
     } finally {
       setLoading(false);
-      setTimeout(() => setSuccess(''), 2000);
     }
   };
 
@@ -115,271 +133,277 @@ const EmployeeAccountPage = () => {
       setLoading(true);
       await addAccountPayment({ employeeId: selectedEmployee, amount: Number(paymentAmount) || 0, description: paymentDesc, date: paymentDate });
       await loadAccount(selectedEmployee);
-      setPaymentAmount('');
-      setPaymentDesc('');
-      setPaymentDate(new Date().toISOString().slice(0,10));
-      setSuccess('Pago registrado');
-    } catch (err) {
+      setPaymentAmount(''); setPaymentDesc(''); setPaymentDate(todayISO());
+      flash('Pago registrado');
+    } catch {
       setError('Error al registrar pago');
-      console.error(err);
     } finally {
       setLoading(false);
-      setTimeout(() => setSuccess(''), 2000);
     }
   };
 
+  const balance = account?.balance ?? 0;
+  const balanceColor = balance < 0 ? theme.palette.error.main : theme.palette.success.main;
+
+  const selectedEmp = employees.find(e => e._id === selectedEmployee);
+  const empName = selectedEmp ? `${selectedEmp.nombre} ${selectedEmp.apellido}` : null;
+
   return (
-    <Container fluid className="px-0 md:px-4 mt-4">
-      <PageHeader
-        icon={<FaWallet />}
-        title="Cuenta Corriente del Empleado"
-        subtitle="Gestión de adelantos, compras y pagos"
-        accentColor="#0ea5e9"
-      />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-      {error && <Alert variant="danger">{error}</Alert>}
-      {success && <Alert variant="success">{success}</Alert>}
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <WalletIcon sx={{ fontSize: 22 }} />
+            {empName ? `Cuenta — ${empName}` : 'Cuenta Corriente'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>
+            {account
+              ? `Saldo actual: ${formatCurrency(balance)} · ${transactions.length} transacciones`
+              : 'Seleccioná un empleado para ver su cuenta'}
+          </Typography>
+        </Box>
+        {loading && <CircularProgress size={24} />}
+      </Box>
 
-      {loading && (
-        <div className="text-center my-4">
-          <Spinner animation="border" />
-          <p className="mt-2 text-muted">Cargando...</p>
-        </div>
-      )}
+      {error   && <Alert severity="error"   onClose={() => setError('')}>{error}</Alert>}
+      {success && <Alert severity="success" onClose={() => setSuccess('')}>{success}</Alert>}
 
-      {/* Selector de empleado */}
-          <SectionCard title="Selección de Empleado" icon={<FaUser size={20} />} className="mb-4" accentColor="#0ea5e9">
-        <Form.Group controlId="employeeSelect">
-          <Form.Label>Empleado</Form.Label>
-          <Form.Select 
-            value={selectedEmployee} 
-            onChange={handleSelectEmployee}
-            className="form-select-lg"
-          >
-            <option value="">Seleccione un empleado</option>
-            {employees.map(emp => (
-              <option key={emp._id} value={emp._id}>
-                {emp.nombre} {emp.apellido} — Legajo: {emp.legajo}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-      </SectionCard>
+      {/* Employee selector */}
+      <SectionBlock title="Selección de Empleado" icon={<PersonIcon fontSize="small" />}>
+        <TextField
+          select
+          label="Empleado"
+          value={selectedEmployee}
+          onChange={handleSelectEmployee}
+          fullWidth
+          size="small"
+        >
+          <MenuItem value=""><em>Seleccione un empleado</em></MenuItem>
+          {employees.map(emp => (
+            <MenuItem key={emp._id} value={emp._id}>
+              {emp.nombre} {emp.apellido}{emp.legajo ? ` — Leg. ${emp.legajo}` : ''}
+            </MenuItem>
+          ))}
+        </TextField>
+      </SectionBlock>
 
       {account && (
         <>
-          {/* Resumen y configuración */}
-              <SectionCard title="Resumen y Configuración" icon={<FaWallet size={20} />} className="mb-4" accentColor="#0ea5e9">
-            <Row>
-              <Col lg={4} md={6} className="mb-3">
-                <Card className="h-100 balance-card shadow-sm">
-                  <Card.Body className="text-center">
-                    <FaWallet size={40} className="text-white mb-3" />
-                    <h5 className="card-title text-white">Saldo Actual</h5>
-                    <h2 className="text-white fw-bold">
-                      {formatCurrency(account?.balance)}
-                    </h2>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col lg={8} md={6} className="mb-3">
-                <Card className="h-100 shadow-sm border border-slate-200/70">
-                  <Card.Header>
-                    <h5 className="mb-0 inline-flex items-center gap-2">
-                      <FaCog />
-                      <span>Configuración de Deducción Semanal</span>
-                    </h5>
-                  </Card.Header>
-                  <Card.Body>
-                    <div className="mb-3">
-                      <strong>Deducción actual:</strong> {formatCurrency(account?.weeklyDeductionAmount)}
-                    </div>
-                    <Form onSubmit={handleUpdateWeeklyDeduction}>
-                      <Row>
-                        <Col md={8}>
-                          <Form.Group>
-                            <Form.Label>Nuevo monto de deducción semanal</Form.Label>
-                            <Form.Control 
-                              type="number" 
-                              min="0" 
-                              value={weeklyDeductionAmount} 
-                              onChange={(e) => setWeeklyDeductionAmount(e.target.value)}
-                              placeholder="Ingrese el monto"
-                            />
-                          </Form.Group>
-                        </Col>
-                        <Col md={4} className="d-flex align-items-end">
-                          <Button type="submit" variant="primary" className="w-100 shadow-sm inline-flex items-center gap-2">
-                            <FaCog />
-                            <span>Actualizar</span>
-                          </Button>
-                        </Col>
-                      </Row>
-                    </Form>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </SectionCard>
+          {/* Balance + weekly deduction */}
+          <SectionBlock title="Resumen y Configuración" icon={<SettingsIcon fontSize="small" />}>
+            <Grid container spacing={2.5} alignItems="stretch">
 
-          {/* Formularios de transacciones */}
-          <Row className="mb-4">
-            <Col lg={6} className="mb-4">
-              <SectionCard title="Registrar Compra" icon={<FaShoppingCart size={20} />} accentColor="#0ea5e9">
-                <Form onSubmit={handleAddPurchase}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Monto</Form.Label>
-                    <Form.Control 
-                      type="number" 
-                      min="0" 
-                      step="0.01"
-                      value={purchaseAmount} 
-                      onChange={(e) => setPurchaseAmount(e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Descripción</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      value={purchaseDesc} 
-                      onChange={(e) => setPurchaseDesc(e.target.value)}
-                      placeholder="Descripción de la compra"
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Fecha</Form.Label>
-                    <Form.Control 
-                      type="date" 
-                      value={purchaseDate} 
-                      onChange={(e) => setPurchaseDate(e.target.value)} 
-                    />
-                  </Form.Group>
-                  <Button type="submit" variant="primary" className="w-100 shadow-sm inline-flex items-center gap-2">
-                    <FaShoppingCart size={16} />
-                    <span>Registrar Compra</span>
-                  </Button>
-                </Form>
-              </SectionCard>
-            </Col>
-            <Col lg={6} className="mb-4">
-              <SectionCard title="Registrar Pago" icon={<FaMoneyBillWave size={20} />} accentColor="#0ea5e9">
-                <Form onSubmit={handleAddPayment}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Monto</Form.Label>
-                    <Form.Control 
-                      type="number" 
-                      min="0" 
-                      step="0.01"
-                      value={paymentAmount} 
-                      onChange={(e) => setPaymentAmount(e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Descripción</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      value={paymentDesc} 
-                      onChange={(e) => setPaymentDesc(e.target.value)}
-                      placeholder="Descripción del pago"
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Fecha</Form.Label>
-                    <Form.Control 
-                      type="date" 
-                      value={paymentDate} 
-                      onChange={(e) => setPaymentDate(e.target.value)} 
-                    />
-                  </Form.Group>
-                  <Button type="submit" variant="primary" className="w-100 shadow-sm inline-flex items-center gap-2">
-                    <FaMoneyBillWave size={16} />
-                    <span>Realizar Pago</span>
-                  </Button>
-                </Form>
-              </SectionCard>
-            </Col>
-          </Row>
+              {/* Balance card — full width */}
+              <Grid xs={12}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    borderRadius: 3,
+                    px: 3,
+                    py: 2.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2.5,
+                    bgcolor: alpha(balanceColor, 0.1),
+                    border: `1.5px solid ${alpha(balanceColor, 0.35)}`,
+                  }}
+                >
+                  <Box sx={{ width: 52, height: 52, borderRadius: 2.5, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: alpha(balanceColor, 0.18), color: balanceColor }}>
+                    <WalletIcon sx={{ fontSize: 26 }} />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="caption" fontWeight={700} textTransform="uppercase" letterSpacing="0.07em" color="text.secondary">
+                      Saldo Actual
+                    </Typography>
+                    <Typography variant="h4" fontWeight={800} letterSpacing="-0.02em" sx={{ color: balanceColor, lineHeight: 1.2 }}>
+                      {formatCurrency(balance)}
+                    </Typography>
+                    {account?.weeklyDeductionAmount > 0 && (
+                      <Typography variant="caption" color="text.secondary">
+                        Deducción semanal: {formatCurrency(account.weeklyDeductionAmount)}
+                      </Typography>
+                    )}
+                  </Box>
+                </Paper>
+              </Grid>
 
-          {/* Historial de transacciones */}
-              <SectionCard title="Historial de Transacciones" icon={<FaHistory size={20} />} accentColor="#0ea5e9">
+              {/* Weekly deduction form */}
+              <Grid xs={12}>
+                <Box component="form" onSubmit={handleUpdateWeeklyDeduction} sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Configurá el monto que se descuenta automáticamente cada semana de la nómina.
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-end' }}>
+                    <TextField
+                      label="Deducción semanal"
+                      type="number"
+                      value={weeklyDeductionAmount}
+                      onChange={e => setWeeklyDeductionAmount(e.target.value)}
+                      size="small"
+                      fullWidth
+                      slotProps={{ input: { inputProps: { min: 0 } } }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      startIcon={<SaveIcon />}
+                      sx={{ whiteSpace: 'nowrap', borderRadius: 2.5 }}
+                      disabled={loading}
+                    >
+                      Actualizar
+                    </Button>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </SectionBlock>
+
+          {/* Purchase + Payment forms */}
+          <Grid container spacing={3}>
+            <Grid xs={12} md={6}>
+              <SectionBlock title="Registrar Compra" icon={<ShoppingCartIcon fontSize="small" />}>
+                <Box component="form" onSubmit={handleAddPurchase} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    label="Monto"
+                    type="number"
+                    value={purchaseAmount}
+                    onChange={e => setPurchaseAmount(e.target.value)}
+                    size="small"
+                    fullWidth
+                    slotProps={{ input: { inputProps: { min: 0, step: 0.01 } } }}
+                    placeholder="0.00"
+                  />
+                  <TextField
+                    label="Descripción"
+                    value={purchaseDesc}
+                    onChange={e => setPurchaseDesc(e.target.value)}
+                    size="small"
+                    fullWidth
+                    placeholder="Descripción de la compra"
+                  />
+                  <TextField
+                    label="Fecha"
+                    type="date"
+                    value={purchaseDate}
+                    onChange={e => setPurchaseDate(e.target.value)}
+                    size="small"
+                    fullWidth
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    startIcon={<ShoppingCartIcon />}
+                    disabled={loading}
+                    sx={{ borderRadius: 2.5, bgcolor: '#FF4C51', '&:hover': { bgcolor: '#d63b3f' } }}
+                  >
+                    Registrar Compra
+                  </Button>
+                </Box>
+              </SectionBlock>
+            </Grid>
+
+            <Grid xs={12} md={6}>
+              <SectionBlock title="Registrar Pago" icon={<PaymentsIcon fontSize="small" />}>
+                <Box component="form" onSubmit={handleAddPayment} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    label="Monto"
+                    type="number"
+                    value={paymentAmount}
+                    onChange={e => setPaymentAmount(e.target.value)}
+                    size="small"
+                    fullWidth
+                    slotProps={{ input: { inputProps: { min: 0, step: 0.01 } } }}
+                    placeholder="0.00"
+                  />
+                  <TextField
+                    label="Descripción"
+                    value={paymentDesc}
+                    onChange={e => setPaymentDesc(e.target.value)}
+                    size="small"
+                    fullWidth
+                    placeholder="Descripción del pago"
+                  />
+                  <TextField
+                    label="Fecha"
+                    type="date"
+                    value={paymentDate}
+                    onChange={e => setPaymentDate(e.target.value)}
+                    size="small"
+                    fullWidth
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    startIcon={<PaymentsIcon />}
+                    disabled={loading}
+                    sx={{ borderRadius: 2.5, bgcolor: '#56CA00', '&:hover': { bgcolor: '#3d9200' } }}
+                  >
+                    Registrar Pago
+                  </Button>
+                </Box>
+              </SectionBlock>
+            </Grid>
+          </Grid>
+
+          {/* Transaction history */}
+          <SectionBlock title="Historial de Transacciones" icon={<HistoryIcon fontSize="small" />}>
             {transactions.length === 0 ? (
-              <Alert variant="light" className="text-center mb-0">
-                <FaHistory size={30} className="text-muted mb-2" />
-                <div>No hay transacciones registradas</div>
-              </Alert>
+              <Box sx={{ textAlign: 'center', py: 6 }}>
+                <HistoryIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                <Typography color="text.secondary">No hay transacciones registradas</Typography>
+              </Box>
             ) : (
-              <>
-                {/* Vista de escritorio: tabla */}
-                <div className="desktop-view">
-                  <div className="table-responsive">
-                    <Table striped hover className="mb-0 align-middle text-sm">
-                      <thead>
-                        <tr>
-                          <th>Fecha</th>
-                          <th>Tipo</th>
-                          <th>Monto</th>
-                          <th>Descripción</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {transactions.map(tx => (
-                          <tr key={tx._id}>
-                            <td>{new Date(tx.date).toLocaleString('es-AR')}</td>
-                            <td>
-                              <span className={`badge ${
-                                tx.type === 'purchase' ? 'bg-danger' : 
-                                tx.type === 'payment' ? 'bg-success' : 'bg-info'
-                              }`}>
-                                {tx.type === 'purchase' ? 'Compra' : 
-                                 tx.type === 'payment' ? 'Pago' : 'Deducción Nómina'}
-                              </span>
-                            </td>
-                            <td className={`fw-bold ${
-                              tx.type === 'purchase' ? 'text-danger' : 'text-success'
-                            }`}>
-                              {tx.type === 'purchase' ? '-' : '+'}${tx.amount?.toLocaleString('es-AR')}
-                            </td>
-                            <td>{tx.description}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </div>
-                </div>
-
-                {/* Vista móvil: tarjetas */}
-                <div className="mobile-view">
-                  {transactions.map(tx => {
-                    const typeText = tx.type === 'purchase' ? 'Compra' : tx.type === 'payment' ? 'Pago' : 'Deducción Nómina';
-                    const typeVariant = tx.type === 'purchase' ? 'danger' : tx.type === 'payment' ? 'success' : 'info';
-                    const amountSign = tx.type === 'purchase' ? '-' : '+';
-                    const amountClass = tx.type === 'purchase' ? 'text-danger' : 'text-success';
-                    const amountNode = (
-                      <span className={`amount-value ${amountClass}`}>{`${amountSign}$${tx.amount?.toLocaleString('es-AR')}`}</span>
-                    );
-                    return (
-                      <MobileCard
-                        key={tx._id}
-                        title={typeText}
-                        subtitle={new Date(tx.date).toLocaleString('es-AR')}
-                        accentColor="#0ea5e9"
-                        badges={[{ text: typeText, variant: typeVariant }]}
-                        fields={[
-                          { label: 'Monto', value: amountNode },
-                          { label: 'Descripción', value: tx.description || '-' }
-                        ]}
-                      />
-                    );
-                  })}
-                </div>
-              </>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                      <TableCell>Fecha</TableCell>
+                      <TableCell>Tipo</TableCell>
+                      <TableCell>Monto</TableCell>
+                      <TableCell>Descripción</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {transactions.map(tx => {
+                      const chip = txChip(tx.type);
+                      const isDebit = tx.type === 'purchase';
+                      return (
+                        <TableRow key={tx._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {new Date(tx.date).toLocaleDateString('es-AR')}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={chip.label}
+                              size="small"
+                              sx={{ borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600, bgcolor: chip.bgcolor, color: chip.color }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight={700} sx={{ color: isDebit ? 'error.main' : 'success.main' }}>
+                              {isDebit ? '-' : '+'}{formatCurrency(tx.amount)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">{tx.description || '—'}</Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             )}
-          </SectionCard>
+          </SectionBlock>
         </>
       )}
-    </Container>
+    </Box>
   );
 };
 

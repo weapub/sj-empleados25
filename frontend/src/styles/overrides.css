@@ -155,18 +155,13 @@
   font-weight: 600 !important;
 }
 
-/* Variables y fondo/texto globales para asegurar contraste */
+/* Variables globales — solo para componentes Bootstrap legacy */
 :root {
-  --text-primary: #0f172a;  /* slate-900 */
-  --text-secondary: #334155; /* slate-600 */
-  --light-bg: #f7f8fc;      /* gris muy tenue */
-  --border-color: #e5e7eb;  /* gray-200 */
-  --primary-color: #4f46e5; /* indigo-600 */
-}
-
-body {
-  background-color: var(--light-bg) !important;
-  color: var(--text-primary) !important;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --light-bg: #f7f8fc;
+  --border-color: #e5e7eb;
+  --primary-color: #4f46e5;
 }
 
 /* =============================================

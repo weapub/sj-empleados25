@@ -180,7 +180,7 @@ const PayrollList = () => {
             label="Empleado"
             value={filterEmployee}
             onChange={e => setFilterEmployee(e.target.value)}
-            sx={{ minWidth: 220 }}
+            sx={{ minWidth: { xs: '100%', sm: 220 } }}
           >
             <MenuItem value="">Todos</MenuItem>
             {uniqueEmployees.map(emp => (
@@ -246,14 +246,14 @@ const PayrollList = () => {
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell>Período</TableCell>
-                  <TableCell>Pago</TableCell>
-                  <TableCell>Estado</TableCell>
-                  <TableCell>Horas Extras</TableCell>
-                  <TableCell>Otros</TableCell>
-                  <TableCell>Descuentos</TableCell>
-                  <TableCell>Adelanto</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Pago</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Estado</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Horas Extras</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Otros</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Descuentos</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Adelanto</TableCell>
                   <TableCell>Neto</TableCell>
-                  <TableCell>Semanal</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Semanal</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -273,13 +273,15 @@ const PayrollList = () => {
 
                     return (
                       <TableRow key={r._id} hover sx={{ '&:last-child td': { border: 0 } }}>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight={600}>
-                            {r.employee ? `${r.employee.nombre} ${r.employee.apellido}` : '—'}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Legajo: {r.employee?.legajo || '—'}
-                          </Typography>
+                        <TableCell sx={{ maxWidth: { xs: 120, sm: 200, md: 'none' } }}>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={600} noWrap>
+                              {r.employee ? `${r.employee.nombre} ${r.employee.apellido}` : '—'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                              Leg. {r.employee?.legajo || '—'}
+                            </Typography>
+                          </Box>
                         </TableCell>
 
                         <TableCell>
@@ -287,9 +289,9 @@ const PayrollList = () => {
                           <Typography variant="caption" color="text.secondary">Días: {dim}</Typography>
                         </TableCell>
 
-                        <TableCell>{formatDate(r.paymentDate)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{formatDate(r.paymentDate)}</TableCell>
 
-                        <TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             <Chip
                               label={r.hasPresentismo ? 'Con Presentismo' : 'Sin Presentismo'}
@@ -314,11 +316,11 @@ const PayrollList = () => {
                           </Box>
                         </TableCell>
 
-                        <TableCell>{formatCurrency(r.extraHours)}</TableCell>
-                        <TableCell>{formatCurrency(r.otherAdditions)}</TableCell>
-                        <TableCell>{formatCurrency(r.discounts)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.extraHours)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.otherAdditions)}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.discounts)}</TableCell>
 
-                        <TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             <Chip
                               label={r.advanceRequested ? 'Con Adelanto' : 'Sin Adelanto'}
@@ -340,11 +342,11 @@ const PayrollList = () => {
                           </Typography>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                           <Typography variant="body2">{formatCurrency(weekly)}</Typography>
                         </TableCell>
 
-                        <TableCell align="right">
+                        <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: { xs: 112, md: 'auto' } }}>
                           <Tooltip title="Ver detalle">
                             <IconButton
                               size="small"

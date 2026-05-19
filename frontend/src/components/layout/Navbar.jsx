@@ -54,7 +54,7 @@ const Navbar = ({ isAuthenticated, logout, onMobileMenuToggle, colorMode, onTogg
               <Avatar
                 sx={{
                   width: 32, height: 32, fontSize: 13, fontWeight: 700,
-                  background: 'linear-gradient(135deg, #8C57FF 0%, #16B1FF 100%)',
+                  bgcolor: 'primary.main', color: 'primary.contrastText',
                 }}
               >
                 {initials}

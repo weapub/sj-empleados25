@@ -256,38 +256,38 @@ const EmployeeDetail = () => {
       {/* ── Datos ── */}
       <Grid container spacing={2.5}>
         {/* Personal */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <SectionPaper title="Información Personal" icon={<PersonIcon fontSize="small" />}>
             <Grid container spacing={2.5}>
-              <Grid item xs={6}><InfoRow label="Legajo"   value={legajo} /></Grid>
-              <Grid item xs={6}><InfoRow label="DNI"      value={employee.dni} /></Grid>
-              <Grid item xs={6}><InfoRow label="CUIT"     value={employee.cuit} /></Grid>
-              <Grid item xs={6}><InfoRow label="Teléfono" value={employee.telefono} /></Grid>
-              <Grid item xs={12}><InfoRow label="Email"   value={employee.email} /></Grid>
-              <Grid item xs={6}><InfoRow label="Fecha de Nacimiento" value={fmt(employee.fechaNacimiento)} /></Grid>
-              <Grid item xs={6}><InfoRow label="Lugar de Nacimiento" value={employee.lugarNacimiento} /></Grid>
-              <Grid item xs={12}><InfoRow label="Domicilio" value={employee.domicilio} /></Grid>
+              <Grid xs={6}><InfoRow label="Legajo"   value={legajo} /></Grid>
+              <Grid xs={6}><InfoRow label="DNI"      value={employee.dni} /></Grid>
+              <Grid xs={6}><InfoRow label="CUIT"     value={employee.cuit} /></Grid>
+              <Grid xs={6}><InfoRow label="Teléfono" value={employee.telefono} /></Grid>
+              <Grid xs={12}><InfoRow label="Email"   value={employee.email} /></Grid>
+              <Grid xs={6}><InfoRow label="Fecha de Nacimiento" value={fmt(employee.fechaNacimiento)} /></Grid>
+              <Grid xs={6}><InfoRow label="Lugar de Nacimiento" value={employee.lugarNacimiento} /></Grid>
+              <Grid xs={12}><InfoRow label="Domicilio" value={employee.domicilio} /></Grid>
             </Grid>
           </SectionPaper>
         </Grid>
 
         {/* Laboral */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <SectionPaper title="Información Laboral" icon={<WorkIcon fontSize="small" />}>
             <Grid container spacing={2.5}>
-              <Grid item xs={6}><InfoRow label="Puesto"       value={employee.puesto} /></Grid>
-              <Grid item xs={6}><InfoRow label="Departamento" value={employee.departamento} /></Grid>
-              <Grid item xs={6}><InfoRow label="Sucursal"     value={employee.sucursal} /></Grid>
-              <Grid item xs={6}>
+              <Grid xs={6}><InfoRow label="Puesto"       value={employee.puesto} /></Grid>
+              <Grid xs={6}><InfoRow label="Departamento" value={employee.departamento} /></Grid>
+              <Grid xs={6}><InfoRow label="Sucursal"     value={employee.sucursal} /></Grid>
+              <Grid xs={6}>
                 <InfoRow label="Salario" value={employee.salario ? `$${Number(employee.salario).toLocaleString('es-AR')}` : '—'} />
               </Grid>
-              <Grid item xs={6}><InfoRow label="Fecha de Contratación"  value={fmt(employee.fechaContratacion)} /></Grid>
-              <Grid item xs={6}><InfoRow label="Fecha de Ingreso"        value={fmt(employee.fechaIngreso)} /></Grid>
-              <Grid item xs={6}><InfoRow label="Registro ARCA" value={fmt(employee.fechaRegistroARCA)} /></Grid>
+              <Grid xs={6}><InfoRow label="Fecha de Contratación"  value={fmt(employee.fechaContratacion)} /></Grid>
+              <Grid xs={6}><InfoRow label="Fecha de Ingreso"        value={fmt(employee.fechaIngreso)} /></Grid>
+              <Grid xs={6}><InfoRow label="Registro ARCA" value={fmt(employee.fechaRegistroARCA)} /></Grid>
               {employee.activo === false && (
                 <>
-                  <Grid item xs={6}><InfoRow label="Fecha de Baja" value={fmt(employee.fechaBaja)} /></Grid>
-                  <Grid item xs={6}><InfoRow label="Motivo de Baja" value={employee.motivoBaja} /></Grid>
+                  <Grid xs={6}><InfoRow label="Fecha de Baja" value={fmt(employee.fechaBaja)} /></Grid>
+                  <Grid xs={6}><InfoRow label="Motivo de Baja" value={employee.motivoBaja} /></Grid>
                 </>
               )}
             </Grid>
@@ -299,7 +299,7 @@ const EmployeeDetail = () => {
       <SectionPaper title="Eventos del Legajo" icon={<EventIcon fontSize="small" />}>
         {/* Nuevo evento */}
         <Grid container spacing={2} alignItems="flex-end" sx={{ mb: 2.5 }}>
-          <Grid item xs={12} sm>
+          <Grid xs={12} sm>
             <TextField
               label="Mensaje del evento"
               multiline
@@ -311,7 +311,7 @@ const EmployeeDetail = () => {
               placeholder="Escribí un mensaje para registrar y/o enviar por WhatsApp…"
             />
           </Grid>
-          <Grid item xs={12} sm="auto">
+          <Grid xs={12} sm="auto">
             <TextField
               label="Tipo"
               select
@@ -323,7 +323,7 @@ const EmployeeDetail = () => {
               {EVENT_TYPES.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
             </TextField>
           </Grid>
-          <Grid item xs={12} sm="auto">
+          <Grid xs={12} sm="auto">
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button variant="contained" onClick={handleCreateEvent} disabled={savingEvent || !newEventMsg.trim()}>
                 Registrar
@@ -406,8 +406,7 @@ const EmployeeDetail = () => {
                   <ListItemText
                     primary={ev.message}
                     secondary={new Date(ev.createdAt).toLocaleString('es-AR')}
-                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
+                    slotProps={{ primary: { variant: 'body2', fontWeight: 500 }, secondary: { variant: 'caption' } }}
                   />
                 </ListItem>
               </React.Fragment>

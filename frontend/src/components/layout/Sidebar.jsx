@@ -3,6 +3,7 @@ import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
   Typography, Avatar, Divider, Tooltip,
 } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
@@ -26,54 +27,60 @@ const NAV_ITEMS = [
   { to: '/employee-account',label: 'Cuenta Corriente',  icon: <WalletIcon />    },
 ];
 
-const NavItem = ({ to, label, icon, end, onNavigate }) => (
-  <ListItem disablePadding sx={{ mb: 0.5 }}>
-    <ListItemButton
-      component={NavLink}
-      to={to}
-      end={end}
-      onClick={onNavigate}
-      sx={{
-        borderRadius: 2,
-        py: 0.875,
-        px: 2,
-        color: 'text.secondary',
-        '& .MuiListItemIcon-root': { color: 'text.secondary', minWidth: 36 },
-        '&.active': {
-          background: 'linear-gradient(270deg, rgba(140,87,255,0.16) 0%, rgba(140,87,255,0.28) 100%)',
-          color: 'primary.main',
-          fontWeight: 600,
-          '& .MuiListItemIcon-root': { color: 'primary.main' },
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            right: 0,
-            top: '12%',
-            height: '76%',
-            width: 3,
-            borderRadius: '3px 0 0 3px',
-            backgroundColor: '#8C57FF',
+const NavItem = ({ to, label, icon, end, onNavigate }) => {
+  const theme = useTheme();
+  const p = theme.palette.primary.main;
+  return (
+    <ListItem disablePadding sx={{ mb: 0.5 }}>
+      <ListItemButton
+        component={NavLink}
+        to={to}
+        end={end}
+        onClick={onNavigate}
+        sx={{
+          borderRadius: 2,
+          py: 0.875,
+          px: 2,
+          color: 'text.secondary',
+          '& .MuiListItemIcon-root': { color: 'text.secondary', minWidth: 36 },
+          '&.active': {
+            background: `linear-gradient(270deg, ${alpha(p, 0.12)} 0%, ${alpha(p, 0.24)} 100%)`,
+            color: 'primary.main',
+            fontWeight: 600,
+            '& .MuiListItemIcon-root': { color: 'primary.main' },
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              right: 0,
+              top: '12%',
+              height: '76%',
+              width: 3,
+              borderRadius: '3px 0 0 3px',
+              backgroundColor: p,
+            },
+            position: 'relative',
           },
-          position: 'relative',
-        },
-        '&:hover': {
-          bgcolor: 'action.hover',
-          color: 'text.primary',
-          '& .MuiListItemIcon-root': { color: 'text.primary' },
-        },
-        transition: 'all 0.15s ease',
-      }}
-    >
-      <ListItemIcon>{icon}</ListItemIcon>
-      <ListItemText
-        primary={label}
-        primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 'inherit' }}
-      />
-    </ListItemButton>
-  </ListItem>
-);
+          '&:hover': {
+            bgcolor: 'action.hover',
+            color: 'text.primary',
+            '& .MuiListItemIcon-root': { color: 'text.primary' },
+          },
+          transition: 'all 0.15s ease',
+        }}
+      >
+        <ListItemIcon>{icon}</ListItemIcon>
+        <ListItemText
+          primary={label}
+          slotProps={{ primary: { fontSize: '0.9rem', fontWeight: 'inherit' } }}
+        />
+      </ListItemButton>
+    </ListItem>
+  );
+};
 
 const SidebarContent = ({ logout, onNavigate }) => {
+  const theme = useTheme();
+  const p = theme.palette.primary.main;
   const [logoOk, setLogoOk]       = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -96,9 +103,9 @@ const SidebarContent = ({ logout, onNavigate }) => {
         <Box
           sx={{
             width: 34, height: 34, borderRadius: 2,
-            background: 'linear-gradient(135deg, #8C57FF 0%, #A379FF 100%)',
+            background: `linear-gradient(135deg, ${p} 0%, ${alpha(p, 0.7)} 100%)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 10px rgba(140,87,255,0.4)',
+            boxShadow: `0 4px 10px ${alpha(p, 0.4)}`,
             flexShrink: 0,
           }}
         >
@@ -153,14 +160,14 @@ const SidebarContent = ({ logout, onNavigate }) => {
           sx={{
             display: 'flex', alignItems: 'center', gap: 1.5,
             p: 1.5, borderRadius: 2,
-            bgcolor: 'rgba(140,87,255,0.06)',
-            border: '1px solid rgba(140,87,255,0.14)',
+            bgcolor: alpha(p, 0.06),
+            border: `1px solid ${alpha(p, 0.14)}`,
           }}
         >
           <Avatar
             sx={{
               width: 38, height: 38,
-              background: 'linear-gradient(135deg, #8C57FF 0%, #16B1FF 100%)',
+              background: `linear-gradient(135deg, ${p} 0%, ${theme.palette.info.main} 100%)`,
               fontSize: 15, fontWeight: 700, flexShrink: 0,
             }}
           >

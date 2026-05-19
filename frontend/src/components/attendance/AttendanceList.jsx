@@ -193,7 +193,7 @@ const AttendanceList = () => {
             name="employeeId"
             value={filter.employeeId}
             onChange={handleFilterChange}
-            sx={{ minWidth: 220 }}
+            sx={{ minWidth: { xs: '100%', sm: 220 } }}
           >
             <MenuItem value="">Todos los empleados</MenuItem>
             {employees.map(emp => (
@@ -258,12 +258,12 @@ const AttendanceList = () => {
                   {headCell('Empleado', 'employee')}
                   {headCell('Fecha', 'date')}
                   {headCell('Estado', 'status')}
-                  {headCell('Horario / Tardanza', 'late')}
-                  <TableCell>Vence cert.</TableCell>
-                  <TableCell>Inicio vac.</TableCell>
-                  <TableCell>Fin vac.</TableCell>
-                  <TableCell>Reincorporación</TableCell>
-                  <TableCell>Certificado</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Horario / Tardanza</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Vence cert.</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Inicio vac.</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Fin vac.</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Reincorporación</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Certificado</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -283,11 +283,13 @@ const AttendanceList = () => {
 
                     return (
                       <TableRow key={att._id} hover sx={{ '&:last-child td': { border: 0 } }}>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight={600}>{getName(att)}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Legajo: {att.employee?.legajo || '—'}
-                          </Typography>
+                        <TableCell sx={{ maxWidth: { xs: 120, sm: 200, md: 'none' } }}>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={600} noWrap>{getName(att)}</Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                              Leg. {att.employee?.legajo || '—'}
+                            </Typography>
+                          </Box>
                         </TableCell>
 
                         <TableCell>
@@ -349,7 +351,7 @@ const AttendanceList = () => {
                           ) : '—'}
                         </TableCell>
 
-                        <TableCell align="right">
+                        <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: { xs: 88, md: 'auto' } }}>
                           <Tooltip title="Editar">
                             <IconButton
                               size="small"

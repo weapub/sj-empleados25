@@ -204,13 +204,13 @@ const PayrollDetail = () => {
         {/* Empleado */}
         <SectionPaper title="Empleado">
           <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <InfoRow
                 label="Nombre"
                 value={receipt.employee ? `${receipt.employee.nombre} ${receipt.employee.apellido}` : null}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <InfoRow label="Legajo" value={receipt.employee?.legajo} />
             </Grid>
           </Grid>
@@ -252,19 +252,19 @@ const PayrollDetail = () => {
         {/* Período y Fecha de Pago */}
         <SectionPaper title="Período y Fecha de Pago">
           <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={4}>
+            <Grid xs={12} sm={4}>
               <InfoRow label="Período" value={formatPeriod(receipt.period)} />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid xs={12} sm={4}>
               <InfoRow label="Fecha de Pago" value={formatDate(receipt.paymentDate)} />
             </Grid>
             {receipt.signed && (
-              <Grid item xs={12} sm={4}>
+              <Grid xs={12} sm={4}>
                 <InfoRow label="Fecha de Firma" value={formatDate(receipt.signedDate)} />
               </Grid>
             )}
             {receipt.advanceRequested && (
-              <Grid item xs={12} sm={4}>
+              <Grid xs={12} sm={4}>
                 <InfoRow label="Fecha de Adelanto" value={formatDate(receipt.advanceDate)} />
               </Grid>
             )}
@@ -274,21 +274,21 @@ const PayrollDetail = () => {
         {/* Montos */}
         <SectionPaper title="Montos">
           <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid xs={12} sm={6} md={3}>
               <InfoRow label="Horas Extras" value={formatCurrency(receipt.extraHours)} />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid xs={12} sm={6} md={3}>
               <InfoRow label="Otros Adicionales" value={formatCurrency(receipt.otherAdditions)} />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid xs={12} sm={6} md={3}>
               <InfoRow label="Descuentos" value={formatCurrency(receipt.discounts)} />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid xs={12} sm={6} md={3}>
               <InfoRow label="Adelanto" value={formatCurrency(receipt.advanceAmount)} />
             </Grid>
 
             {/* NETO destacado */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <Paper
                 variant="outlined"
                 sx={{

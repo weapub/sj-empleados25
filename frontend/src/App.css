@@ -44,14 +44,12 @@ button { cursor: pointer; }
   --font-alt: 'Plus Jakarta Sans', sans-serif;
 
   font-family: var(--font-body);
-  color: var(--text-primary);
 }
 
-/* Tipografía base más legible */
+/* Tipografía base — color gestionado por MUI CssBaseline */
 body {
   font-size: 16px;
   line-height: 1.6;
-  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -272,45 +270,7 @@ button:focus-visible,
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* Colores de fondo y texto según esquema preferido */
-@media (prefers-color-scheme: light) {
-  body {
-    color: var(--vite-text-light);
-    background-color: var(--vite-bg-light);
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button,
-  .btn {
-    background-color: #f9f9f9;
-    color: var(--vite-text-light);
-  }
-}
-@media (prefers-color-scheme: dark) {
-  body {
-    color: var(--vite-text-dark);
-    background-color: var(--vite-bg-dark);
-  }
-  button,
-  .btn {
-    background-color: #1a1a1a;
-    color: var(--vite-text-dark);
-  }
-}
-
-/* Base clara por defecto (legible y amigable) */
-:root { color-scheme: light; }
-body {
-  color: var(--text-primary);
-  background-color: var(--light-bg);
-}
-button,
-.btn {
-  background-color: #ffffff;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-}
+/* Fondo y color gestionados por MUI CssBaseline + ThemeProvider */
 a:hover { color: var(--primary-color); }
 /* Override utilitario Bootstrap: reducir padding horizontal de .px-4 */
 .px-4 {

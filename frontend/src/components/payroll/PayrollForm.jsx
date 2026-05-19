@@ -153,7 +153,7 @@ const PayrollForm = () => {
           <Grid container spacing={2.5}>
 
             {/* Empleado */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 select
                 fullWidth
@@ -174,7 +174,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Período */}
-            <Grid item xs={12} md={3}>
+            <Grid xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -189,7 +189,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Fecha de pago */}
-            <Grid item xs={12} md={3}>
+            <Grid xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -204,7 +204,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Firmado switch */}
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <FormControlLabel
                 control={
                   <Switch
@@ -218,7 +218,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Fecha firma */}
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <TextField
                 fullWidth
                 size="small"
@@ -233,7 +233,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Presentismo switch */}
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <FormControlLabel
                 control={
                   <Switch
@@ -247,7 +247,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Montos */}
-            <Grid item xs={12} md={3}>
+            <Grid xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -258,7 +258,7 @@ const PayrollForm = () => {
                 onChange={handleChange}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -269,7 +269,7 @@ const PayrollForm = () => {
                 onChange={handleChange}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -280,7 +280,7 @@ const PayrollForm = () => {
                 onChange={handleChange}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -294,7 +294,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Adelanto switch */}
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <FormControlLabel
                 control={
                   <Switch
@@ -308,7 +308,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Fecha adelanto */}
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <TextField
                 fullWidth
                 size="small"
@@ -323,7 +323,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Monto adelanto */}
-            <Grid item xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <TextField
                 fullWidth
                 size="small"
@@ -337,7 +337,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Monto semanal calculado (readonly) */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -349,7 +349,7 @@ const PayrollForm = () => {
             </Grid>
 
             {/* Botones */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                 <Button
                   variant="outlined"

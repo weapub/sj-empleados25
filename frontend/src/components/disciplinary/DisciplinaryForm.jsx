@@ -152,7 +152,7 @@ const DisciplinaryForm = () => {
           <Grid container spacing={2.5}>
 
             {/* Empleado */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 select
                 fullWidth
@@ -174,7 +174,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Fecha */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -189,7 +189,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Hora */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -203,7 +203,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Tipo */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 select
                 fullWidth
@@ -221,7 +221,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Días suspensión */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -235,7 +235,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Fecha reincorporación */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -249,7 +249,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Descripción */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 size="small"
@@ -265,7 +265,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Documento */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Box>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   Documento (PDF, JPG, PNG — máx. 5 MB)
@@ -300,7 +300,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Firmado */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <FormControlLabel
                 control={
                   <Switch
@@ -314,7 +314,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Fecha firma */}
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -329,7 +329,7 @@ const DisciplinaryForm = () => {
             </Grid>
 
             {/* Botones */}
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                 <Button
                   variant="outlined"

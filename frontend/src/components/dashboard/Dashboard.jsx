@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Grid, Typography, Button, Paper, Divider,
+  Box, Grid, Typography, Button, Paper, Divider, Skeleton,
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, MenuItem, Select, FormControl, InputLabel,
   List, ListItem, ListItemText, Chip, CircularProgress, Alert,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
   GridView as LayoutIcon,
   PeopleAlt as UsersIcon,
@@ -130,10 +131,10 @@ const Dashboard = () => {
   );
 
   const quickActions = [
-    { label: 'Nuevo Empleado',       to: '/employees/new',    icon: <PersonAddIcon />,   color: 'primary'   },
-    { label: 'Registrar Asistencia', to: '/attendance',       icon: <AttendanceIcon />,  color: 'success'   },
-    { label: 'Nueva Disciplinaria',  to: '/disciplinary/new', icon: <DisciplinaryIcon />,color: 'warning'   },
-    { label: 'Nuevo Recibo',         to: '/payroll/new',      icon: <ReceiptIcon />,     color: 'info'      },
+    { label: 'Nuevo Empleado',       to: '/employees/new',    icon: <PersonAddIcon />,   bg: '#8C57FF', hover: '#7E4EE6' },
+    { label: 'Registrar Asistencia', to: '/attendance',       icon: <AttendanceIcon />,  bg: '#16B1FF', hover: '#0E9FE5' },
+    { label: 'Nueva Disciplinaria',  to: '/disciplinary/new', icon: <DisciplinaryIcon />,bg: '#FF4C51', hover: '#d63b3f' },
+    { label: 'Nuevo Recibo',         to: '/payroll/new',      icon: <ReceiptIcon />,     bg: '#56CA00', hover: '#3d9200' },
   ];
 
   return (
@@ -149,15 +150,128 @@ const Dashboard = () => {
         </Typography>
       </Box>
 
-      {/* ── Métricas de personal ── */}
-      <SectionBlock title="Métricas de Personal" icon={<UsersIcon />} mb={3}>
-        <Grid container spacing={2}>
-          {mkCard('Empleados Activos',  stats.empleadosActivos,  <UsersIcon />,    '#56CA00', deltas.empleadosActivos)}
-          {mkCard('Inasistencias (Mes)',stats.inasistenciasMes,  <CalendarXIcon />, '#FF4C51', deltas.inasistenciasMes)}
-          {mkCard('Tardanzas (Mes)',    stats.tardanzasMes,      <ClockIcon />,    '#FFB400', deltas.tardanzasMes)}
-          {mkCard('Sin Presentismo',    stats.sinPresentismo,    <PersonOffIcon />, '#8A8D93', deltas.sinPresentismo)}
-        </Grid>
-      </SectionBlock>
+      {/* ── Métricas de Personal (diseño hero) ── */}
+      <Paper variant="outlined" sx={{ mb: 3, borderRadius: 3.5, overflow: 'hidden', borderColor: 'divider', boxShadow: '0 1px 3px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.05)' }}>
+        {/* Encabezado de sección */}
+        <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ color: 'primary.main', display: 'flex' }}><UsersIcon /></Box>
+            <Typography variant="h6" fontWeight={600} fontSize="0.9375rem">Métricas de Personal</Typography>
+          </Box>
+          {!stats.loading && !stats.error && (
+            <Chip
+              label={`${stats.empleadosActivos} activos`}
+              size="small"
+              sx={{ bgcolor: alpha('#56CA00', 0.12), color: '#4DB600', fontWeight: 700, fontSize: '0.75rem', border: `1px solid ${alpha('#56CA00', 0.3)}` }}
+            />
+          )}
+        </Box>
+
+        <Box sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
+
+          {/* Hero: Empleados Activos */}
+          <Paper elevation={0} sx={{
+            p: { xs: 2.5, sm: 3 }, borderRadius: 3,
+            border: `1.5px solid ${alpha('#56CA00', 0.3)}`,
+            bgcolor: alpha('#56CA00', 0.06),
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <UsersIcon sx={{
+              position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)',
+              fontSize: 160, opacity: 0.06, color: '#56CA00', pointerEvents: 'none',
+            }} />
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'text.secondary', display: 'block', mb: 0.75 }}>
+                  Empleados Activos
+                </Typography>
+                {stats.loading
+                  ? <Skeleton variant="text" width={110} height={80} />
+                  : <Typography variant="h2" sx={{ fontWeight: 900, letterSpacing: '-0.04em', color: '#4DB600', lineHeight: 1, mb: 0.5 }}>
+                      {stats.error ? '—' : stats.empleadosActivos}
+                    </Typography>
+                }
+                <Typography variant="body2" color="text.secondary">Plantilla total en actividad</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0, ml: 2 }}>
+                <Box sx={{ width: 56, height: 56, borderRadius: 3, bgcolor: alpha('#56CA00', 0.16), color: '#4DB600', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <UsersIcon sx={{ fontSize: 30 }} />
+                </Box>
+                {deltas.empleadosActivos && !stats.loading && !stats.error && (() => {
+                  const dn = String(deltas.empleadosActivos).trim().startsWith('-');
+                  return (
+                    <Chip
+                      label={`${dn ? '▼' : '▲'} ${deltas.empleadosActivos}`}
+                      size="small"
+                      sx={{ height: 22, fontSize: '0.7rem', fontWeight: 700,
+                        bgcolor: dn ? alpha('#FF4C51', 0.12) : alpha('#56CA00', 0.12),
+                        color: dn ? '#FF4C51' : '#4DB600',
+                        border: `1px solid ${alpha(dn ? '#FF4C51' : '#56CA00', 0.3)}`,
+                      }}
+                    />
+                  );
+                })()}
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* Tarjetas de alerta: Inasistencias, Tardanzas, Sin Presentismo */}
+          <Grid container spacing={2}>
+            {[
+              { key: 'inas',  title: 'Inasistencias',   subtitle: 'este mes',    value: stats.inasistenciasMes, icon: <CalendarXIcon />, color: '#FF4C51', delta: deltas.inasistenciasMes },
+              { key: 'tard',  title: 'Tardanzas',        subtitle: 'este mes',    value: stats.tardanzasMes,     icon: <ClockIcon />,     color: '#FFB400', delta: deltas.tardanzasMes     },
+              { key: 'pres',  title: 'Sin Presentismo',  subtitle: 'empleados',   value: stats.sinPresentismo,   icon: <PersonOffIcon />, color: '#8A8D93', delta: deltas.sinPresentismo   },
+            ].map(({ key, title, subtitle, value, icon, color, delta }) => {
+              const dStr = String(delta || '').trim();
+              const dn   = dStr.startsWith('-');
+              return (
+                <Grid xs={12} sm={4} key={key}>
+                  <Paper elevation={0} sx={{
+                    p: { xs: 2, sm: 2.5 }, borderRadius: 3, height: '100%',
+                    border: `1px solid ${alpha(color, 0.22)}`,
+                    borderLeft: `4px solid ${color}`,
+                    bgcolor: alpha(color, 0.05),
+                    position: 'relative', overflow: 'hidden',
+                  }}>
+                    {/* Watermark */}
+                    <Box sx={{ position: 'absolute', right: -8, bottom: -8, color, opacity: 0.06, lineHeight: 0, pointerEvents: 'none' }}>
+                      {React.cloneElement(icon, { sx: { fontSize: 72 } })}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5, position: 'relative' }}>
+                      <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: alpha(color, 0.16), color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {icon}
+                      </Box>
+                      {dStr && !stats.loading && !stats.error && (
+                        <Chip
+                          label={`${dn ? '▼' : '▲'} ${dStr}`}
+                          size="small"
+                          sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700,
+                            bgcolor: dn ? alpha('#FF4C51', 0.12) : alpha('#56CA00', 0.12),
+                            color: dn ? '#FF4C51' : '#4DB600',
+                          }}
+                        />
+                      )}
+                    </Box>
+                    {stats.loading
+                      ? <Skeleton width="55%" height={48} />
+                      : <>
+                          <Typography variant="h3" sx={{ fontWeight: 800, letterSpacing: '-0.03em', color, lineHeight: 1, mb: 0.25, position: 'relative' }}>
+                            {stats.error ? '—' : value}
+                          </Typography>
+                          <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'text.secondary', display: 'block' }}>
+                            {title}
+                          </Typography>
+                          <Typography variant="caption" color="text.disabled">{subtitle}</Typography>
+                        </>
+                    }
+                  </Paper>
+                </Grid>
+              );
+            })}
+          </Grid>
+
+        </Box>
+      </Paper>
 
       {/* ── Gestión disciplinaria ── */}
       <SectionBlock title="Gestión Disciplinaria y Administrativa" icon={<WarningIcon />} mb={3}>
@@ -172,16 +286,15 @@ const Dashboard = () => {
       {/* ── Acciones rápidas ── */}
       <SectionBlock title="Acciones Rápidas" icon={<UsersIcon />}>
         <Grid container spacing={1.5}>
-          {quickActions.map(({ label, to, icon, color }) => (
-            <Grid item xs={12} sm={6} md={4} key={to}>
+          {quickActions.map(({ label, to, icon, bg, hover }) => (
+            <Grid xs={12} sm={6} md={4} key={to}>
               <Button
                 component={Link}
                 to={to}
                 variant="contained"
-                color={color}
                 fullWidth
                 startIcon={icon}
-                sx={{ py: 1.5, borderRadius: 2.5 }}
+                sx={{ py: 1.5, borderRadius: 2.5, bgcolor: bg, '&:hover': { bgcolor: hover }, color: '#fff' }}
               >
                 {label}
               </Button>
@@ -189,7 +302,7 @@ const Dashboard = () => {
           ))}
 
           {/* WhatsApp presentismo */}
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid xs={12} sm={6} md={4}>
             <Button
               variant="outlined"
               fullWidth
@@ -203,7 +316,7 @@ const Dashboard = () => {
           </Grid>
 
           {/* Configurar destinatarios */}
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid xs={12} sm={6} md={4}>
             <Button
               component={Link}
               to="/admin/presentismo/recipients"

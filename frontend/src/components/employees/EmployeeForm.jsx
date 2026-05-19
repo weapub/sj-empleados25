@@ -27,7 +27,7 @@ const SectionBlock = ({ title, icon, children }) => (
 );
 
 const Field = ({ children, xs = 12, sm = 6 }) => (
-  <Grid item xs={xs} sm={sm}>{children}</Grid>
+  <Grid xs={xs} sm={sm}>{children}</Grid>
 );
 
 const EMPTY_FORM = {

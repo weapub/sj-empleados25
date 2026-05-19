@@ -88,8 +88,11 @@ const authLimiter = rateLimit({
 // Static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
-app.use('/api/auth', authLimiter, authRoutes);
+// Routes — rate limiter sólo en POST (login/register), no en GET /me
+app.use('/api/auth', (req, res, next) => {
+  if (req.method === 'POST') return authLimiter(req, res, next);
+  next();
+}, authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/disciplinary', disciplinaryRoutes);

@@ -5,7 +5,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
 import buildTheme, { SIDEBAR_WIDTH } from './theme';
 import { getCurrentUser } from './services/api';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 import Navbar  from './components/layout/Navbar';
