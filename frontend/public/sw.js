@@ -1,6 +1,5 @@
 // Service Worker para PWA (producción)
 const CACHE_NAME = 'sj-empleados-v4';
-// Sólo precachea recursos estables sin hash; los assets con hash se cachean runtime
 const urlsToCache = [
   '/',
   '/manifest.json',
@@ -10,79 +9,53 @@ const urlsToCache = [
   '/brand-logo.png'
 ];
 
-// Instalación del Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
-  // Activar inmediatamente el SW nuevo
   self.skipWaiting();
 });
 
-// Activación del Service Worker
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((name) => name !== CACHE_NAME && caches.delete(name))
+      )
+    )
   );
-  // Tomar control de las páginas abiertas
   self.clients.claim();
 });
 
-// Intercepción de requests
-// Estrategia network-first con fallback a cache para HTML/API; cache-first para estáticos
+const networkFirst = (request) =>
+  fetch(request)
+    .then((response) => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+      }
+      return response;
+    })
+    .catch(() =>
+      caches.match(request).then((cached) => cached || Response.error())
+    );
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Evitar manejar solicitudes de otros orígenes
-  if (url.origin !== self.location.origin) {
-    return;
-  }
+  if (url.origin !== self.location.origin) return;
 
-  if (request.destination === 'document') {
-    // HTML: intenta red desde red, fallback a cache
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
+  // No interceptar WebSockets ni solicitudes no-GET
+  if (request.method !== 'GET') return;
 
-  if (['style', 'script', 'image', 'font'].includes(request.destination)) {
-    // Estáticos: network-first con fallback a cache y revalidación
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
-    return;
+  if (
+    request.destination === 'document' ||
+    request.destination === 'style' ||
+    request.destination === 'script' ||
+    request.destination === 'image' ||
+    request.destination === 'font'
+  ) {
+    event.respondWith(networkFirst(request));
   }
-
-  // Por defecto: network-first
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        return response;
-      })
-      .catch(() => caches.match(request))
-  );
 });

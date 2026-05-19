@@ -28,7 +28,7 @@
     <div id="root"></div>
     <script type="module" src="/src/index.jsx"></script>
     <script>
-      if ('serviceWorker' in navigator) {
+      if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
         window.addEventListener('load', () => {
           navigator.serviceWorker
             .register('/sw.js')
@@ -39,6 +39,8 @@
               console.log('SW registration failed: ', registrationError);
             });
         });
+      } else if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
       }
     </script>
   </body>
