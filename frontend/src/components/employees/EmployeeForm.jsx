@@ -79,7 +79,7 @@ const EmployeeForm = () => {
       const payload = { ...formData };
       ['fechaContratacion','fechaIngreso','fechaRegistroARCA','fechaNacimiento','fechaBaja']
         .forEach(k => { if (payload[k] === '') payload[k] = null; });
-      if (payload.activo) { payload.fechaBaja = null; payload.motivoBaja = ''; }
+      if (payload.activo !== false) { payload.fechaBaja = null; payload.motivoBaja = ''; }
       if (isEditing) await updateEmployee(id, payload);
       else           await createEmployee(payload);
       navigate('/employees');

@@ -86,7 +86,10 @@ exports.updateEmployee = async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(update, 'dni')) {
       update.dni = update.dni ? String(update.dni).replace(/\D/g, '') : '';
     }
-    Object.assign(employee, update);
+    employee.set(update);
+    if (Object.prototype.hasOwnProperty.call(update, 'motivoBaja')) {
+      employee.markModified('motivoBaja');
+    }
     const updatedEmployee = await employee.save();
 
     // Log event if important changes
