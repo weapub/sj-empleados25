@@ -159,9 +159,9 @@ const EmployeeList = () => {
           </Box>
         ) : (
           <TableContainer>
-            <Table>
+            <Table size="small">
               <TableHead>
-                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5, whiteSpace: 'nowrap' } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Email</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Puesto</TableCell>

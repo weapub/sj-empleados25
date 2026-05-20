@@ -171,9 +171,9 @@ const DisciplinaryList = () => {
           </Box>
         ) : (
           <TableContainer>
-            <Table sx={{ '& td, & th': { px: { xs: 1, md: 2 } } }}>
+            <Table size="small" sx={{ '& td, & th': { px: { xs: 1, md: 2 } } }}>
               <TableHead>
-                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5, whiteSpace: 'nowrap' } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Fecha</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Hora</TableCell>

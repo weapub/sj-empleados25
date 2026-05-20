@@ -252,9 +252,9 @@ const AttendanceList = () => {
           </Box>
         ) : (
           <TableContainer>
-            <Table>
+            <Table size="small">
               <TableHead>
-                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5, whiteSpace: 'nowrap' } }}>
                   {headCell('Empleado', 'employee')}
                   {headCell('Fecha', 'date')}
                   {headCell('Estado', 'status')}
@@ -297,14 +297,14 @@ const AttendanceList = () => {
                         </TableCell>
 
                         <TableCell>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             <Chip
                               label={typeLabel(att.type)}
                               size="small"
                               sx={{ ...chipSx, ...typeChipSx(att.type) }}
                             />
                             <Chip
-                              label={att.justified ? 'Justificado' : 'No justificado'}
+                              label={att.justified ? 'Justif.' : 'No justif.'}
                               size="small"
                               sx={{
                                 ...chipSx,
@@ -314,7 +314,7 @@ const AttendanceList = () => {
                               }}
                             />
                             <Chip
-                              label={att.lostPresentismo ? 'Sin presentismo' : 'Con presentismo'}
+                              label={att.lostPresentismo ? 'Sin pres.' : 'Con pres.'}
                               size="small"
                               sx={{
                                 ...chipSx,

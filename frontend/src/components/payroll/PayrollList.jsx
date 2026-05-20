@@ -351,19 +351,19 @@ const PayrollList = () => {
           </Box>
         ) : (
           <TableContainer>
-            <Table>
+            <Table size="small">
               <TableHead>
-                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
+                <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5, whiteSpace: 'nowrap' } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell>Período</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Pago</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Estado</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Horas Extras</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Otros</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Descuentos</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Hs. Extra</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Otros</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Descuentos</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Adelanto</TableCell>
-                  <TableCell>Neto</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Semanal</TableCell>
+                  <TableCell align="right">Neto</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>Semanal</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -402,9 +402,9 @@ const PayrollList = () => {
                         <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDate(r.paymentDate)}</TableCell>
 
                         <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             <Chip
-                              label={r.hasPresentismo ? 'Con Presentismo' : 'Sin Presentismo'}
+                              label={r.hasPresentismo ? 'Pres.' : 'Sin pres.'}
                               size="small"
                               sx={{
                                 ...chipSx,
@@ -414,7 +414,7 @@ const PayrollList = () => {
                               }}
                             />
                             <Chip
-                              label={r.signed ? 'Firmado' : 'Sin Firmar'}
+                              label={r.signed ? 'Firmado' : 'Sin firmar'}
                               size="small"
                               sx={{
                                 ...chipSx,
@@ -426,9 +426,9 @@ const PayrollList = () => {
                           </Box>
                         </TableCell>
 
-                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.extraHours)}</TableCell>
-                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.otherAdditions)}</TableCell>
-                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.discounts)}</TableCell>
+                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.extraHours)}</TableCell>
+                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.otherAdditions)}</TableCell>
+                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.discounts)}</TableCell>
 
                         <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -446,13 +446,13 @@ const PayrollList = () => {
                           </Box>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell align="right">
                           <Typography variant="body2" fontWeight={700} color="success.main">
                             {formatCurrency(netToPay)}
                           </Typography>
                         </TableCell>
 
-                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                        <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           <Typography variant="body2">{formatCurrency(weekly)}</Typography>
                         </TableCell>
 
