@@ -11,6 +11,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Search as SearchIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import { getEmployees, deleteEmployee } from '../../services/api';
@@ -98,15 +99,28 @@ const EmployeeList = () => {
             Gestión del registro de empleados
           </Typography>
         </Box>
-        <Button
-          component={Link}
-          to="/employees/new"
-          variant="contained"
-          startIcon={<PersonAddIcon />}
-          sx={{ borderRadius: 2.5 }}
-        >
-          Nuevo Empleado
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Tooltip title="Actualizar lista">
+            <Button
+              variant="outlined"
+              startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
+              onClick={() => fetchEmployees(page)}
+              disabled={loading}
+              sx={{ borderRadius: 2.5 }}
+            >
+              Actualizar
+            </Button>
+          </Tooltip>
+          <Button
+            component={Link}
+            to="/employees/new"
+            variant="contained"
+            startIcon={<PersonAddIcon />}
+            sx={{ borderRadius: 2.5 }}
+          >
+            Nuevo Empleado
+          </Button>
+        </Box>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
