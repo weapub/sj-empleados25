@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -152,6 +152,7 @@ async function startServer() {
     } else {
       console.error('[DB] Error conectando a MongoDB local:', err.message);
       console.log('[DB] Iniciando MongoDB en memoria (solo desarrollo)');
+      const { MongoMemoryServer } = require('mongodb-memory-server');
       const memServer = await MongoMemoryServer.create();
       const memUri = memServer.getUri();
       await mongoose.connect(memUri);
