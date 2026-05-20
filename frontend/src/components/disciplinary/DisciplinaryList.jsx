@@ -171,11 +171,11 @@ const DisciplinaryList = () => {
           </Box>
         ) : (
           <TableContainer>
-            <Table>
+            <Table sx={{ '& td, & th': { px: { xs: 1, md: 2 } } }}>
               <TableHead>
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5 } }}>
                   <TableCell>Empleado</TableCell>
-                  <TableCell>Fecha</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Fecha</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Hora</TableCell>
                   <TableCell>Tipo</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Días susp.</TableCell>
@@ -196,11 +196,14 @@ const DisciplinaryList = () => {
                 ) : (
                   disciplinaries.map((d) => (
                     <TableRow key={d._id} hover sx={{ '&:last-child td': { border: 0 } }}>
-                      <TableCell sx={{ maxWidth: { xs: 120, sm: 200, md: 'none' } }}>
+                      <TableCell sx={{ maxWidth: { xs: 140, sm: 200, md: 'none' } }}>
                         {d.employee ? (
                           <Box sx={{ minWidth: 0 }}>
                             <Typography variant="body2" fontWeight={600} noWrap>
                               {d.employee.nombre} {d.employee.apellido}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' } }}>
+                              {formatDate(d.date)}
                             </Typography>
                             <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
                               Leg. {d.employee.legajo || '—'}
@@ -211,7 +214,7 @@ const DisciplinaryList = () => {
                         )}
                       </TableCell>
 
-                      <TableCell>{formatDate(d.date)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{formatDate(d.date)}</TableCell>
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{d.time || '—'}</TableCell>
 
                       <TableCell>
