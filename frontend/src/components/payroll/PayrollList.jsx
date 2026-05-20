@@ -12,6 +12,7 @@ import {
   Visibility as ViewIcon,
   ArrowUpward as AscIcon,
   ArrowDownward as DescIcon,
+  Print as PrintIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -135,6 +136,100 @@ const PayrollList = () => {
 
   const toggleSortDir = () => setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
 
+  const handlePrint = () => {
+    const rows = sortedReceipts.map(r => {
+      const dim = daysInMonth(r.period);
+      const netToPay = Number(r.netAmount) || 0;
+      const advance = r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0;
+      const weekly = Math.round(((netToPay / dim) * 7) - advance);
+      const name = r.employee ? `${r.employee.apellido}, ${r.employee.nombre}` : '—';
+      const legajo = r.employee?.legajo || '—';
+      const extras = Number(r.extraHours) || 0;
+      const descuentos = Number(r.discounts) || 0;
+      return `<tr>
+        <td>${name}</td>
+        <td>${legajo}</td>
+        <td style="text-align:center">${formatPeriod(r.period)}</td>
+        <td style="text-align:right">${formatCurrency(netToPay)}</td>
+        <td style="text-align:right;font-weight:700;color:#16a34a">${formatCurrency(weekly)}</td>
+        <td style="text-align:right;color:${descuentos > 0 ? '#dc2626' : '#888'}">${descuentos > 0 ? formatCurrency(descuentos) : '—'}</td>
+        <td style="text-align:right;color:${extras > 0 ? '#2563eb' : '#888'}">${extras > 0 ? formatCurrency(extras) : '—'}</td>
+        <td style="text-align:right">${r.advanceRequested ? formatCurrency(r.advanceAmount) : '—'}</td>
+      </tr>`;
+    }).join('');
+
+    const totalWeekly   = sortedReceipts.reduce((s, r) => { const dim = daysInMonth(r.period); const net = Number(r.netAmount) || 0; const adv = r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0; return s + Math.round(((net / dim) * 7) - adv); }, 0);
+    const totalDesc     = sortedReceipts.reduce((s, r) => s + (Number(r.discounts) || 0), 0);
+    const totalExtras   = sortedReceipts.reduce((s, r) => s + (Number(r.extraHours) || 0), 0);
+    const totalAdelantos= sortedReceipts.reduce((s, r) => s + (r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0), 0);
+
+    const period    = filterPeriod ? formatPeriod(filterPeriod) : 'Todos los períodos';
+    const printDate = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte Semanal de Haberes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #111; padding: 24px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 2px solid #111; padding-bottom: 10px; }
+  .header h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .header .meta { font-size: 10px; color: #555; margin-top: 3px; }
+  .badge { display: inline-block; background: #111; color: #fff; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  thead tr { background: #111; color: #fff; }
+  th { padding: 6px 8px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  th.r { text-align: right; }
+  td { padding: 5px 8px; border-bottom: 1px solid #e5e5e5; vertical-align: middle; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+  .foot td { font-weight: 700; border-top: 2px solid #111; background: #f0f0f0; font-size: 11px; }
+  @media print { body { padding: 12px; } @page { margin: 12mm; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="badge">San Jorge Fiambres</div>
+    <h1 style="margin-top:6px">Reporte Semanal de Haberes</h1>
+    <div class="meta">Período: <strong>${period}</strong> &nbsp;·&nbsp; Emitido: ${printDate} &nbsp;·&nbsp; ${sortedReceipts.length} registro${sortedReceipts.length !== 1 ? 's' : ''}</div>
+  </div>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Empleado</th>
+      <th>Legajo</th>
+      <th style="text-align:center">Período</th>
+      <th class="r">Neto mensual</th>
+      <th class="r">Cobro semanal</th>
+      <th class="r">Descuentos</th>
+      <th class="r">Horas extras</th>
+      <th class="r">Adelanto</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${rows}
+    <tr class="foot">
+      <td colspan="4">TOTALES — ${sortedReceipts.length} empleados</td>
+      <td style="text-align:right;color:#16a34a">${formatCurrency(totalWeekly)}</td>
+      <td style="text-align:right;color:#dc2626">${totalDesc > 0 ? formatCurrency(totalDesc) : '—'}</td>
+      <td style="text-align:right;color:#2563eb">${totalExtras > 0 ? formatCurrency(totalExtras) : '—'}</td>
+      <td style="text-align:right">${totalAdelantos > 0 ? formatCurrency(totalAdelantos) : '—'}</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>`;
+
+    const w = window.open('', '_blank', 'width=900,height=650');
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 350);
+  };
+
   const uniqueEmployees = receipts
     .map(r => r.employee)
     .filter(Boolean)
@@ -156,14 +251,29 @@ const PayrollList = () => {
             Gestione, filtre y ordene los recibos emitidos
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{ borderRadius: 2.5 }}
-          onClick={() => navigate('/payroll/new')}
-        >
-          Registrar Nuevo Recibo
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Tooltip title={sortedReceipts.length === 0 ? 'No hay datos para imprimir' : 'Imprimir reporte semanal'}>
+            <span>
+              <Button
+                variant="outlined"
+                startIcon={<PrintIcon />}
+                onClick={handlePrint}
+                disabled={sortedReceipts.length === 0}
+                sx={{ borderRadius: 2.5 }}
+              >
+                Reporte Semanal
+              </Button>
+            </span>
+          </Tooltip>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ borderRadius: 2.5 }}
+            onClick={() => navigate('/payroll/new')}
+          >
+            Nuevo Recibo
+          </Button>
+        </Box>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
