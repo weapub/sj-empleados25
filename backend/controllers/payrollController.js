@@ -90,7 +90,8 @@ exports.getAllReceipts = async (req, res) => {
   try {
     const receipts = await PayrollReceipt.find()
       .populate('employee', 'nombre apellido legajo')
-      .sort({ paymentDate: -1 });
+      .sort({ paymentDate: -1 })
+      .lean();
     res.json(receipts);
   } catch (error) {
     console.error(error);
