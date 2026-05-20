@@ -12,6 +12,8 @@ import {
   ArrowUpward as AscIcon,
   ArrowDownward as DescIcon,
   Visibility as ViewIcon,
+  CheckCircle as CheckCircleIcon,
+  HourglassBottom as HourglassBottomIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getAllDisciplinaries, deleteDisciplinary } from '../../services/api';
@@ -180,8 +182,7 @@ const DisciplinaryList = () => {
                   <TableCell>Tipo</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Días susp.</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Reincorporación</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Firmado</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Fecha firma</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Firma</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Documento</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
@@ -189,7 +190,7 @@ const DisciplinaryList = () => {
               <TableBody>
                 {disciplinaries.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    <TableCell colSpan={9} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                       No hay medidas disciplinarias registradas
                     </TableCell>
                   </TableRow>
@@ -229,19 +230,18 @@ const DisciplinaryList = () => {
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDate(d.returnToWorkDate)}</TableCell>
 
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                        <Chip
-                          label={d.signed ? 'Firmado' : 'Sin firmar'}
-                          size="small"
-                          sx={{
-                            ...chipSx,
-                            ...(d.signed
-                              ? { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' }
-                              : { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }),
-                          }}
-                        />
+                        <Tooltip
+                          title={d.signed
+                            ? `Firmado${d.signedDate ? ': ' + formatDate(d.signedDate) : ''}`
+                            : 'Pendiente de firma'}
+                          arrow
+                        >
+                          {d.signed
+                            ? <CheckCircleIcon sx={{ fontSize: 18, color: '#16B1FF' }} />
+                            : <HourglassBottomIcon sx={{ fontSize: 18, color: '#E6A200' }} />
+                          }
+                        </Tooltip>
                       </TableCell>
-
-                      <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(d.signedDate)}</TableCell>
 
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                         {d.document ? (
@@ -297,6 +297,20 @@ const DisciplinaryList = () => {
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
           sx={{ borderTop: '1px solid', borderColor: 'divider' }}
         />
+
+        {/* Leyenda de iconos */}
+        <Box sx={{ px: 2.5, py: 1.5, borderTop: '1px solid', borderColor: 'divider', display: { xs: 'none', md: 'flex' }, gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography variant="caption" color="text.disabled" fontWeight={700} letterSpacing="0.06em" sx={{ textTransform: 'uppercase' }}>Leyenda</Typography>
+          {[
+            { icon: <CheckCircleIcon sx={{ fontSize: 14, color: '#16B1FF' }} />, label: 'Firmado' },
+            { icon: <HourglassBottomIcon sx={{ fontSize: 14, color: '#E6A200' }} />, label: 'Pendiente de firma' },
+          ].map(({ icon, label }) => (
+            <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {icon}
+              <Typography variant="caption" color="text.secondary">{label}</Typography>
+            </Box>
+          ))}
+        </Box>
       </Paper>
 
       <DocumentViewerModal

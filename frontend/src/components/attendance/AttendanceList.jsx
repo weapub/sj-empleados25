@@ -12,6 +12,10 @@ import {
   ArrowUpward as AscIcon,
   ArrowDownward as DescIcon,
   Description as DocIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getAttendances, getEmployees, deleteAttendance } from '../../services/api';
@@ -297,32 +301,24 @@ const AttendanceList = () => {
                         </TableCell>
 
                         <TableCell>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
                             <Chip
                               label={typeLabel(att.type)}
                               size="small"
                               sx={{ ...chipSx, ...typeChipSx(att.type) }}
                             />
-                            <Chip
-                              label={att.justified ? 'Justif.' : 'No justif.'}
-                              size="small"
-                              sx={{
-                                ...chipSx,
-                                ...(att.justified
-                                  ? { bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }
-                                  : { bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }),
-                              }}
-                            />
-                            <Chip
-                              label={att.lostPresentismo ? 'Sin pres.' : 'Con pres.'}
-                              size="small"
-                              sx={{
-                                ...chipSx,
-                                ...(att.lostPresentismo
-                                  ? { bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }
-                                  : { bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }),
-                              }}
-                            />
+                            <Tooltip title={att.justified ? 'Justificado' : 'No justificado'} arrow>
+                              {att.justified
+                                ? <CheckCircleIcon sx={{ fontSize: 16, color: '#4DB600', verticalAlign: 'middle' }} />
+                                : <CancelIcon sx={{ fontSize: 16, color: '#FF4C51', verticalAlign: 'middle' }} />
+                              }
+                            </Tooltip>
+                            <Tooltip title={att.lostPresentismo ? 'Perdió presentismo' : 'Conserva presentismo'} arrow>
+                              {att.lostPresentismo
+                                ? <StarBorderIcon sx={{ fontSize: 16, color: '#FF4C51', verticalAlign: 'middle' }} />
+                                : <StarIcon sx={{ fontSize: 16, color: '#4DB600', verticalAlign: 'middle' }} />
+                              }
+                            </Tooltip>
                           </Box>
                         </TableCell>
 
@@ -390,6 +386,22 @@ const AttendanceList = () => {
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
           sx={{ borderTop: '1px solid', borderColor: 'divider' }}
         />
+
+        {/* Leyenda de iconos */}
+        <Box sx={{ px: 2.5, py: 1.5, borderTop: '1px solid', borderColor: 'divider', display: { xs: 'none', md: 'flex' }, gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography variant="caption" color="text.disabled" fontWeight={700} letterSpacing="0.06em" sx={{ textTransform: 'uppercase' }}>Leyenda</Typography>
+          {[
+            { icon: <CheckCircleIcon sx={{ fontSize: 14, color: '#4DB600' }} />, label: 'Justificado' },
+            { icon: <CancelIcon sx={{ fontSize: 14, color: '#FF4C51' }} />, label: 'No justificado' },
+            { icon: <StarIcon sx={{ fontSize: 14, color: '#4DB600' }} />, label: 'Con presentismo' },
+            { icon: <StarBorderIcon sx={{ fontSize: 14, color: '#FF4C51' }} />, label: 'Sin presentismo' },
+          ].map(({ icon, label }) => (
+            <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {icon}
+              <Typography variant="caption" color="text.secondary">{label}</Typography>
+            </Box>
+          ))}
+        </Box>
       </Paper>
 
       <DocumentViewerModal

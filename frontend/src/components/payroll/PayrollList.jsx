@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, IconButton, Tooltip, Typography, Button, CircularProgress, Alert,
+  IconButton, Tooltip, Typography, Button, CircularProgress, Alert,
   TextField, MenuItem,
 } from '@mui/material';
 import {
@@ -13,6 +13,11 @@ import {
   ArrowUpward as AscIcon,
   ArrowDownward as DescIcon,
   Print as PrintIcon,
+  CheckCircle as CheckCircleIcon,
+  HourglassBottom as HourglassBottomIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  MonetizationOn as MonetizationOnIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -35,8 +40,6 @@ const formatPeriod = (period) => {
   return `${m}-${y}`;
 };
 
-const chipSx = { borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600 };
-
 const SORT_OPTIONS = [
   { value: 'employee',    label: 'Empleado' },
   { value: 'period',      label: 'Período' },
@@ -48,6 +51,14 @@ const SORT_OPTIONS = [
   { value: 'advance',     label: 'Adelanto' },
   { value: 'net',         label: 'Neto' },
   { value: 'weekly',      label: 'Semanal' },
+];
+
+const LEGEND = [
+  { icon: <CheckCircleIcon sx={{ fontSize: 14, color: '#16B1FF' }} />, label: 'Firmado' },
+  { icon: <HourglassBottomIcon sx={{ fontSize: 14, color: '#E6A200' }} />, label: 'Pendiente firma' },
+  { icon: <StarIcon sx={{ fontSize: 14, color: '#4DB600' }} />, label: 'Con presentismo' },
+  { icon: <StarBorderIcon sx={{ fontSize: 14, color: '#FF4C51' }} />, label: 'Sin presentismo' },
+  { icon: <MonetizationOnIcon sx={{ fontSize: 14, color: '#E6A200' }} />, label: 'Con adelanto' },
 ];
 
 const PayrollList = () => {
@@ -158,10 +169,10 @@ const PayrollList = () => {
       </tr>`;
     }).join('');
 
-    const totalWeekly   = sortedReceipts.reduce((s, r) => { const dim = daysInMonth(r.period); const net = Number(r.netAmount) || 0; const adv = r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0; return s + Math.round(((net / dim) * 7) - adv); }, 0);
-    const totalDesc     = sortedReceipts.reduce((s, r) => s + (Number(r.discounts) || 0), 0);
-    const totalExtras   = sortedReceipts.reduce((s, r) => s + (Number(r.extraHours) || 0), 0);
-    const totalAdelantos= sortedReceipts.reduce((s, r) => s + (r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0), 0);
+    const totalWeekly    = sortedReceipts.reduce((s, r) => { const dim = daysInMonth(r.period); const net = Number(r.netAmount) || 0; const adv = r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0; return s + Math.round(((net / dim) * 7) - adv); }, 0);
+    const totalDesc      = sortedReceipts.reduce((s, r) => s + (Number(r.discounts) || 0), 0);
+    const totalExtras    = sortedReceipts.reduce((s, r) => s + (Number(r.extraHours) || 0), 0);
+    const totalAdelantos = sortedReceipts.reduce((s, r) => s + (r.advanceRequested ? (Number(r.advanceAmount) || 0) : 0), 0);
 
     const period    = filterPeriod ? formatPeriod(filterPeriod) : 'Todos los períodos';
     const printDate = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -356,21 +367,17 @@ const PayrollList = () => {
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5, whiteSpace: 'nowrap' } }}>
                   <TableCell>Empleado</TableCell>
                   <TableCell>Período</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Pago</TableCell>
                   <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Estado</TableCell>
-                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Hs. Extra</TableCell>
-                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Otros</TableCell>
-                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Descuentos</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Adelanto</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Adiciones</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Desc.</TableCell>
                   <TableCell align="right">Neto</TableCell>
-                  <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>Semanal</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {sortedReceipts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                       No hay recibos registrados
                     </TableCell>
                   </TableRow>
@@ -383,6 +390,7 @@ const PayrollList = () => {
 
                     return (
                       <TableRow key={r._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                        {/* Empleado */}
                         <TableCell sx={{ maxWidth: { xs: 120, sm: 200, md: 'none' } }}>
                           <Box sx={{ minWidth: 0 }}>
                             <Typography variant="body2" fontWeight={600} noWrap>
@@ -394,68 +402,72 @@ const PayrollList = () => {
                           </Box>
                         </TableCell>
 
+                        {/* Período + Pago */}
                         <TableCell>
                           <Typography variant="body2">{formatPeriod(r.period)}</Typography>
-                          <Typography variant="caption" color="text.secondary">Días: {dim}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            {formatDate(r.paymentDate)}
+                          </Typography>
                         </TableCell>
 
-                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDate(r.paymentDate)}</TableCell>
-
+                        {/* Estado: iconos con tooltip */}
                         <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            <Chip
-                              label={r.hasPresentismo ? 'Pres.' : 'Sin pres.'}
-                              size="small"
-                              sx={{
-                                ...chipSx,
-                                ...(r.hasPresentismo
-                                  ? { bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }
-                                  : { bgcolor: 'rgba(255,76,81,0.12)', color: '#FF4C51' }),
-                              }}
-                            />
-                            <Chip
-                              label={r.signed ? 'Firmado' : 'Sin firmar'}
-                              size="small"
-                              sx={{
-                                ...chipSx,
-                                ...(r.signed
-                                  ? { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' }
-                                  : { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }),
-                              }}
-                            />
+                          <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center' }}>
+                            <Tooltip title={r.signed ? 'Firmado' : 'Pendiente de firma'} arrow>
+                              {r.signed
+                                ? <CheckCircleIcon sx={{ fontSize: 18, color: '#16B1FF' }} />
+                                : <HourglassBottomIcon sx={{ fontSize: 18, color: '#E6A200' }} />
+                              }
+                            </Tooltip>
+                            <Tooltip title={r.hasPresentismo ? 'Con presentismo' : 'Sin presentismo'} arrow>
+                              {r.hasPresentismo
+                                ? <StarIcon sx={{ fontSize: 18, color: '#4DB600' }} />
+                                : <StarBorderIcon sx={{ fontSize: 18, color: '#FF4C51' }} />
+                              }
+                            </Tooltip>
+                            {r.advanceRequested && (
+                              <Tooltip title={`Adelanto: ${formatCurrency(r.advanceAmount)}`} arrow>
+                                <MonetizationOnIcon sx={{ fontSize: 18, color: '#E6A200' }} />
+                              </Tooltip>
+                            )}
                           </Box>
                         </TableCell>
 
-                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.extraHours)}</TableCell>
-                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.otherAdditions)}</TableCell>
-                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatCurrency(r.discounts)}</TableCell>
-
-                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                            <Chip
-                              label={r.advanceRequested ? 'Con Adelanto' : 'Sin Adelanto'}
-                              size="small"
-                              sx={{
-                                ...chipSx,
-                                ...(r.advanceRequested
-                                  ? { bgcolor: 'rgba(255,180,0,0.12)', color: '#E6A200' }
-                                  : { bgcolor: 'rgba(22,177,255,0.12)', color: '#16B1FF' }),
-                              }}
-                            />
-                            <Typography variant="caption">{formatCurrency(r.advanceAmount)}</Typography>
-                          </Box>
+                        {/* Adiciones: Hs. Extra + Otros */}
+                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                          {(Number(r.extraHours) > 0 || Number(r.otherAdditions) > 0) ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                              {Number(r.extraHours) > 0 && (
+                                <Typography variant="caption" color="info.main">Hs: {formatCurrency(r.extraHours)}</Typography>
+                              )}
+                              {Number(r.otherAdditions) > 0 && (
+                                <Typography variant="caption" sx={{ color: '#56CA00' }}>Ot: {formatCurrency(r.otherAdditions)}</Typography>
+                              )}
+                            </Box>
+                          ) : (
+                            <Typography variant="caption" color="text.disabled">—</Typography>
+                          )}
                         </TableCell>
 
+                        {/* Descuentos */}
+                        <TableCell align="right" sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                          {Number(r.discounts) > 0
+                            ? <Typography variant="body2" color="error.main">{formatCurrency(r.discounts)}</Typography>
+                            : <Typography variant="caption" color="text.disabled">—</Typography>
+                          }
+                        </TableCell>
+
+                        {/* Neto + Semanal como caption */}
                         <TableCell align="right">
                           <Typography variant="body2" fontWeight={700} color="success.main">
                             {formatCurrency(netToPay)}
                           </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            ≈ {formatCurrency(weekly)}/sem
+                          </Typography>
                         </TableCell>
 
-                        <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                          <Typography variant="body2">{formatCurrency(weekly)}</Typography>
-                        </TableCell>
-
+                        {/* Acciones */}
                         <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: { xs: 112, md: 'auto' } }}>
                           <Tooltip title="Ver detalle">
                             <IconButton
@@ -493,6 +505,27 @@ const PayrollList = () => {
             </Table>
           </TableContainer>
         )}
+
+        {/* Leyenda de iconos */}
+        <Box sx={{
+          px: 2.5, py: 1.5,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          display: { xs: 'none', md: 'flex' },
+          gap: 3,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+        }}>
+          <Typography variant="caption" color="text.disabled" fontWeight={700} letterSpacing="0.06em" sx={{ textTransform: 'uppercase' }}>
+            Leyenda
+          </Typography>
+          {LEGEND.map(({ icon, label }) => (
+            <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {icon}
+              <Typography variant="caption" color="text.secondary">{label}</Typography>
+            </Box>
+          ))}
+        </Box>
       </Paper>
     </Box>
   );
