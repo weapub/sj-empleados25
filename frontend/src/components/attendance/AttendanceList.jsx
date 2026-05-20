@@ -256,25 +256,22 @@ const AttendanceList = () => {
           </Box>
         ) : (
           <TableContainer>
-            <Table size="small">
+            <Table size="small" sx={{ '& td, & th': { px: { xs: 1, md: 1.5 } } }}>
               <TableHead>
                 <TableRow sx={{ '& th': { fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', bgcolor: 'action.hover', py: 1.5, whiteSpace: 'nowrap' } }}>
                   {headCell('Empleado', 'employee')}
                   {headCell('Fecha', 'date')}
                   {headCell('Estado', 'status')}
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Horario / Tardanza</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Vence cert.</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Inicio vac.</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Fin vac.</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Reincorporación</TableCell>
-                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Certificado</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Horario</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Fechas clave</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Cert.</TableCell>
                   <TableCell align="right">Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {attendances.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                       No hay registros que coincidan con los filtros
                     </TableCell>
                   </TableRow>
@@ -284,6 +281,7 @@ const AttendanceList = () => {
                     const reg = att.actualEntry || '—';
                     const late = att.lateMinutes ?? 0;
                     const hasHorario = att.scheduledEntry || att.actualEntry || late > 0;
+                    const hasFechasClave = att.certificateExpiry || att.vacationsStart || att.returnToWorkDate;
 
                     return (
                       <TableRow key={att._id} hover sx={{ '&:last-child td': { border: 0 } }}>
@@ -298,10 +296,15 @@ const AttendanceList = () => {
 
                         <TableCell>
                           <Typography variant="body2">{formatDate(att.date)}</Typography>
+                          {att.returnToWorkDate && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                              Reincorp: {formatDate(att.returnToWorkDate)}
+                            </Typography>
+                          )}
                         </TableCell>
 
                         <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'nowrap' }}>
                             <Chip
                               label={typeLabel(att.type)}
                               size="small"
@@ -322,17 +325,28 @@ const AttendanceList = () => {
                           </Box>
                         </TableCell>
 
-                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                          <Typography variant="body2">
-                            {hasHorario ? `${estab} → ${reg} (${late} min)` : '—'}
+                        {/* Horario/Tardanza — solo lg */}
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                          <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                            {hasHorario ? `${estab} → ${reg} (${late}m)` : '—'}
                           </Typography>
                         </TableCell>
 
-                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(att.certificateExpiry)}</TableCell>
-                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(att.vacationsStart)}</TableCell>
-                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>{formatDate(att.vacationsEnd)}</TableCell>
-                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{formatDate(att.returnToWorkDate)}</TableCell>
+                        {/* Fechas clave (cert. vence, vacaciones) — solo lg */}
+                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
+                          {hasFechasClave ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                              {att.certificateExpiry && (
+                                <Typography variant="caption" color="text.secondary">Cert: {formatDate(att.certificateExpiry)}</Typography>
+                              )}
+                              {att.vacationsStart && (
+                                <Typography variant="caption" color="text.secondary">Vac: {formatDate(att.vacationsStart)}–{formatDate(att.vacationsEnd)}</Typography>
+                              )}
+                            </Box>
+                          ) : '—'}
+                        </TableCell>
 
+                        {/* Certificado — md */}
                         <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                           {att.justificationDocument ? (
                             <Tooltip title="Ver certificado">
