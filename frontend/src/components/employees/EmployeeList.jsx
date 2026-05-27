@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TablePagination, Avatar, Chip, IconButton, Tooltip, Typography, Button,
-  CircularProgress, Alert, TextField, InputAdornment,
+  CircularProgress, Alert, TextField, InputAdornment, ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -12,9 +13,11 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Refresh as RefreshIcon,
+  PersonOff as PersonOffIcon,
+  RestoreFromTrash as RestoreIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
-import { getEmployees, deleteEmployee } from '../../services/api';
+import { getEmployees, deleteEmployee, restoreEmployee } from '../../services/api';
 import Swal from 'sweetalert2';
 
 const avatarColor = (name = '') => {
@@ -37,11 +40,12 @@ const EmployeeList = () => {
   const [total, setTotal]           = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch]         = useState('');
+  const [filtroActivo, setFiltroActivo] = useState('true'); // 'true' | 'false' | 'all'
 
-  const fetchEmployees = async (targetPage = 0) => {
+  const fetchEmployees = useCallback(async (targetPage = 0, activo = filtroActivo) => {
     try {
       setLoading(true);
-      const resp = await getEmployees({ page: targetPage + 1, limit: rowsPerPage });
+      const resp = await getEmployees({ page: targetPage + 1, limit: rowsPerPage, activo });
       setEmployees(resp.data || []);
       setTotal(resp.total || 0);
       setTotalPages(resp.totalPages || 1);
@@ -51,33 +55,74 @@ const EmployeeList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rowsPerPage, filtroActivo]);
 
-  useEffect(() => { fetchEmployees(0); }, []);
+  useEffect(() => { fetchEmployees(0, filtroActivo); }, [filtroActivo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePageChange = (_, newPage) => {
     setPage(newPage);
-    fetchEmployees(newPage);
+    fetchEmployees(newPage, filtroActivo);
   };
 
+  const handleFiltroChange = (_, newFiltro) => {
+    if (!newFiltro) return; // evitar deselección total
+    setPage(0);
+    setSearch('');
+    setFiltroActivo(newFiltro);
+  };
+
+  // Dar de baja (soft-delete) con motivo
   const handleDelete = async (id, nombre) => {
-    const result = await Swal.fire({
-      title: '¿Eliminar empleado?',
-      text: `Esta acción eliminará a ${nombre} de forma permanente.`,
+    const { value: motivoBaja, isConfirmed } = await Swal.fire({
+      title: `Dar de baja a ${nombre}`,
+      html: `
+        <p style="margin-bottom:12px;color:#666;font-size:0.9rem">
+          El empleado quedará inactivo y podrá ser restaurado en cualquier momento.
+        </p>
+        <textarea id="swal-motivo" class="swal2-textarea" placeholder="Motivo de baja (opcional)…" rows="3"
+          style="width:100%;resize:none;font-size:0.9rem"></textarea>
+      `,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#FF4C51',
       cancelButtonColor: '#8A8D93',
-      confirmButtonText: 'Sí, eliminar',
+      confirmButtonText: 'Dar de baja',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        return document.getElementById('swal-motivo')?.value?.trim() || '';
+      },
+    });
+    if (!isConfirmed) return;
+    try {
+      await deleteEmployee(id, motivoBaja);
+      fetchEmployees(page, filtroActivo);
+      Swal.fire({ icon: 'success', title: 'Dado de baja', text: motivoBaja || undefined, timer: 1800, showConfirmButton: false });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Error al dar de baja';
+      Swal.fire({ icon: 'error', title: 'Error', text: msg });
+    }
+  };
+
+  // Restaurar empleado dado de baja
+  const handleRestore = async (id, nombre) => {
+    const result = await Swal.fire({
+      title: `¿Restaurar a ${nombre}?`,
+      text: 'El empleado volverá a estar activo en el sistema.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#56CA00',
+      cancelButtonColor: '#8A8D93',
+      confirmButtonText: 'Sí, restaurar',
       cancelButtonText: 'Cancelar',
     });
     if (!result.isConfirmed) return;
     try {
-      await deleteEmployee(id);
-      fetchEmployees(page);
-      Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1500, showConfirmButton: false });
-    } catch {
-      Swal.fire({ icon: 'error', title: 'Error al eliminar' });
+      await restoreEmployee(id);
+      fetchEmployees(page, filtroActivo);
+      Swal.fire({ icon: 'success', title: 'Empleado restaurado', timer: 1500, showConfirmButton: false });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Error al restaurar';
+      Swal.fire({ icon: 'error', title: 'Error', text: msg });
     }
   };
 
@@ -104,7 +149,7 @@ const EmployeeList = () => {
             <Button
               variant="outlined"
               startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
-              onClick={() => fetchEmployees(page)}
+              onClick={() => fetchEmployees(page, filtroActivo)}
               disabled={loading}
               sx={{ borderRadius: 2.5 }}
             >
@@ -126,14 +171,14 @@ const EmployeeList = () => {
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
 
       <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden', borderColor: 'divider' }}>
-        {/* Search bar */}
-        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+        {/* Search + filtros */}
+        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <TextField
             placeholder="Buscar por nombre, puesto, departamento…"
             size="small"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            sx={{ width: { xs: '100%', sm: 340 } }}
+            sx={{ width: { xs: '100%', sm: 300 } }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -144,6 +189,24 @@ const EmployeeList = () => {
               },
             }}
           />
+          <ToggleButtonGroup
+            value={filtroActivo}
+            exclusive
+            onChange={handleFiltroChange}
+            size="small"
+            sx={{ height: 40 }}
+          >
+            <ToggleButton value="true" sx={{ px: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem' }}>
+              Activos
+            </ToggleButton>
+            <ToggleButton value="false" sx={{ px: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem' }}>
+              <PersonOffIcon sx={{ fontSize: 16, mr: 0.6 }} />
+              Dados de baja
+            </ToggleButton>
+            <ToggleButton value="all" sx={{ px: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem' }}>
+              Todos
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Box>
 
         {loading ? (
@@ -154,7 +217,7 @@ const EmployeeList = () => {
           <Box sx={{ textAlign: 'center', py: 8 }}>
             <PeopleIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
             <Typography color="text.secondary">
-              {search ? 'Sin resultados para la búsqueda' : 'No hay empleados registrados'}
+              {search ? 'Sin resultados para la búsqueda' : 'No hay empleados en esta categoría'}
             </Typography>
           </Box>
         ) : (
@@ -173,6 +236,7 @@ const EmployeeList = () => {
               <TableBody>
                 {filtered.map((emp) => {
                   const color = avatarColor(`${emp.nombre}${emp.apellido}`);
+                  const isInactive = emp.activo === false;
                   return (
                     <TableRow
                       key={emp._id}
@@ -180,9 +244,9 @@ const EmployeeList = () => {
                       sx={{
                         '&:last-child td': { border: 0 },
                         cursor: 'pointer',
-                        opacity: emp.activo === false ? 0.65 : 1,
-                        bgcolor: emp.activo === false ? 'rgba(255,76,81,0.04)' : 'inherit',
-                        borderLeft: emp.activo === false ? '3px solid #FF4C51' : '3px solid transparent',
+                        opacity: isInactive ? 0.65 : 1,
+                        bgcolor: isInactive ? 'rgba(255,76,81,0.04)' : 'inherit',
+                        borderLeft: isInactive ? '3px solid #FF4C51' : '3px solid transparent',
                       }}
                       onClick={() => navigate(`/employees/${emp._id}`)}
                     >
@@ -191,13 +255,13 @@ const EmployeeList = () => {
                           <Avatar sx={{
                             display: { xs: 'none', sm: 'flex' },
                             width: 36, height: 36, fontSize: 13, fontWeight: 700, flexShrink: 0,
-                            bgcolor: emp.activo === false ? '#8A8D93' : color,
+                            bgcolor: isInactive ? '#8A8D93' : color,
                           }}>
                             {initials(emp.nombre, emp.apellido)}
                           </Avatar>
                           <Box sx={{ minWidth: 0 }}>
                             <Typography variant="body2" fontWeight={600} lineHeight={1.3} noWrap
-                              sx={{ textDecoration: emp.activo === false ? 'line-through' : 'none', color: emp.activo === false ? 'text.secondary' : 'text.primary' }}>
+                              sx={{ textDecoration: isInactive ? 'line-through' : 'none', color: isInactive ? 'text.secondary' : 'text.primary' }}>
                               {emp.nombre} {emp.apellido}
                             </Typography>
                             {emp.legajo && (
@@ -212,7 +276,7 @@ const EmployeeList = () => {
                         <Typography variant="body2" color="text.secondary">{emp.email || '—'}</Typography>
                       </TableCell>
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                        <Typography variant="body2" color={emp.activo === false ? 'text.secondary' : 'text.primary'}>{emp.puesto || '—'}</Typography>
+                        <Typography variant="body2" color={isInactive ? 'text.secondary' : 'text.primary'}>{emp.puesto || '—'}</Typography>
                       </TableCell>
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                         {emp.departamento ? (
@@ -220,7 +284,7 @@ const EmployeeList = () => {
                         ) : '—'}
                       </TableCell>
                       <TableCell>
-                        {emp.activo !== false ? (
+                        {!isInactive ? (
                           <Chip label="Activo" size="small" sx={{ borderRadius: 1.5, fontSize: '0.72rem', fontWeight: 600, bgcolor: 'rgba(86,202,0,0.12)', color: '#4DB600' }} />
                         ) : (
                           <Tooltip title={emp.motivoBaja || 'Sin motivo registrado'} arrow>
@@ -241,16 +305,26 @@ const EmployeeList = () => {
                             <ViewIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Editar">
-                          <IconButton size="small" onClick={() => navigate(`/employees/edit/${emp._id}`)} sx={{ color: 'warning.main' }}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Eliminar">
-                          <IconButton size="small" onClick={() => handleDelete(emp._id, `${emp.nombre} ${emp.apellido}`)} sx={{ color: 'error.main' }}>
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        {!isInactive ? (
+                          <>
+                            <Tooltip title="Editar">
+                              <IconButton size="small" onClick={() => navigate(`/employees/edit/${emp._id}`)} sx={{ color: 'warning.main' }}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Dar de baja">
+                              <IconButton size="small" onClick={() => handleDelete(emp._id, `${emp.nombre} ${emp.apellido}`)} sx={{ color: 'error.main' }}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <Tooltip title="Restaurar empleado">
+                            <IconButton size="small" onClick={() => handleRestore(emp._id, `${emp.nombre} ${emp.apellido}`)} sx={{ color: 'success.main' }}>
+                              <RestoreIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                       </TableCell>
                     </TableRow>
                   );

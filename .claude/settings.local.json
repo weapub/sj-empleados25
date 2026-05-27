@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Ivan\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Ivan-Documents-trae-projects-sj-empleados25-sj-empleados25\\\\2158d043-73d1-4018-9df5-023adf87797f\\\\tasks\\\\bwafknhrv.output\" -Tail 20)",
+      "Bash(curl -s -X POST http://localhost:5000/api/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@test.com\\\\\",\\\\\"password\\\\\":\\\\\"123456\\\\\"}\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "PowerShell(Stop-Process -Name node -Force -ErrorAction SilentlyContinue)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\Ivan\\\\Documents\\\\trae_projects\\\\sj-empleados25\" -Depth 1)",
+      "Bash(pkill -f \"react-scripts\")",
+      "Bash(pkill -f \"nodemon\")",
+      "Bash(pkill -f \"node index.js\")",
+      "Bash(rm -rf \"c:/Users/Ivan/Documents/trae_projects/sj-empleados25/frontend/node_modules\" && echo \"node_modules eliminado\")",
+      "Bash(npm install *)",
+      "Bash(npm start *)",
+      "Bash(fuser -k 5178/tcp)",
+      "Bash(fuser -k 5179/tcp)",
+      "Bash(pkill -f vite)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Ivan\\Documents\\trae_projects\\sj-empleados25\\frontend\\node_modules"
+    ]
+  }
+}

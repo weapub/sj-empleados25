@@ -2,19 +2,31 @@ const Employee = require('../models/Employee');
 const EmployeeEvent = require('../models/EmployeeEvent');
 
 // Obtener empleados con paginación
+// Query params:
+//   ?activo=true|false|all  (default: 'true' → sólo activos)
 exports.getEmployees = async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limitRaw = parseInt(req.query.limit, 10);
     const limit = Math.min(Math.max(limitRaw || 25, 1), 100);
 
+    // Filtro por estado
+    const activoParam = req.query.activo;
+    let filter = {};
+    if (!activoParam || activoParam === 'true') {
+      filter = { activo: true };
+    } else if (activoParam === 'false') {
+      filter = { activo: false };
+    }
+    // activoParam === 'all' → sin filtro
+
     const [data, total] = await Promise.all([
-      Employee.find()
+      Employee.find(filter)
         .sort({ apellido: 1, nombre: 1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
-      Employee.countDocuments(),
+      Employee.countDocuments(filter),
     ]);
 
     const totalPages = Math.max(Math.ceil(total / limit), 1);
@@ -116,15 +128,67 @@ exports.updateEmployee = async (req, res) => {
   }
 };
 
-// Eliminar un empleado
+// Dar de baja a un empleado (soft-delete)
+// Body: { motivoBaja?: string }
 exports.deleteEmployee = async (req, res) => {
   try {
-    const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
-    if (!deletedEmployee) {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) {
       return res.status(404).json({ message: 'Empleado no encontrado' });
     }
-    res.status(200).json({ message: 'Empleado eliminado correctamente' });
+    if (employee.activo === false) {
+      return res.status(400).json({ message: 'El empleado ya se encuentra dado de baja' });
+    }
+
+    employee.activo = false;
+    employee.fechaBaja = new Date();
+    if (req.body && req.body.motivoBaja) {
+      employee.motivoBaja = String(req.body.motivoBaja).trim();
+    }
+    const updated = await employee.save();
+
+    // Registrar evento de baja
+    const event = new EmployeeEvent({
+      employee: updated._id,
+      type: 'employee_update',
+      message: `Baja de ${updated.nombre} ${updated.apellido}. Motivo: ${updated.motivoBaja || 'sin motivo registrado'}`,
+      changes: [{ field: 'activo', from: true, to: false }],
+    });
+    await event.save();
+
+    res.status(200).json({ message: 'Empleado dado de baja correctamente', employee: updated });
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar empleado', error: error.message });
+    res.status(500).json({ message: 'Error al dar de baja al empleado', error: error.message });
+  }
+};
+
+// Restaurar un empleado dado de baja
+exports.restoreEmployee = async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) {
+      return res.status(404).json({ message: 'Empleado no encontrado' });
+    }
+    if (employee.activo !== false) {
+      return res.status(400).json({ message: 'El empleado ya se encuentra activo' });
+    }
+
+    employee.activo = true;
+    employee.fechaBaja = undefined;
+    employee.motivoBaja = undefined;
+    const updated = await employee.save();
+
+    // Registrar evento de reactivación
+    const event = new EmployeeEvent({
+      employee: updated._id,
+      type: 'employee_update',
+      message: `Reactivación de ${updated.nombre} ${updated.apellido}`,
+      changes: [{ field: 'activo', from: false, to: true }],
+    });
+    await event.save();
+
+    res.status(200).json({ message: 'Empleado reactivado correctamente', employee: updated });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al restaurar el empleado', error: error.message });
   }
 };

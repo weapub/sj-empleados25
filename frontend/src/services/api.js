@@ -77,10 +77,11 @@ export const getCurrentUser = async () => {
 };
 
 // Servicios de empleados
-export const getEmployees = async ({ page = 1, limit = 25 } = {}) => {
+// activo: 'true' | 'false' | 'all'
+export const getEmployees = async ({ page = 1, limit = 25, activo = 'true' } = {}) => {
   setAuthToken(localStorage.getItem('token'));
   const response = await axios.get(`${API_URL}/employees`, {
-    params: { page, limit },
+    params: { page, limit, activo },
   });
   return response.data; // { data, total, page, totalPages }
 };
@@ -103,9 +104,17 @@ export const updateEmployee = async (id, employeeData) => {
   return response.data;
 };
 
-export const deleteEmployee = async (id) => {
+export const deleteEmployee = async (id, motivoBaja = '') => {
   setAuthToken(localStorage.getItem('token'));
-  const response = await axios.delete(`${API_URL}/employees/${id}`);
+  const response = await axios.delete(`${API_URL}/employees/${id}`, {
+    data: motivoBaja ? { motivoBaja } : {},
+  });
+  return response.data;
+};
+
+export const restoreEmployee = async (id) => {
+  setAuthToken(localStorage.getItem('token'));
+  const response = await axios.patch(`${API_URL}/employees/${id}/restore`);
   return response.data;
 };
 

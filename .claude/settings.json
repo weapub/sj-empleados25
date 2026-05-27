@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:5000/api/auth/login\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"admin@test.com\",\"password\":\"123456\"}' -UseBasicParsing; $r.StatusCode; $r.Content } catch { $_.Exception.Message; $_.Exception.Response.StatusCode })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:5000/api/auth/login\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"admin@test.com\",\"password\":\"123456\"}' -UseBasicParsing; \"Status: $\\($r.StatusCode\\)\"; $r.Content } catch { \"Error: $\\($_.Exception.Message\\)\" })",
+      "Bash(node -e \"console.log\\(require\\('c:/Users/Ivan/Documents/trae_projects/sj-empleados25/frontend/node_modules/@mui/material/package.json'\\).version\\)\")",
+      "WebFetch(domain:themeselection.com)",
+      "WebFetch(domain:demos.themeselection.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api *)",
+      "Bash(python3 -c \"import json,sys; [print\\(f['name']\\) for f in json.load\\(sys.stdin\\) if f['type']=='dir' or f['name'].endswith\\('.js'\\)]\")",
+      "WebFetch(domain:api.github.com)",
+      "PowerShell(Get-Process -Name node -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Ivan\\\\Documents\\\\trae_projects\\\\sj-empleados25\\\\backend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Normal; Write-Output \"Backend restarting...\")",
+      "Bash(curl -s -X POST http://localhost:5000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@test.com\",\"password\":\"123456\"}')",
+      "Bash(git commit -m ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5178)",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\Ivan\\\\Documents\\\\trae_projects\\\\sj-empleados25\\\\frontend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Normal; Write-Output \"Vite iniciando...\")",
+      "Bash(git commit *)",
+      "Bash(npx vite *)",
+      "Bash(node scripts/promoteAdmin.js sanjorgefiambres@gmail.com --role superadmin --name \"San Jorge\")",
+      "Bash(gh run *)"
+    ]
+  }
+}
